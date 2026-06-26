@@ -3,40 +3,13 @@ import { Award, Compass, Layers, ShieldCheck, Flame, BookOpen, ChevronRight, Che
 
 const STRATEGIES_DATA = [
   {
-    id: "ewu-trend",
-    title: "1. EWU Trend Indicator Strategy",
-    subtitle: "Earn With Us Algorithmic Trend Rider",
-    difficulty: "Beginner Friendly",
-    icon: Flame,
-    color: "#10b981", // Green
-    description: "This strategy utilizes the proprietary Earn With Us algorithmic trend tracker to identify long-term structural trends while filtering out sideways consolidations and market noise.",
-    concepts: [
-      "EWU Indicator Buy/Sell Signals",
-      "Exponential Cloud Filtering",
-      "Dynamic volatility channels (ATR-based bands)"
-    ],
-    rules: [
-      "Identify the higher-timeframe trend bias using the color-coded EWU Cloud (Green = Bullish, Red = Bearish).",
-      "Enter a trade only when the EWU Trend Indicator flashes a signal in alignment with the Cloud.",
-      "Place your Stop Loss just below the bottom of the Cloud channel.",
-      "Take profit when the price hits the opposite volatility channel border or when a reversal signal occurs."
-    ],
-    pineCodeSnippet: `//@version=5
-strategy("EWU Trend Strategy", overlay=true)
-ewuCloud = ta.ema(close, 50)
-volatilityATR = ta.atr(14)
-longCondition = close > ewuCloud and ta.crossover(close, ta.ema(close, 9))
-if (longCondition)
-    strategy.entry("Long", strategy.long)`
-  },
-  {
     id: "market-structure",
-    title: "2. EWU Market Structure Automator",
-    subtitle: "Structure Breaks & Reversals",
+    title: "1. EWU Market Structure Automator",
+    subtitle: "Structure Breaks & Reversals (BOS & CHoCH)",
     difficulty: "Intermediate",
     icon: Compass,
     color: "#0ea5e9", // Blue
-    description: "Focuses on identifying structural shifts in the market. Automating breaks of structure enables traders to catch trend reversals early at key swing levels.",
+    description: "Focuses on identifying structural shifts in market swings. Automating breaks of structure enables traders to catch trend reversals early at key swing levels without drawing lines manually.",
     concepts: [
       "BOS (Break of Structure) - Signals continuation of the active trend.",
       "CHoCH (Change of Character) - Signals the initial shift in trend direction.",
@@ -46,7 +19,7 @@ if (longCondition)
       "Wait for a CHoCH signal to indicate the old trend has run out of momentum (character shift).",
       "Once a new trend starts, wait for a BOS (trend continuation break) to confirm strength.",
       "Enter on a pullback to the key swing low or swing high that initiated the break.",
-      "Target the next major swing point or order block zone."
+      "Target the next major swing point or unmitigated order block zone."
     ],
     pineCodeSnippet: `//@version=5
 indicator("EWU Market Structure", overlay=true)
@@ -56,8 +29,32 @@ isBOS = close > swingHigh[1] // Break of Structure
 plotshape(isBOS, title="BOS", style=shape.triangleup, color=color.blue)`
   },
   {
+    id: "ewu-order-block",
+    title: "2. EWU Order Block & Supply/Demand Strategy",
+    subtitle: "Institutional Block Orders & Key Zones",
+    difficulty: "Intermediate",
+    icon: Flame,
+    color: "#10b981", // Green
+    description: "Identifies zones where institutional players have left unfilled buy or sell orders (Order Blocks), acting as strong support or resistance pivots when price retraces.",
+    concepts: [
+      "Order Blocks (OB) - Last opposite candle before a strong expansion move",
+      "Mitigated vs. Unmitigated OB zones",
+      "Volume Profile confluences"
+    ],
+    rules: [
+      "Identify a strong displacement move (high volume breakout) that breaks structure (BOS).",
+      "Locate the last opposite candle (down-close before a rally, up-close before a drop) that initiated the move. This is your Order Block.",
+      "Draw the Order Block boundary. Place a limit entry order at the open of the block candle.",
+      "Set Stop Loss just below/above the block candle wick. Target the next liquidity pool."
+    ],
+    pineCodeSnippet: `//@version=5
+indicator("EWU Order Block Finder", overlay=true)
+isBullishOB = close > open and close[1] < open[1] and volume > ta.sma(volume, 20)
+plotshape(isBullishOB, "OB", shape.labelup, color=color.green)`
+  },
+  {
     id: "fvg-imbalance",
-    title: "3. EWU Imbalance & Gap Strategy",
+    title: "3. EWU Imbalance & Gap Strategy (FVG)",
     subtitle: "Inefficiency & Retracement",
     difficulty: "Advanced",
     icon: Layers,
@@ -116,9 +113,9 @@ export default function Strategies() {
         {/* Page Header */}
         <div style={stratStyles.header}>
           <span className="badge-glow">LEARNING ACADEMY</span>
-          <h1 style={{ fontSize: '2.25rem', marginTop: 8 }}>Earn With Us Trading Strategies</h1>
+          <h1 style={{ fontSize: '2.25rem', marginTop: 8 }}>Earn With Us Price Action Strategies</h1>
           <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginTop: 4 }}>
-            Master institutional Price Action concepts under the Earn With Us suite. Learn to identify market trend confirmations, structure breaks, and liquidity pools.
+            Master institutional Price Action concepts under the Earn With Us suite. Learn to identify market swings, structure breaks, order blocks, and liquidity pools.
           </p>
         </div>
 
@@ -126,7 +123,7 @@ export default function Strategies() {
         <div className="glass-card" style={stratStyles.infoCard}>
           <BookOpen size={20} color="#10b981" style={{ flexShrink: 0 }} />
           <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <b>Educational Hub:</b> These strategies are compiled from core price action concepts. Understanding these rules helps you read order flows, support structures, and momentum blocks effectively using the <b>Earn With Us (EWU)</b> analysis toolkit.
+            <b>Price Action Hub:</b> These strategies focus <b>exclusively on Price Action</b> (structure, zones, and liquidity) rather than lagging indicators. Understanding these rules helps you read order flows, support structures, and momentum blocks effectively.
           </p>
         </div>
 
