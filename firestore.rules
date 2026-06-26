@@ -20,14 +20,23 @@ service cloud.firestore {
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // 1. A user can read and write to their own profile document
-      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      // 1. A user can read their own profile document
+      allow read: if isAuthenticated() && request.auth.uid == userId;
       
-      // 2. Admins can view/list all profiles and modify roles (read, list, update)
-      allow read, list, update: if isAdmin();
+      // 2. A user can create their own profile document, but must set role to 'user'
+      // (unless they are the super admin, who can set it to 'admin')
+      allow create: if isAuthenticated() && request.auth.uid == userId && (
+        request.resource.data.role == 'user' || 
+        request.auth.token.email == 'mahaboobbasha140724@gmail.com'
+      );
       
-      // 3. Super admins or system can create/delete users
-      allow create, delete: if isAdmin();
+      // 3. A user can update their own profile, but CANNOT modify the 'role' field
+      allow update: if isAuthenticated() && request.auth.uid == userId && (
+        request.resource.data.role == resource.data.role
+      );
+      
+      // 4. Admins have full access to manage roles and list users
+      allow read, list, write: if isAdmin();
     }
     
     // Deny read/write access to all other paths by default unless authenticated
