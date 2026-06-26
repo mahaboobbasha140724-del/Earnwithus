@@ -19,6 +19,7 @@ import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
+import Strategies from './pages/Strategies';
 
 // Helper component to auto-scroll window to top on navigation
 function ScrollToTop() {
@@ -125,6 +126,7 @@ function MainApp() {
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/strategies" element={<Strategies />} />
         </Routes>
       </main>
 

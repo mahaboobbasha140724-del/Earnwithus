@@ -130,6 +130,9 @@ export default function Header({ setSelectedStockForModal }) {
             </li>
 
             <li style={headerStyles.navItem}>
+              <Link to="/strategies" style={headerStyles.navLink}>Strategies</Link>
+            </li>
+            <li style={headerStyles.navItem}>
               <Link to="/pricing" style={headerStyles.navLink}>Pricing</Link>
             </li>
           </ul>
@@ -221,6 +224,7 @@ export default function Header({ setSelectedStockForModal }) {
             
             <div style={{ margin: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }} />
             
+            <Link to="/strategies" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Strategies</Link>
             <Link to="/pricing" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Pricing</Link>
             
             <div style={headerStyles.drawerFooter}>
