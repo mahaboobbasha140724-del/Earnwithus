@@ -3,35 +3,35 @@ import { Award, Compass, Layers, ShieldCheck, Flame, BookOpen, ChevronRight, Che
 
 const STRATEGIES_DATA = [
   {
-    id: "sfx-trend",
-    title: "1. SFX Algo Trend Riding Strategy",
-    subtitle: "Algorithmic Trend Confirmation",
+    id: "ewu-trend",
+    title: "1. EWU Trend Indicator Strategy",
+    subtitle: "Earn With Us Algorithmic Trend Rider",
     difficulty: "Beginner Friendly",
     icon: Flame,
     color: "#10b981", // Green
-    description: "This strategy utilizes algorithmic overlays to identify long-term structural trends while filtering out sideways consolidations and market noise.",
+    description: "This strategy utilizes the proprietary Earn With Us algorithmic trend tracker to identify long-term structural trends while filtering out sideways consolidations and market noise.",
     concepts: [
-      "Algorithm-generated Buy/Sell Signals",
-      "Exponential Moving Average (EMA) Cloud filtering",
+      "EWU Indicator Buy/Sell Signals",
+      "Exponential Cloud Filtering",
       "Dynamic volatility channels (ATR-based bands)"
     ],
     rules: [
-      "Identify the higher-timeframe trend bias using the color-coded EMA Cloud (Green = Bullish, Red = Bearish).",
-      "Enter a trade only when the SFX Algo flashes a signal in alignment with the EMA Cloud.",
+      "Identify the higher-timeframe trend bias using the color-coded EWU Cloud (Green = Bullish, Red = Bearish).",
+      "Enter a trade only when the EWU Trend Indicator flashes a signal in alignment with the Cloud.",
       "Place your Stop Loss just below the bottom of the Cloud channel.",
       "Take profit when the price hits the opposite volatility channel border or when a reversal signal occurs."
     ],
     pineCodeSnippet: `//@version=5
-strategy("SFX Trend Strategy", overlay=true)
-emaCloud = ta.ema(close, 50)
+strategy("EWU Trend Strategy", overlay=true)
+ewuCloud = ta.ema(close, 50)
 volatilityATR = ta.atr(14)
-longCondition = close > emaCloud and ta.crossover(close, ta.ema(close, 9))
+longCondition = close > ewuCloud and ta.crossover(close, ta.ema(close, 9))
 if (longCondition)
     strategy.entry("Long", strategy.long)`
   },
   {
     id: "market-structure",
-    title: "2. BOS & CHoCH Market Structure Strategy",
+    title: "2. EWU Market Structure Automator",
     subtitle: "Structure Breaks & Reversals",
     difficulty: "Intermediate",
     icon: Compass,
@@ -49,7 +49,7 @@ if (longCondition)
       "Target the next major swing point or order block zone."
     ],
     pineCodeSnippet: `//@version=5
-indicator("Market Structure Automator", overlay=true)
+indicator("EWU Market Structure", overlay=true)
 swingHigh = ta.highest(high, 5)
 swingLow = ta.lowest(low, 5)
 isBOS = close > swingHigh[1] // Break of Structure
@@ -57,7 +57,7 @@ plotshape(isBOS, title="BOS", style=shape.triangleup, color=color.blue)`
   },
   {
     id: "fvg-imbalance",
-    title: "3. Fair Value Gaps (FVG) Imbalance Strategy",
+    title: "3. EWU Imbalance & Gap Strategy",
     subtitle: "Inefficiency & Retracement",
     difficulty: "Advanced",
     icon: Layers,
@@ -75,13 +75,13 @@ plotshape(isBOS, title="BOS", style=shape.triangleup, color=color.blue)`
       "Confirm entry with lower-timeframe character shifts (CHoCH). Stop Loss goes below Candle 1's origin."
     ],
     pineCodeSnippet: `//@version=5
-indicator("FVG Visualizer", overlay=true)
+indicator("EWU FVG Visualizer", overlay=true)
 isFVG_Bull = low[0] > high[2] and body_size > average_body // Gap between low(0) and high(2)
 box.new(left=bar_index[2], top=low[0], right=bar_index, bottom=high[2], bgcolor=color.new(color.yellow, 90))`
   },
   {
     id: "liquidity-sweeps",
-    title: "4. Liquidity Sweeps & Grab Strategy",
+    title: "4. EWU Liquidity Sweep Strategy",
     subtitle: "Stop-loss Hunting Confluence",
     difficulty: "Advanced",
     icon: ShieldCheck,
@@ -99,7 +99,7 @@ box.new(left=bar_index[2], top=low[0], right=bar_index, bottom=high[2], bgcolor=
       "Enter immediately in the opposite direction of the sweep. Target the opposite liquidity pool."
     ],
     pineCodeSnippet: `//@version=5
-indicator("Liquidity Sweep Detector", overlay=true)
+indicator("EWU Liquidity Sweep Detector", overlay=true)
 eqLows = ta.lowest(low, 20)
 isSweep = low < eqLows[1] and close > eqLows[1] // Sweep and recover
 plotchar(isSweep, char="🧹", location=location.belowbar, color=color.purple)`
@@ -116,9 +116,9 @@ export default function Strategies() {
         {/* Page Header */}
         <div style={stratStyles.header}>
           <span className="badge-glow">LEARNING ACADEMY</span>
-          <h1 style={{ fontSize: '2.25rem', marginTop: 8 }}>FluxCharts Trading Strategies</h1>
+          <h1 style={{ fontSize: '2.25rem', marginTop: 8 }}>Earn With Us Trading Strategies</h1>
           <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginTop: 4 }}>
-            Master institutional Price Action concepts. Learn to identify Smart Money trend confirmations, structure breaks, and liquidity pools.
+            Master institutional Price Action concepts under the Earn With Us suite. Learn to identify market trend confirmations, structure breaks, and liquidity pools.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function Strategies() {
         <div className="glass-card" style={stratStyles.infoCard}>
           <BookOpen size={20} color="#10b981" style={{ flexShrink: 0 }} />
           <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <b>Educational Hub:</b> These strategies are compiled from core concepts popularized by <b>FluxCharts</b> and Price Action indicators on TradingView. Understanding these rules helps you read order flows, support structures, and momentum blocks effectively.
+            <b>Educational Hub:</b> These strategies are compiled from core price action concepts. Understanding these rules helps you read order flows, support structures, and momentum blocks effectively using the <b>Earn With Us (EWU)</b> analysis toolkit.
           </p>
         </div>
 
