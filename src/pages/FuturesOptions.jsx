@@ -17,22 +17,29 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
 
   useEffect(() => {
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
-    fetch(`${API_BASE}/api/market/fii-dii`)
-      .then(res => res.json())
-      .then(resData => {
-        if (resData.success) {
-          setLiveFII({
-            nifty: resData.nifty || 24056.00,
-            niftyChange: resData.niftyChange !== undefined ? resData.niftyChange : 0.14,
-            banknifty: resData.banknifty || 58177.05,
-            bankniftyChange: resData.bankniftyChange !== undefined ? resData.bankniftyChange : 0.05,
-            pcr: resData.pcr || 1.06
-          });
-        }
-      })
-      .catch(err => {
-        console.error("Failed to fetch live F&O details:", err);
-      });
+    
+    const fetchFO = () => {
+      fetch(`${API_BASE}/api/market/fii-dii`)
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.success) {
+            setLiveFII({
+              nifty: resData.nifty || 24056.00,
+              niftyChange: resData.niftyChange !== undefined ? resData.niftyChange : 0.14,
+              banknifty: resData.banknifty || 58177.05,
+              bankniftyChange: resData.bankniftyChange !== undefined ? resData.bankniftyChange : 0.05,
+              pcr: resData.pcr || 1.06
+            });
+          }
+        })
+        .catch(err => {
+          console.error("Failed to fetch live F&O details:", err);
+        });
+    };
+
+    fetchFO();
+    const interval = setInterval(fetchFO, 15000); // Real-time updates: poll every 15s
+    return () => clearInterval(interval);
   }, []);
 
   const activeStock = optionsStocks.find(s => s.symbol === selectedSymbol) || optionsStocks[0];

@@ -19,28 +19,35 @@ export default function Home({ setSelectedStockForModal }) {
 
   useEffect(() => {
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
-    fetch(`${API_BASE}/api/market/overview`)
-      .then(res => res.json())
-      .then(resData => {
-        if (resData.success && resData.data) {
-          const map = {};
-          resData.data.forEach(item => {
-            map[item.symbol] = {
-              price: item.price,
-              change: item.change
-            };
-          });
-          setLiveData(prev => ({
-            ...prev,
-            ...map
-          }));
-        }
-        setLoadingLive(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch live quotes on home:", err);
-        setLoadingLive(false);
-      });
+    
+    const fetchOverview = () => {
+      fetch(`${API_BASE}/api/market/overview`)
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.success && resData.data) {
+            const map = {};
+            resData.data.forEach(item => {
+              map[item.symbol] = {
+                price: item.price,
+                change: item.change
+              };
+            });
+            setLiveData(prev => ({
+              ...prev,
+              ...map
+            }));
+          }
+          setLoadingLive(false);
+        })
+        .catch(err => {
+          console.error("Failed to fetch live quotes on home:", err);
+          setLoadingLive(false);
+        });
+    };
+
+    fetchOverview();
+    const interval = setInterval(fetchOverview, 15000); // Real-time updates: poll every 15s
+    return () => clearInterval(interval);
   }, []);
 
   // Auto rotate testimonials

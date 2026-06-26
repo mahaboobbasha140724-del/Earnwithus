@@ -22,28 +22,35 @@ export default function Sentiment() {
 
   useEffect(() => {
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+    
+    const fetchSentiment = () => {
+      fetch(`${API_BASE}/api/market/fii-dii`)
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.success) {
+            if (resData.flows) setFlowData(resData.flows);
+            if (resData.pcr) setPcr(resData.pcr);
+            if (resData.sentimentScore) setSentimentScore(resData.sentimentScore);
+            if (resData.date) setDate(resData.date);
+            if (resData.updatedAt) setUpdatedAt(resData.updatedAt);
+            if (resData.source) setSource(resData.source);
+            if (resData.nifty) setNifty(resData.nifty);
+            if (resData.niftyChange !== undefined) setNiftyChange(resData.niftyChange);
+            if (resData.banknifty) setBanknifty(resData.banknifty);
+            if (resData.bankniftyChange !== undefined) setBankniftyChange(resData.bankniftyChange);
+          }
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Error fetching sentiment data:", err);
+          setLoading(false);
+        });
+    };
+
     setLoading(true);
-    fetch(`${API_BASE}/api/market/fii-dii`)
-      .then(res => res.json())
-      .then(resData => {
-        if (resData.success) {
-          if (resData.flows) setFlowData(resData.flows);
-          if (resData.pcr) setPcr(resData.pcr);
-          if (resData.sentimentScore) setSentimentScore(resData.sentimentScore);
-          if (resData.date) setDate(resData.date);
-          if (resData.updatedAt) setUpdatedAt(resData.updatedAt);
-          if (resData.source) setSource(resData.source);
-          if (resData.nifty) setNifty(resData.nifty);
-          if (resData.niftyChange !== undefined) setNiftyChange(resData.niftyChange);
-          if (resData.banknifty) setBanknifty(resData.banknifty);
-          if (resData.bankniftyChange !== undefined) setBankniftyChange(resData.bankniftyChange);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching sentiment data:", err);
-        setLoading(false);
-      });
+    fetchSentiment();
+    const interval = setInterval(fetchSentiment, 15000); // Real-time updates: poll every 15s
+    return () => clearInterval(interval);
   }, []);
 
   // Custom mock sector sentiment levels
