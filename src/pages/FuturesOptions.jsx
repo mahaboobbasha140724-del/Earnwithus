@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Info, ChevronRight, Activity, TrendingUp, HelpCircle } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
 
@@ -7,8 +7,41 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
   const optionsStocks = mockStocks.filter(s => s.options);
   const [selectedSymbol, setSelectedSymbol] = useState('NIFTY50');
 
+  const [liveFII, setLiveFII] = useState({
+    nifty: 24056.00,
+    niftyChange: 0.14,
+    banknifty: 58177.05,
+    bankniftyChange: 0.05,
+    pcr: 1.06
+  });
+
+  useEffect(() => {
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+    fetch(`${API_BASE}/api/market/fii-dii`)
+      .then(res => res.json())
+      .then(resData => {
+        if (resData.success) {
+          setLiveFII({
+            nifty: resData.nifty || 24056.00,
+            niftyChange: resData.niftyChange !== undefined ? resData.niftyChange : 0.14,
+            banknifty: resData.banknifty || 58177.05,
+            bankniftyChange: resData.bankniftyChange !== undefined ? resData.bankniftyChange : 0.05,
+            pcr: resData.pcr || 1.06
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch live F&O details:", err);
+      });
+  }, []);
+
   const activeStock = optionsStocks.find(s => s.symbol === selectedSymbol) || optionsStocks[0];
-  const { spot, chain } = activeStock.options;
+  const { chain } = activeStock.options;
+
+  const isNifty = selectedSymbol === 'NIFTY50';
+  const liveSpot = isNifty ? liveFII.nifty : liveFII.banknifty;
+  const liveChange = isNifty ? liveFII.niftyChange : liveFII.bankniftyChange;
+  const livePCR = isNifty ? liveFII.pcr : 1.12; // Bank Nifty PCR fallback or calculation
 
   // Calculate total Call vs Put OI for analytics chart
   const totalCallOI = chain.reduce((acc, row) => acc + row.callOI, 0);
@@ -48,17 +81,17 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
         <div style={foStyles.metaGrid}>
           <div className="glass-card" style={foStyles.metaCard}>
             <div style={foStyles.metaTitle}>Spot Price</div>
-            <div style={foStyles.metaPrice}>₹{spot.toLocaleString()}</div>
-            <span style={{ fontSize: '0.75rem', color: activeStock.change >= 0 ? '#10b981' : '#ef4444', fontWeight: 700 }}>
-              {activeStock.change >= 0 ? '+' : ''}{activeStock.change.toFixed(2)}% Today
+            <div style={foStyles.metaPrice}>₹{liveSpot.toLocaleString()}</div>
+            <span style={{ fontSize: '0.75rem', color: liveChange >= 0 ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+              {liveChange >= 0 ? '+' : ''}{liveChange.toFixed(2)}% Today
             </span>
           </div>
 
           <div className="glass-card" style={foStyles.metaCard}>
             <div style={foStyles.metaTitle}>PCR (Open Interest)</div>
-            <div style={foStyles.metaValue}>{(totalPutOI / totalCallOI).toFixed(2)}</div>
+            <div style={foStyles.metaValue}>{livePCR.toFixed(2)}</div>
             <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 700 }}>
-              {(totalPutOI / totalCallOI) >= 1.0 ? 'Bullish Sentiment' : 'Bearish Sentiment'}
+              {livePCR >= 1.0 ? 'Bullish Sentiment' : 'Bearish Sentiment'}
             </span>
           </div>
 

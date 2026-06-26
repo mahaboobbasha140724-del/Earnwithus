@@ -8,6 +8,41 @@ export default function Home({ setSelectedStockForModal }) {
   const [activeTraderTab, setActiveTraderTab] = useState('short'); // 'short' | 'long' | 'fo'
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
+  const [liveData, setLiveData] = useState({
+    NIFTY50: { price: 24056.00, change: 0.14 },
+    BANKNIFTY: { price: 58177.05, change: 0.05 },
+    RELIANCE: { price: 2950.00, change: 0.87 },
+    HDFCBANK: { price: 1520.50, change: 0.68 },
+    TCS: { price: 3950.25, change: -0.38 }
+  });
+  const [loadingLive, setLoadingLive] = useState(true);
+
+  useEffect(() => {
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+    fetch(`${API_BASE}/api/market/overview`)
+      .then(res => res.json())
+      .then(resData => {
+        if (resData.success && resData.data) {
+          const map = {};
+          resData.data.forEach(item => {
+            map[item.symbol] = {
+              price: item.price,
+              change: item.change
+            };
+          });
+          setLiveData(prev => ({
+            ...prev,
+            ...map
+          }));
+        }
+        setLoadingLive(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch live quotes on home:", err);
+        setLoadingLive(false);
+      });
+  }, []);
+
   // Auto rotate testimonials
   useEffect(() => {
     const timer = setInterval(() => {
@@ -82,8 +117,13 @@ export default function Home({ setSelectedStockForModal }) {
                 <div>
                   <span style={homeStyles.chartTitle}>NIFTY 50 INDEX</span>
                   <div style={homeStyles.chartPriceContainer}>
-                    <span style={homeStyles.chartPrice}>19,850.40</span>
-                    <span style={homeStyles.chartPriceChange}>+167.20 (0.85%)</span>
+                    <span style={homeStyles.chartPrice}>{liveData.NIFTY50.price.toLocaleString()}</span>
+                    <span style={{
+                      ...homeStyles.chartPriceChange,
+                      color: liveData.NIFTY50.change >= 0 ? '#10b981' : '#ef4444'
+                    }}>
+                      {liveData.NIFTY50.change >= 0 ? '+' : ''}{liveData.NIFTY50.change.toFixed(2)}%
+                    </span>
                   </div>
                 </div>
                 <div style={homeStyles.liveDotContainer}>
@@ -117,17 +157,32 @@ export default function Home({ setSelectedStockForModal }) {
 
               {/* Quick stock ticks */}
               <div style={homeStyles.quickTicks}>
-                <div style={homeStyles.tickItem} onClick={() => setSelectedStockForModal(mockStocks[0])}>
+                <div style={homeStyles.tickItem} onClick={() => {
+                  const stockObj = mockStocks.find(s => s.symbol === 'RELIANCE') || mockStocks[0];
+                  setSelectedStockForModal({ ...stockObj, price: liveData.RELIANCE.price, change: liveData.RELIANCE.change });
+                }}>
                   <span style={homeStyles.tickSymbol}>RELIANCE</span>
-                  <span style={homeStyles.tickValGreen}>₹2465.30 (+1.45%)</span>
+                  <span style={liveData.RELIANCE.change >= 0 ? homeStyles.tickValGreen : homeStyles.tickValRed}>
+                    ₹{liveData.RELIANCE.price.toLocaleString()} ({liveData.RELIANCE.change >= 0 ? '+' : ''}{liveData.RELIANCE.change.toFixed(2)}%)
+                  </span>
                 </div>
-                <div style={homeStyles.tickItem} onClick={() => setSelectedStockForModal(mockStocks[3])}>
+                <div style={homeStyles.tickItem} onClick={() => {
+                  const stockObj = mockStocks.find(s => s.symbol === 'HDFCBANK') || mockStocks[3];
+                  setSelectedStockForModal({ ...stockObj, price: liveData.HDFCBANK.price, change: liveData.HDFCBANK.change });
+                }}>
                   <span style={homeStyles.tickSymbol}>HDFCBANK</span>
-                  <span style={homeStyles.tickValGreen}>₹1610.15 (+2.10%)</span>
+                  <span style={liveData.HDFCBANK.change >= 0 ? homeStyles.tickValGreen : homeStyles.tickValRed}>
+                    ₹{liveData.HDFCBANK.price.toLocaleString()} ({liveData.HDFCBANK.change >= 0 ? '+' : ''}{liveData.HDFCBANK.change.toFixed(2)}%)
+                  </span>
                 </div>
-                <div style={homeStyles.tickItem} onClick={() => setSelectedStockForModal(mockStocks[1])}>
+                <div style={homeStyles.tickItem} onClick={() => {
+                  const stockObj = mockStocks.find(s => s.symbol === 'TCS') || mockStocks[1];
+                  setSelectedStockForModal({ ...stockObj, price: liveData.TCS.price, change: liveData.TCS.change });
+                }}>
                   <span style={homeStyles.tickSymbol}>TCS</span>
-                  <span style={homeStyles.tickValRed}>₹3410.80 (-0.85%)</span>
+                  <span style={liveData.TCS.change >= 0 ? homeStyles.tickValGreen : homeStyles.tickValRed}>
+                    ₹{liveData.TCS.price.toLocaleString()} ({liveData.TCS.change >= 0 ? '+' : ''}{liveData.TCS.change.toFixed(2)}%)
+                  </span>
                 </div>
               </div>
             </div>
