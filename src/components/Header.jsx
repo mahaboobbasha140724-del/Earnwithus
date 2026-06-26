@@ -142,6 +142,16 @@ export default function Header({ setSelectedStockForModal }) {
             <li style={headerStyles.navItem}>
               <Link to="/pricing" style={headerStyles.navLink}>Pricing</Link>
             </li>
+            <li style={headerStyles.navItem}>
+              <a 
+                href="https://chat.whatsapp.com/LO3eNiIvHRv1DNDaAmkPoG?s=cl&p=a&mlu=1" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ ...headerStyles.navLink, color: '#10b981', fontWeight: 600 }}
+              >
+                WhatsApp
+              </a>
+            </li>
           </ul>
         </nav>
 
@@ -296,6 +306,15 @@ export default function Header({ setSelectedStockForModal }) {
             
             <Link to="/strategies" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Strategies</Link>
             <Link to="/pricing" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Pricing</Link>
+            <a 
+              href="https://chat.whatsapp.com/LO3eNiIvHRv1DNDaAmkPoG?s=cl&p=a&mlu=1" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              onClick={handleMobileLinkClick} 
+              style={{ ...headerStyles.mobileLink, color: '#10b981', fontWeight: 'bold' }}
+            >
+              💬 WhatsApp Group
+            </a>
             
             <div style={headerStyles.drawerFooter}>
               {currentUser ? (
