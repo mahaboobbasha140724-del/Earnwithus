@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
 :root {
   /* Premium Dark Theme Color Palette */
   --bg-darker: #07080d;
@@ -25,8 +27,8 @@
   --text-muted: #64748b;
   
   /* Fonts */
-  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Ubuntu', system-ui, -apple-system, sans-serif;
+  --font-body: 'Ubuntu', system-ui, -apple-system, sans-serif;
 
   /* Misc */
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.7);

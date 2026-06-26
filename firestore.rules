@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if the current user is an admin.
+    // An admin is either:
+    // 1. The hardcoded super admin email (mahaboobbasha140724@gmail.com)
+    // 2. A user with 'admin' role in their user document database record
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'mahaboobbasha140724@gmail.com' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // Rules for the 'users' collection
+    match /users/{userId} {
+      // 1. A user can read and write to their own profile document
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      
+      // 2. Admins can view/list all profiles and modify roles (read, list, update)
+      allow read, list, update: if isAdmin();
+      
+      // 3. Super admins or system can create/delete users
+      allow create, delete: if isAdmin();
+    }
+    
+    // Deny read/write access to all other paths by default unless authenticated
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
