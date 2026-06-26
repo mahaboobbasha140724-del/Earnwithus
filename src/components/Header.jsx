@@ -558,10 +558,21 @@ const headerStyles = {
     color: '#94a3b8',
     fontWeight: 500,
     fontSize: '0.9rem',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+    outline: 'none',
+    fontFamily: 'inherit',
+    transition: '0.15s ease',
   },
   getStartedBtn: {
     padding: '10px 20px',
     fontSize: '0.85rem',
+    cursor: 'pointer',
+    border: 'none',
+    outline: 'none',
+    fontFamily: 'inherit',
   },
   
   // Mobile Drawer
@@ -629,6 +640,10 @@ const headerStyles = {
     borderRadius: '8px',
     color: '#ffffff',
     fontWeight: 500,
+    background: 'none',
+    cursor: 'pointer',
+    outline: 'none',
+    fontFamily: 'inherit',
   },
   profileWrapper: {
     position: 'relative',

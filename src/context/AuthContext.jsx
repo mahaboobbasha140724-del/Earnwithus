@@ -5,7 +5,9 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   updateProfile,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -39,7 +41,6 @@ export function AuthProvider({ children }) {
               role: user.email === 'mahaboobbasha140724@gmail.com' ? 'admin' : 'user',
               createdAt: new Date().toISOString()
             };
-            // Try to set it in Firestore as a fallback
             try {
               await setDoc(docRef, fallbackProfile);
             } catch (err) {
@@ -49,7 +50,6 @@ export function AuthProvider({ children }) {
           }
         } catch (error) {
           console.error("Error fetching user profile:", error);
-          // Set basic local profile if Firestore fails
           setUserProfile({
             uid: user.uid,
             email: user.email,
@@ -91,6 +91,31 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+    
+    const role = user.email === 'mahaboobbasha140724@gmail.com' ? 'admin' : 'user';
+    const docRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(docRef);
+    
+    if (!docSnap.exists()) {
+      const profileData = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || 'Trader',
+        role,
+        createdAt: new Date().toISOString()
+      };
+      await setDoc(docRef, profileData);
+      setUserProfile(profileData);
+    } else {
+      setUserProfile(docSnap.data());
+    }
+    return user;
+  }
+
   function logout() {
     return signOut(auth);
   }
@@ -106,6 +131,7 @@ export function AuthProvider({ children }) {
     loading,
     signUp,
     login,
+    loginWithGoogle,
     logout,
     resetPassword
   };

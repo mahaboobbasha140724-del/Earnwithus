@@ -12,7 +12,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, signUp, resetPassword } = useAuth();
+  const { login, signUp, resetPassword, loginWithGoogle } = useAuth();
 
   if (!isOpen) return null;
 
@@ -67,6 +67,24 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
       } else {
         setError(err.message || "An error occurred. Please try again.");
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setMessage('');
+    setLoading(true);
+    try {
+      await loginWithGoogle();
+      setMessage("Signed in with Google successfully!");
+      setTimeout(() => {
+        handleClose();
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to sign in with Google.");
     } finally {
       setLoading(false);
     }
@@ -228,6 +246,32 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
           </button>
         </form>
 
+        {/* Google Sign In Divider & Button */}
+        {activeTab !== 'reset' && (
+          <>
+            <div style={modalStyles.dividerContainer}>
+              <div style={modalStyles.dividerLine}></div>
+              <span style={modalStyles.dividerText}>or continue with</span>
+              <div style={modalStyles.dividerLine}></div>
+            </div>
+
+            <button 
+              type="button" 
+              onClick={handleGoogleLogin} 
+              disabled={loading}
+              style={modalStyles.googleBtn}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" style={{ marginRight: 10 }}>
+                <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.54 15.01 1 12 1 7.24 1 3.19 3.74 1.24 7.76l3.96 3.07C6.13 7.82 8.84 5.04 12 5.04z"/>
+                <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.28 1.47-1.11 2.72-2.36 3.56l3.66 2.84c2.14-1.97 3.37-4.87 3.37-8.55z"/>
+                <path fill="#FBBC05" d="M5.2 14.67c-.24-.72-.38-1.49-.38-2.3s.14-1.58.38-2.3L1.24 7.76C.45 9.4 0 11.2 0 13.1c0 1.9.45 3.7 1.24 5.34l3.96-3.07z"/>
+                <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.93l-3.66-2.84c-1.1.74-2.51 1.18-4.3 1.18-3.16 0-5.87-2.78-6.8-5.79l-3.96 3.07C3.19 20.26 7.24 23 12 23z"/>
+              </svg>
+              Sign In with Google
+            </button>
+          </>
+        )}
+
         {/* Footer Navigation */}
         <div style={modalStyles.footer}>
           {activeTab === 'reset' ? (
@@ -306,10 +350,6 @@ const modalStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: '0.15s ease',
-    ':hover': {
-      backgroundColor: 'rgba(255,255,255,0.05)',
-      color: '#ffffff',
-    }
   },
   tabs: {
     display: 'flex',
@@ -364,10 +404,6 @@ const modalStyles = {
     fontSize: '0.85rem',
     outline: 'none',
     transition: '0.15s ease',
-    ':focus': {
-      borderColor: '#10b981',
-      backgroundColor: 'rgba(16,185,129,0.02)',
-    }
   },
   forgotBtn: {
     background: 'none',
@@ -378,9 +414,6 @@ const modalStyles = {
     cursor: 'pointer',
     padding: 0,
     transition: '0.15s ease',
-    ':hover': {
-      textDecoration: 'underline',
-    }
   },
   errorBox: {
     display: 'flex',
@@ -402,6 +435,39 @@ const modalStyles = {
     padding: '10px 14px',
     marginBottom: 16,
   },
+  dividerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '18px 0',
+    gap: '12px',
+  },
+  dividerLine: {
+    flexGrow: 1,
+    height: '1px',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  dividerText: {
+    fontSize: '0.75rem',
+    color: '#64748b',
+    fontWeight: 500,
+  },
+  googleBtn: {
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '8px',
+    color: '#ffffff',
+    fontSize: '0.85rem',
+    fontWeight: 700,
+    padding: '10px 14px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: '0.15s ease',
+    outline: 'none',
+  },
   footer: {
     marginTop: 24,
     textAlign: 'center',
@@ -420,8 +486,5 @@ const modalStyles = {
     cursor: 'pointer',
     padding: 0,
     transition: '0.15s ease',
-    ':hover': {
-      textDecoration: 'underline',
-    }
   }
 };
