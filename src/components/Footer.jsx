@@ -50,11 +50,11 @@ export default function Footer() {
               </div>
               <div style={footerStyles.infoItem}>
                 <Phone size={16} color="#10b981" />
-                <span style={footerStyles.infoText}>+91 6361666629</span>
+                <span style={footerStyles.infoText}>+91 8790699123</span>
               </div>
               <div style={footerStyles.infoItem}>
                 <Mail size={16} color="#10b981" />
-                <a href="mailto:support@earnwithus.com" style={footerStyles.link}>support@earnwithus.com</a>
+                <a href="mailto:mahaboobbasha140724@gmail.com" style={footerStyles.link}>mahaboobbasha140724@gmail.com</a>
               </div>
             </div>
           </div>

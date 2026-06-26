@@ -7,6 +7,9 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import StockModal from './components/StockModal';
 
+// Context
+import { AuthProvider } from './context/AuthContext';
+
 // Pages
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
@@ -20,6 +23,8 @@ import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import Strategies from './pages/Strategies';
+import AdminDashboard from './pages/AdminDashboard';
+
 
 // Helper component to auto-scroll window to top on navigation
 function ScrollToTop() {
@@ -127,6 +132,7 @@ function MainApp() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/strategies" element={<Strategies />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>
 
@@ -147,7 +153,9 @@ function MainApp() {
 export default function App() {
   return (
     <BrowserRouter>
-      <MainApp />
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

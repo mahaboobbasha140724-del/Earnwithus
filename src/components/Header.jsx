@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield } from 'lucide-react';
 import { searchStocks } from '../data/mockStocks';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from './AuthModal';
 
 export default function Header({ setSelectedStockForModal }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,6 +15,11 @@ export default function Header({ setSelectedStockForModal }) {
   
   const searchRef = useRef(null);
   const navigate = useNavigate();
+
+  const { currentUser, userProfile, isAdmin, logout } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState('login');
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -189,8 +196,71 @@ export default function Header({ setSelectedStockForModal }) {
 
           {/* Action CTAs */}
           <div className="desktop-only" style={headerStyles.actions}>
-            <Link to="/pricing" style={headerStyles.loginBtn}>Login</Link>
-            <Link to="/pricing" className="btn-primary" style={headerStyles.getStartedBtn}>Get Started</Link>
+            {currentUser ? (
+              <div 
+                style={headerStyles.profileWrapper} 
+                onMouseLeave={() => setProfileDropdownOpen(false)}
+              >
+                <button 
+                  style={headerStyles.avatarBtn} 
+                  onMouseEnter={() => setProfileDropdownOpen(true)}
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                >
+                  <span style={headerStyles.avatarText}>
+                    {(userProfile?.displayName || currentUser?.email || 'U')[0].toUpperCase()}
+                  </span>
+                </button>
+                {profileDropdownOpen && (
+                  <div style={headerStyles.profileDropdown}>
+                    <div style={headerStyles.profileHeader}>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#ffffff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {userProfile?.displayName || 'Trader'}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: 2, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {currentUser.email}
+                      </div>
+                      {isAdmin && (
+                        <span className="badge-glow" style={{ fontSize: '0.6rem', marginTop: 6, display: 'inline-block', padding: '2px 6px' }}>
+                          ADMIN
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.06)' }}></div>
+                    {isAdmin && (
+                      <Link 
+                        to="/admin" 
+                        style={headerStyles.profileLink}
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <Shield size={12} style={{ marginRight: 6 }} /> Admin Dashboard
+                      </Link>
+                    )}
+                    <button 
+                      onClick={() => { logout(); setProfileDropdownOpen(false); }}
+                      style={headerStyles.signOutBtn}
+                    >
+                      <LogOut size={12} style={{ marginRight: 6 }} /> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <button 
+                  onClick={() => { setAuthModalTab('login'); setIsAuthModalOpen(true); }}
+                  style={headerStyles.loginBtn}
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => { setAuthModalTab('signup'); setIsAuthModalOpen(true); }}
+                  className="btn-primary" 
+                  style={headerStyles.getStartedBtn}
+                >
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -228,15 +298,70 @@ export default function Header({ setSelectedStockForModal }) {
             <Link to="/pricing" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Pricing</Link>
             
             <div style={headerStyles.drawerFooter}>
-              <Link to="/pricing" onClick={handleMobileLinkClick} className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginBottom: 12 }}>Get Started</Link>
-              <Link to="/pricing" onClick={handleMobileLinkClick} style={headerStyles.mobileLoginBtn}>Login</Link>
+              {currentUser ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ padding: '0 8px 12px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '0.9rem' }}>
+                      {userProfile?.displayName || 'Trader'}
+                    </div>
+                    <div style={{ color: '#64748b', fontSize: '0.75rem', marginTop: 2 }}>
+                      {currentUser.email}
+                    </div>
+                    {isAdmin && (
+                      <span className="badge-glow" style={{ fontSize: '0.6rem', marginTop: 6, display: 'inline-block', padding: '2px 6px' }}>
+                        ADMIN
+                      </span>
+                    )}
+                  </div>
+                  {isAdmin && (
+                    <Link 
+                      to="/admin" 
+                      onClick={handleMobileLinkClick} 
+                      className="btn-primary" 
+                      style={{ width: '100%', justifyContent: 'center' }}
+                    >
+                      <Shield size={14} style={{ marginRight: 6 }} /> Admin Panel
+                    </Link>
+                  )}
+                  <button 
+                    onClick={() => { logout(); handleMobileLinkClick(); }} 
+                    style={headerStyles.mobileLoginBtn}
+                  >
+                    <LogOut size={14} style={{ marginRight: 6 }} /> Sign Out
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => { setAuthModalTab('signup'); setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }} 
+                    className="btn-primary" 
+                    style={{ width: '100%', justifyContent: 'center', marginBottom: 12 }}
+                  >
+                    Get Started
+                  </button>
+                  <button 
+                    onClick={() => { setAuthModalTab('login'); setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }} 
+                    style={headerStyles.mobileLoginBtn}
+                  >
+                    Login
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        initialTab={authModalTab} 
+      />
     </header>
   );
 }
+
 
 // Inline CSS Styles for absolute component fidelity
 const headerStyles = {
@@ -504,5 +629,71 @@ const headerStyles = {
     borderRadius: '8px',
     color: '#ffffff',
     fontWeight: 500,
+  },
+  profileWrapper: {
+    position: 'relative',
+    display: 'inline-block',
+  },
+  avatarBtn: {
+    width: '38px',
+    height: '38px',
+    borderRadius: '50%',
+    backgroundColor: '#10b981',
+    border: '2px solid rgba(255,255,255,0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    boxShadow: '0 0 12px rgba(16, 185, 129, 0.3)',
+  },
+  avatarText: {
+    color: '#0d0f17',
+    fontWeight: 800,
+    fontSize: '0.95rem',
+  },
+  profileDropdown: {
+    position: 'absolute',
+    top: 'calc(100% + 12px)',
+    right: 0,
+    backgroundColor: '#0d0f17',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '12px',
+    width: '220px',
+    padding: '8px',
+    boxShadow: '0 12px 28px rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    zIndex: 1000,
+    animation: 'fadeIn 0.2s ease',
+  },
+  profileHeader: {
+    padding: '12px 14px',
+  },
+  profileLink: {
+    padding: '10px 14px',
+    borderRadius: '8px',
+    color: '#e2e8f0',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    transition: '0.15s ease',
+    textDecoration: 'none',
+  },
+  signOutBtn: {
+    padding: '10px 14px',
+    borderRadius: '8px',
+    color: '#ef4444',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    width: '100%',
+    textAlign: 'left',
+    transition: '0.15s ease',
   }
 };

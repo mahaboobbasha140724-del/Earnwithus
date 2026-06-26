@@ -48,7 +48,7 @@ export default function ContactUs() {
                   <div style={contactStyles.iconBox}><Phone size={20} color="#10b981" /></div>
                   <div>
                     <div style={contactStyles.channelLabel}>Support Hotline</div>
-                    <div style={contactStyles.channelVal}>+91 6361666629</div>
+                    <div style={contactStyles.channelVal}>+91 8790699123</div>
                   </div>
                 </div>
 
@@ -56,7 +56,7 @@ export default function ContactUs() {
                   <div style={contactStyles.iconBox}><Mail size={20} color="#10b981" /></div>
                   <div>
                     <div style={contactStyles.channelLabel}>Official Email</div>
-                    <div style={contactStyles.channelVal}>support@earnwithus.com</div>
+                    <div style={contactStyles.channelVal}>mahaboobbasha140724@gmail.com</div>
                   </div>
                 </div>
 
