@@ -108,29 +108,35 @@ export default function Strategies() {
 
   return (
     <div style={stratStyles.container} className="animate-fade-in">
-      <div className="page-wrapper">
+      
+      {/* Ambient Spatial Lighting Orbs */}
+      <div style={stratStyles.lightOrbLeft} />
+      <div style={stratStyles.lightOrbRight} />
+
+      <div className="page-wrapper" style={{ position: 'relative', zIndex: 1 }}>
         
         {/* Page Header */}
         <div style={stratStyles.header}>
-          <span className="badge-glow">LEARNING ACADEMY</span>
-          <h1 style={{ fontSize: '2.25rem', marginTop: 8 }}>Earn With Us Price Action Strategies</h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginTop: 4 }}>
-            Master institutional Price Action concepts under the Earn With Us suite. Learn to identify market swings, structure breaks, order blocks, and liquidity pools.
+          <span className="badge-glow" style={stratStyles.spatialBadge}>LEARNING HUB</span>
+          <h1 style={stratStyles.headerTitle}>Earn With Us Price Action Academy</h1>
+          <p style={stratStyles.headerSubtitle}>
+            Unlock institutional market dynamics. Explore interactive guides on swings, structure breaks, order blocks, and liquidity.
           </p>
         </div>
 
-        {/* Info Box */}
+        {/* Info Box - Floating Glass Card */}
         <div className="glass-card" style={stratStyles.infoCard}>
-          <BookOpen size={20} color="#10b981" style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <b>Price Action Hub:</b> These strategies focus <b>exclusively on Price Action</b> (structure, zones, and liquidity) rather than lagging indicators. Understanding these rules helps you read order flows, support structures, and momentum blocks effectively.
+          <div style={stratStyles.infoGlow} />
+          <BookOpen size={20} color="#10b981" style={{ flexShrink: 0, position: 'relative', zIndex: 2 }} />
+          <p style={{ fontSize: '0.9rem', color: '#e2e8f0', lineHeight: '1.6', position: 'relative', zIndex: 2, margin: 0 }}>
+            <b>Price Action Architecture:</b> These models focus purely on raw chart mechanics, volume pools, and order inefficiencies, providing a lagging-indicator-free edge to your trading setup.
           </p>
         </div>
 
         {/* Dashboard Grid */}
         <div style={stratStyles.grid}>
           
-          {/* Left: Strategy Sidebar selector */}
+          {/* Left Sidebar: Strategy selector with specular highlight */}
           <div style={stratStyles.sidebar}>
             {STRATEGIES_DATA.map((strat) => {
               const IconComponent = strat.icon;
@@ -139,83 +145,107 @@ export default function Strategies() {
                 <div 
                   key={strat.id}
                   onClick={() => setSelectedStrategy(strat)}
-                  className="glass-card"
+                  className="spatial-card-hover"
                   style={{
                     ...stratStyles.sidebarCard,
-                    borderColor: isSelected ? strat.color : 'rgba(255,255,255,0.06)',
-                    backgroundColor: isSelected ? 'rgba(255,255,255,0.02)' : '#0d0f17',
-                    boxShadow: isSelected ? `0 0 15px ${strat.color}22` : 'none'
+                    borderColor: isSelected ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)',
+                    background: isSelected 
+                      ? `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)`
+                      : 'rgba(255,255,255,0.02)',
+                    boxShadow: isSelected 
+                      ? `0 12px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 0 20px ${strat.color}25` 
+                      : '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0px rgba(255,255,255,0.05)'
                   }}
                 >
                   <div style={stratStyles.sidebarCardHeader}>
                     <div style={{ ...stratStyles.iconBox, backgroundColor: `${strat.color}15`, color: strat.color }}>
-                      <IconComponent size={18} />
+                      <IconComponent size={20} />
                     </div>
-                    <div>
-                      <h3 style={{ fontSize: '0.95rem', color: isSelected ? '#ffffff' : '#cbd5e1' }}>
-                        {strat.subtitle}
+                    <div style={{ flexGrow: 1 }}>
+                      <h3 style={{ fontSize: '0.95rem', color: '#ffffff', margin: 0, fontWeight: 700 }}>
+                        {strat.subtitle.split(' (')[0]}
                       </h3>
-                      <span style={stratStyles.difficultyBadge}>{strat.difficulty}</span>
+                      <span style={{ ...stratStyles.difficultyBadge, color: strat.color }}>{strat.difficulty}</span>
                     </div>
-                    <ChevronRight size={16} color="#64748b" style={{ marginLeft: 'auto' }} />
+                    <ChevronRight size={18} color="#94a3b8" style={{ marginLeft: 8 }} />
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Right: Strategy Content View */}
-          <div className="glass-card" style={stratStyles.contentArea}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 16, marginBottom: 20 }}>
+          {/* Right: Detailed content pane formatted as a floating slab */}
+          <div 
+            className="glass-card" 
+            style={{
+              ...stratStyles.contentArea,
+              boxShadow: `0 30px 60px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.15), 0 0 35px ${selectedStrategy.color}08`
+            }}
+          >
+            {/* Specular light border on top */}
+            <div style={stratStyles.specularLine} />
+
+            <div style={stratStyles.contentHeader}>
               <div>
-                <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>{selectedStrategy.title}</h2>
-                <span className="badge-glow" style={{ marginTop: 6, display: 'inline-block' }}>{selectedStrategy.subtitle}</span>
+                <h2 style={stratStyles.contentTitle}>{selectedStrategy.title}</h2>
+                <span className="badge-glow" style={{ ...stratStyles.contentBadge, borderColor: selectedStrategy.color, color: selectedStrategy.color }}>
+                  {selectedStrategy.subtitle}
+                </span>
               </div>
-              <span className="badge-gold" style={{ borderColor: selectedStrategy.color, color: selectedStrategy.color }}>
+              <span style={{ ...stratStyles.statusIndicator, backgroundColor: `${selectedStrategy.color}15`, color: selectedStrategy.color, borderColor: `${selectedStrategy.color}30` }}>
                 {selectedStrategy.difficulty}
               </span>
             </div>
 
-            <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: 24 }}>
+            <p style={stratStyles.strategyDesc}>
               {selectedStrategy.description}
             </p>
 
             {/* Core Concepts */}
-            <h4 style={stratStyles.sectionSubTitle}>Core Concepts Visualized</h4>
+            <h4 style={{ ...stratStyles.sectionSubTitle, borderLeftColor: selectedStrategy.color }}>Core Dynamics Visualized</h4>
             <div style={stratStyles.conceptsGrid}>
               {selectedStrategy.concepts.map((concept, idx) => (
                 <div key={idx} style={stratStyles.conceptItem}>
-                  <CheckCircle size={16} color={selectedStrategy.color} style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>{concept}</span>
+                  <div style={{ ...stratStyles.conceptBullet, backgroundColor: `${selectedStrategy.color}20` }}>
+                    <CheckCircle size={14} color={selectedStrategy.color} />
+                  </div>
+                  <span style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>{concept}</span>
                 </div>
               ))}
             </div>
 
             {/* Strategy Rules */}
-            <h4 style={stratStyles.sectionSubTitle}>Execution Rules</h4>
+            <h4 style={{ ...stratStyles.sectionSubTitle, borderLeftColor: selectedStrategy.color }}>Execution Ruleset</h4>
             <div style={stratStyles.rulesList}>
               {selectedStrategy.rules.map((rule, idx) => (
                 <div key={idx} style={stratStyles.ruleItem}>
-                  <div style={{ ...stratStyles.ruleIndex, backgroundColor: selectedStrategy.color }}>
+                  <div style={{ ...stratStyles.ruleIndex, background: `linear-gradient(135deg, ${selectedStrategy.color} 0%, rgba(255,255,255,0.1) 100%)` }}>
                     {idx + 1}
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: '1.5' }}>{rule}</p>
+                  <p style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>{rule}</p>
                 </div>
               ))}
             </div>
 
             {/* Pine Script Mock Code Box */}
-            <h4 style={stratStyles.sectionSubTitle}>Pine Script Logic Overlay (TradingView)</h4>
+            <h4 style={{ ...stratStyles.sectionSubTitle, borderLeftColor: selectedStrategy.color }}>Pine Script Code (TradingView Editor)</h4>
             <div style={stratStyles.codeWrapper}>
+              <div style={stratStyles.codeHeader}>
+                <div style={stratStyles.windowDotRed} />
+                <div style={stratStyles.windowDotYellow} />
+                <div style={stratStyles.windowDotGreen} />
+                <span style={stratStyles.codeTitle}>PineScript_OB_Automator.src</span>
+              </div>
               <pre style={stratStyles.pre}>
                 <code>{selectedStrategy.pineCodeSnippet}</code>
               </pre>
             </div>
             
-            <div style={stratStyles.tipsFooter}>
-              <Info size={16} color={selectedStrategy.color} style={{ flexShrink: 0 }} />
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                Note: Backtest this model on paper or a demo account before risking capital. Market conditions change character rapidly.
+            {/* Tips footer block */}
+            <div style={{ ...stratStyles.tipsFooter, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+              <Info size={18} color={selectedStrategy.color} style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '0.8rem', color: '#94a3b8', lineHeight: '1.4' }}>
+                Note: Backtest these Price Action setups extensively using historical data before trading. Risk management remains your primary shield in volatile sessions.
               </span>
             </div>
 
@@ -228,123 +258,310 @@ export default function Strategies() {
   );
 }
 
+// Add CSS styling dynamically for spatial effects and 3D tilts
+if (typeof document !== 'undefined') {
+  const styleEl = document.createElement('style');
+  styleEl.innerHTML = `
+    .spatial-card-hover {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      backdrop-filter: blur(20px);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .spatial-card-hover:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.06) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+    }
+  `;
+  document.head.appendChild(styleEl);
+}
+
 const stratStyles = {
   container: {
     padding: '40px 0 64px 0',
+    position: 'relative',
+    overflow: 'hidden',
+    minHeight: '100vh',
+  },
+  lightOrbLeft: {
+    width: '500px',
+    height: '500px',
+    background: 'radial-gradient(circle, rgba(14, 165, 233, 0.12) 0%, rgba(14, 165, 233, 0.0) 70%)',
+    position: 'absolute',
+    top: '-100px',
+    left: '-150px',
+    filter: 'blur(60px)',
+    pointerEvents: 'none',
+    zIndex: 0,
+  },
+  lightOrbRight: {
+    width: '600px',
+    height: '600px',
+    background: 'radial-gradient(circle, rgba(16, 185, 129, 0.09) 0%, rgba(16, 185, 129, 0.0) 75%)',
+    position: 'absolute',
+    bottom: '50px',
+    right: '-200px',
+    filter: 'blur(80px)',
+    pointerEvents: 'none',
+    zIndex: 0,
   },
   header: {
-    marginBottom: '32px',
+    marginBottom: '36px',
+  },
+  spatialBadge: {
+    textTransform: 'uppercase',
+    letterSpacing: '0.15em',
+    fontSize: '0.7rem',
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+  },
+  headerTitle: {
+    fontFamily: 'var(--font-heading)',
+    fontSize: '2.5rem',
+    fontWeight: 800,
+    letterSpacing: '-0.02em',
+    marginTop: '12px',
+    color: '#ffffff',
+  },
+  headerSubtitle: {
+    color: '#94a3b8',
+    fontSize: '1rem',
+    marginTop: '6px',
+    maxWidth: '700px',
+    lineHeight: '1.5',
   },
   infoCard: {
-    padding: '16px 20px',
-    backgroundColor: 'rgba(16, 185, 129, 0.04)',
-    border: '1px solid rgba(16, 185, 129, 0.12)',
-    borderRadius: '8px',
+    padding: '20px 24px',
+    background: 'rgba(255, 255, 255, 0.01)',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+    backdropFilter: 'blur(30px)',
+    borderRadius: '16px',
     display: 'flex',
-    gap: '12px',
+    gap: '16px',
     alignItems: 'center',
     marginBottom: '32px',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+  },
+  infoGlow: {
+    width: '120px',
+    height: '120px',
+    background: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
+    position: 'absolute',
+    left: '-20px',
+    top: '-20px',
+    zIndex: 1,
+    filter: 'blur(10px)',
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 2.2fr',
+    gridTemplateColumns: '1fr 2fr',
     gap: '32px',
+    alignItems: 'start',
   },
   sidebar: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '20px',
   },
   sidebarCard: {
-    padding: '16px',
+    padding: '20px',
     cursor: 'pointer',
-    transition: '0.2s ease',
+    borderRadius: '16px',
+    backdropFilter: 'blur(20px)',
   },
   sidebarCardHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '16px',
   },
   iconBox: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
+    width: '40px',
+    height: '40px',
+    borderRadius: '12px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
   },
   difficultyBadge: {
-    fontSize: '0.7rem',
-    color: '#64748b',
-    fontWeight: 600,
+    fontSize: '0.75rem',
+    fontWeight: 700,
     textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginTop: '4px',
+    display: 'block',
   },
   contentArea: {
-    padding: '32px',
-    backgroundColor: '#0d0f17',
+    padding: '36px',
+    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    backdropFilter: 'blur(30px)',
+    borderRadius: '24px',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  specularLine: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '1px',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2) 30%, rgba(255,255,255,0.2) 70%, transparent)',
+  },
+  contentHeader: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    borderBottom: '1px solid rgba(255,255,255,0.06)',
+    paddingBottom: '20px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+    gap: '16px',
+  },
+  contentTitle: {
+    fontFamily: 'var(--font-heading)',
+    fontSize: '1.8rem',
+    fontWeight: 800,
+    color: '#ffffff',
+    margin: 0,
+    letterSpacing: '-0.01em',
+  },
+  contentBadge: {
+    marginTop: '8px',
+    display: 'inline-block',
+    textTransform: 'none',
+    fontSize: '0.8rem',
+    padding: '4px 12px',
+    borderRadius: '999px',
+  },
+  statusIndicator: {
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    padding: '6px 14px',
+    borderRadius: '999px',
+    border: '1px solid',
+    textTransform: 'uppercase',
+  },
+  strategyDesc: {
+    color: '#e2e8f0',
+    fontSize: '1rem',
+    lineHeight: '1.7',
+    marginBottom: '28px',
   },
   sectionSubTitle: {
-    fontSize: '1rem',
+    fontSize: '1.05rem',
     color: '#ffffff',
     fontWeight: 700,
-    borderLeft: '3px solid #10b981',
-    paddingLeft: '10px',
-    margin: '24px 0 12px 0',
+    borderLeft: '4px solid',
+    paddingLeft: '12px',
+    margin: '32px 0 16px 0',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
   },
   conceptsGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-    marginBottom: '20px',
+    gap: '16px',
+    marginBottom: '28px',
   },
   conceptItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-  },
-  rulesList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '14px',
-    marginBottom: '24px',
-  },
-  ruleItem: {
-    display: 'flex',
     gap: '12px',
-    alignItems: 'flex-start',
   },
-  ruleIndex: {
-    width: '20px',
-    height: '20px',
+  conceptBullet: {
+    width: '24px',
+    height: '24px',
     borderRadius: '50%',
-    color: '#0d0f17',
-    fontWeight: 800,
-    fontSize: '0.75rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    marginTop: '2px',
+  },
+  rulesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '18px',
+    marginBottom: '28px',
+  },
+  ruleItem: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'flex-start',
+  },
+  ruleIndex: {
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    color: '#ffffff',
+    fontWeight: 800,
+    fontSize: '0.8rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
   },
   codeWrapper: {
-    backgroundColor: '#07080d',
+    backgroundColor: '#050608',
     border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: '8px',
-    padding: '16px',
+    borderRadius: '16px',
+    padding: '20px',
     overflowX: 'auto',
+    boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.8)',
+    position: 'relative',
+  },
+  codeHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    borderBottom: '1px solid rgba(255,255,255,0.04)',
+    paddingBottom: '12px',
+    marginBottom: '14px',
+  },
+  windowDotRed: {
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    backgroundColor: '#ef4444',
+  },
+  windowDotYellow: {
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    backgroundColor: '#eab308',
+  },
+  windowDotGreen: {
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    backgroundColor: '#22c55e',
+  },
+  codeTitle: {
+    fontSize: '0.75rem',
+    color: '#64748b',
+    marginLeft: '12px',
     fontFamily: 'monospace',
-    fontSize: '0.8rem',
   },
   pre: {
     margin: 0,
     color: '#34d399',
+    fontFamily: 'Consolas, Monaco, monospace',
+    fontSize: '0.85rem',
+    lineHeight: '1.5',
   },
   tipsFooter: {
     display: 'flex',
-    gap: '8px',
+    gap: '12px',
     alignItems: 'center',
-    marginTop: '24px',
-    borderTop: '1px solid rgba(255,255,255,0.06)',
-    paddingTop: '16px',
+    marginTop: '32px',
+    borderTop: '1px solid',
+    paddingTop: '20px',
   }
 };
