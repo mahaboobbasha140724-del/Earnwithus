@@ -93,9 +93,30 @@ export default function RRG() {
             <div style={rrgStyles.chartWrapper}>
               
               <svg width="100%" height="100%" viewBox={`0 0 ${svgSize} ${svgSize}`} style={{ backgroundColor: '#0a0b10', borderRadius: '12px' }}>
+                <defs>
+                  <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981" />
+                  </marker>
+                  <marker id="arrow-yellow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#f59e0b" />
+                  </marker>
+                  <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444" />
+                  </marker>
+                  <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#0ea5e9" />
+                  </marker>
+                </defs>
+
+                {/* Quadrant Backgrounds */}
+                <rect x={padding} y={padding} width={(svgSize - 2*padding)/2} height={(svgSize - 2*padding)/2} fill="rgba(14, 165, 233, 0.1)" /> {/* Improving: Top Left */}
+                <rect x={svgSize/2} y={padding} width={(svgSize - 2*padding)/2} height={(svgSize - 2*padding)/2} fill="rgba(16, 185, 129, 0.1)" /> {/* Leading: Top Right */}
+                <rect x={padding} y={svgSize/2} width={(svgSize - 2*padding)/2} height={(svgSize - 2*padding)/2} fill="rgba(239, 68, 68, 0.1)" /> {/* Lagging: Bottom Left */}
+                <rect x={svgSize/2} y={svgSize/2} width={(svgSize - 2*padding)/2} height={(svgSize - 2*padding)/2} fill="rgba(245, 158, 11, 0.1)" /> {/* Weakening: Bottom Right */}
+
                 {/* Quadrants dividers */}
-                <line x1={svgSize / 2} y1={padding} x2={svgSize / 2} y2={svgSize - padding} stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
-                <line x1={padding} y1={svgSize / 2} x2={svgSize - padding} y2={svgSize / 2} stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+                <line x1={svgSize / 2} y1={padding} x2={svgSize / 2} y2={svgSize - padding} stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+                <line x1={padding} y1={svgSize / 2} x2={svgSize - padding} y2={svgSize / 2} stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
                 
                 {/* Quadrant Text Labels */}
                 <text x={svgSize - padding - 60} y={padding + 24} fill="#10b981" fontSize="11" fontWeight="800" letterSpacing="0.05em">LEADING</text>
@@ -128,6 +149,10 @@ export default function RRG() {
                                   activePt.x >= 100 && activePt.y < 100 ? '#f59e0b' :
                                   activePt.x < 100 && activePt.y < 100 ? '#ef4444' : '#0ea5e9';
 
+                    const arrowId = activePt.x >= 100 && activePt.y >= 100 ? 'arrow-green' :
+                                    activePt.x >= 100 && activePt.y < 100 ? 'arrow-yellow' :
+                                    activePt.x < 100 && activePt.y < 100 ? 'arrow-red' : 'arrow-blue';
+
                     const isFocused = activeSector?.symbol === sector.symbol;
 
                     return (
@@ -138,7 +163,14 @@ export default function RRG() {
                       >
                         {/* Trail Line */}
                         {points.length > 1 && (
-                          <path d={pathD} fill="none" stroke={color} strokeWidth={isFocused ? 2.5 : 1.5} strokeDasharray={isFocused ? "none" : "3,3"} opacity={isFocused ? 0.95 : 0.6} />
+                          <path 
+                            d={pathD} 
+                            fill="none" 
+                            stroke={color} 
+                            strokeWidth={isFocused ? 2.5 : 1.5} 
+                            opacity={isFocused ? 0.95 : 0.8}
+                            markerEnd={`url(#${arrowId})`}
+                          />
                         )}
                         
                         {/* Current Location Point */}
