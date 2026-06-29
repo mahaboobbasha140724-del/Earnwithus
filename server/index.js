@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import http from 'http';
 import { Server } from 'socket.io';
+import WebSocket from 'ws';
 import * as dhan from 'dhanhq';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -275,6 +276,56 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 // DhanHQ WebSocket Integration
 let marketData = {};
 let dhanFeed = null;
+
+// Monkey-patch DhanFeed to use query parameter authentication (fixes 400 Bad Request error)
+dhan.DhanFeed.prototype.connect = async function() {
+    if (this.accessToken === '' || this.clientId === '') {
+        console.error('Access Token or Client ID is missing');
+        return;
+    }
+    
+    const WSS_URL_WITH_AUTH = `wss://api-feed.dhan.co?version=2&token=${this.accessToken}&clientId=${this.clientId}&authType=2`;
+    this.ws = new WebSocket(WSS_URL_WITH_AUTH);
+    
+    this.ws.on('error', (error) => {
+        console.error('WebSocket error:', error);
+        setTimeout(() => {
+            console.log('WEBSOCKET_CLOSE: reconnecting...');
+            this.connect();
+        }, 5000);
+    });
+    
+    this.ws.on('open', async () => {
+        console.log('WebSocket connection established & authorized successfully via query parameters');
+        await this.sdkHelper.onConnectionEstablished(this.ws);
+    });
+    
+    this.ws.on('message', async (data) => {
+        let response;
+        const responseCode = data.readUInt8(0);
+        switch (responseCode) {
+            case 2: response = this.processTickerPacket(data); break;
+            case 3: response = this.processMarketDepthPacket(data); break;
+            case 4: response = this.processQuotePacket(data); break;
+            case 5: response = this.processOIDataPacket(data); break;
+            case 6: response = this.processPrevClosePacket(data); break;
+            case 7: response = this.processMarketStatusPacket(data); break;
+            case 50: 
+                this.processServerDisConnectionPacket(data);
+                process.exit();
+                break;
+            default:
+                console.warn(`Unknown response code: ${responseCode}`);
+                response = null;
+        }
+        await this.sdkHelper.onMessageReceived(response);
+    });
+    
+    this.ws.on('close', async (code, reason) => {
+        console.log(`WebSocket closed with code ${code}: ${reason}`);
+        await this.sdkHelper.onClose(this.ws, code, reason.toString());
+    });
+};
 
 async function startDhanFeed() {
     try {
