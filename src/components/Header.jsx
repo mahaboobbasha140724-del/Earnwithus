@@ -137,6 +137,9 @@ export default function Header({ setSelectedStockForModal }) {
             </li>
 
             <li style={headerStyles.navItem}>
+              <Link to="/paper-trade" style={headerStyles.navLink}>Paper Trade <span className="badge-glow" style={{marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#3b82f6'}}>NEW</span></Link>
+            </li>
+            <li style={headerStyles.navItem}>
               <Link to="/strategies" style={headerStyles.navLink}>Strategies</Link>
             </li>
             <li style={headerStyles.navItem}>
@@ -304,6 +307,7 @@ export default function Header({ setSelectedStockForModal }) {
             
             <div style={{ margin: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }} />
             
+            <Link to="/paper-trade" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Paper Trade <span className="badge-glow" style={{marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#3b82f6'}}>NEW</span></Link>
             <Link to="/strategies" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Strategies</Link>
             <Link to="/pricing" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Pricing</Link>
             <a 

@@ -2,11 +2,23 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { Server } from 'socket.io';
+import * as dhan from 'dhanhq';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ["GET", "POST"]
+  }
+});
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
@@ -260,6 +272,64 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
   });
 }
 
-app.listen(PORT, () => {
+// DhanHQ WebSocket Integration
+let marketData = {};
+let dhanFeed = null;
+
+async function startDhanFeed() {
+    try {
+        dhanFeed = new dhan.DhanFeed(process.env.DHAN_CLIENT_ID, process.env.DHAN_ACCESS_TOKEN, [
+            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "1333" }, // HDFCBANK
+            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "2885" }, // RELIANCE
+            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "11536" }, // TCS
+            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "1594" }, // INFY
+            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "4963" }, // ICICIBANK
+            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "3045" }, // SBIN
+            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "1660" }  // ITC
+        ], "Quote");
+
+        dhanFeed.onConnect = () => {
+            console.log("Connected to DhanHQ Live Market Feed WebSocket");
+        };
+
+        dhanFeed.onMessage = (data) => {
+            if (data && data.LTP) {
+                const tick = {
+                    symbol: data.SecurityId, // Will map to ticker string on frontend
+                    price: data.LTP,
+                    open: data.Open,
+                    high: data.High,
+                    low: data.Low,
+                    close: data.Close,
+                    volume: data.Volume
+                };
+                marketData[data.SecurityId] = tick;
+                io.emit('market_tick', tick);
+            }
+        };
+
+        dhanFeed.onClose = () => {
+            console.log("DhanHQ WebSocket Closed. Reconnecting in 5s...");
+            setTimeout(startDhanFeed, 5000);
+        };
+        
+        dhanFeed.connect();
+    } catch (e) {
+        console.error("Failed to start DhanHQ Feed:", e);
+    }
+}
+startDhanFeed();
+
+// Socket.io Handlers
+io.on('connection', (socket) => {
+    console.log('Client connected to WebSocket:', socket.id);
+    socket.emit('initial_market_data', marketData);
+    
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+server.listen(PORT, () => {
   console.log(`Earn With Us Backend live on port ${PORT}`);
 });

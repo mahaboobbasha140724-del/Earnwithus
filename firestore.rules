@@ -37,6 +37,17 @@ service cloud.firestore {
       
       // 4. Admins have full access to manage roles and list users
       allow read, list, write: if isAdmin();
+      
+      // Paper Trading Subcollections
+      match /portfolio/{document=**} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
+      match /positions/{document=**} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
+      match /orders/{document=**} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
     }
     
     // Deny read/write access to all other paths by default unless authenticated

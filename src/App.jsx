@@ -9,6 +9,7 @@ import StockModal from './components/StockModal';
 
 // Context
 import { AuthProvider } from './context/AuthContext';
+import { PaperTradeProvider } from './context/PaperTradeContext';
 
 // Pages
 import Home from './pages/Home';
@@ -24,7 +25,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import Strategies from './pages/Strategies';
 import AdminDashboard from './pages/AdminDashboard';
-
+import PaperTrade from './pages/PaperTrade';
 
 // Helper component to auto-scroll window to top on navigation
 function ScrollToTop() {
@@ -127,6 +128,7 @@ function MainApp() {
           <Route path="/features/rrg" element={<RRG setSelectedStockForModal={setSelectedStockForModal} />} />
           <Route path="/features/sentiment" element={<Sentiment />} />
           <Route path="/features/futures-options" element={<FuturesOptions setSelectedStockForModal={setSelectedStockForModal} />} />
+          <Route path="/paper-trade" element={<PaperTrade />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -154,7 +156,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <MainApp />
+        <PaperTradeProvider>
+          <MainApp />
+        </PaperTradeProvider>
       </AuthProvider>
     </BrowserRouter>
   );
