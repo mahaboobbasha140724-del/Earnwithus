@@ -45,7 +45,14 @@ export const PaperTradeProvider = ({ children }) => {
   
   // Custom backend URL stored in localStorage for Firebase to Render communication
   const [backendUrl, setBackendUrl] = useState(() => {
-    return localStorage.getItem('VITE_BACKEND_URL') || import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://earn-with-us.onrender.com');
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' || 
+                        window.location.hostname.startsWith('192.168.') ||
+                        window.location.hostname.startsWith('10.');
+    const defaultLocalUrl = `http://${window.location.hostname}:3001`;
+    return localStorage.getItem('VITE_BACKEND_URL') || 
+           import.meta.env.VITE_BACKEND_URL || 
+           (isLocalhost ? defaultLocalUrl : 'https://earn-with-us.onrender.com');
   });
 
   const updateBackendUrl = (url) => {

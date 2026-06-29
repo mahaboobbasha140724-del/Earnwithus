@@ -63,7 +63,7 @@ async function fetchYahooQuote(yahooSymbol) {
     
     const meta = data.chart.result[0].meta;
     const price = meta.regularMarketPrice;
-    const prevClose = meta.chartPreviousClose;
+    const prevClose = meta.chartPreviousClose || price;
     const change = price - prevClose;
     const changePercent = (change / prevClose) * 100;
     
@@ -72,6 +72,10 @@ async function fetchYahooQuote(yahooSymbol) {
       yahooSymbol,
       price: Number(price.toFixed(2)),
       change: Number(changePercent.toFixed(2)),
+      open: Number((meta.regularMarketPrice || price).toFixed(2)),
+      high: Number((meta.regularMarketDayHigh || price).toFixed(2)),
+      low: Number((meta.regularMarketDayLow || price).toFixed(2)),
+      close: Number(prevClose.toFixed(2)),
       high52: meta.fiftyTwoWeekHigh || price,
       low52: meta.fiftyTwoWeekLow || price,
       volume: meta.regularMarketVolume || 0
@@ -276,6 +280,7 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 // DhanHQ WebSocket Integration
 let marketData = {};
 let dhanFeed = null;
+let isDhanConnected = false;
 
 const DHAN_TO_YAHOO = {
   "1333": "HDFCBANK.NS",
@@ -296,10 +301,10 @@ async function populateInitialMarketData() {
         marketData[dhanId] = {
           symbol: dhanId,
           price: quote.price,
-          open: quote.price,
-          high: quote.price,
-          low: quote.price,
-          close: quote.price - quote.change,
+          open: quote.open,
+          high: quote.high,
+          low: quote.low,
+          close: quote.close,
           volume: quote.volume
         };
       }
@@ -310,15 +315,45 @@ async function populateInitialMarketData() {
     console.error("Failed to populate initial market data:", err);
   }
 }
+
+// Fallback polling: If Dhan WebSocket is disconnected, poll Yahoo Finance every 10 seconds for pseudo-live ticks
+async function pollYahooFallback() {
+  if (isDhanConnected) return;
+  
+  console.log("DhanHQ is offline. Polling live prices from Yahoo Finance fallback...");
+  try {
+    const promises = Object.entries(DHAN_TO_YAHOO).map(async ([dhanId, yahooSymbol]) => {
+      const quote = await fetchYahooQuote(yahooSymbol);
+      if (quote) {
+        const tick = {
+          symbol: dhanId,
+          price: quote.price,
+          open: quote.open,
+          high: quote.high,
+          low: quote.low,
+          close: quote.close,
+          volume: quote.volume
+        };
+        marketData[dhanId] = tick;
+        io.emit('market_tick', tick);
+      }
+    });
+    await Promise.all(promises);
+  } catch (err) {
+    console.error("Failed to poll Yahoo Finance fallback:", err.message);
+  }
+}
+
 // Populate on startup
 populateInitialMarketData();
-// Periodically refresh Yahoo fallback every 1 minute
-setInterval(populateInitialMarketData, 60000);
+// Poll every 10 seconds
+setInterval(pollYahooFallback, 10000);
 
 // Monkey-patch DhanFeed to use query parameter authentication (fixes 400 Bad Request error)
 dhan.DhanFeed.prototype.connect = async function() {
     if (this.accessToken === '' || this.clientId === '') {
         console.error('Access Token or Client ID is missing');
+        isDhanConnected = false;
         return;
     }
     
@@ -327,6 +362,7 @@ dhan.DhanFeed.prototype.connect = async function() {
     
     this.ws.on('error', (error) => {
         console.error('WebSocket error:', error);
+        isDhanConnected = false;
         setTimeout(() => {
             console.log('WEBSOCKET_CLOSE: reconnecting...');
             this.connect();
@@ -335,6 +371,7 @@ dhan.DhanFeed.prototype.connect = async function() {
     
     this.ws.on('open', async () => {
         console.log('WebSocket connection established & authorized successfully via query parameters');
+        isDhanConnected = true;
         await this.sdkHelper.onConnectionEstablished(this.ws);
     });
     
@@ -350,6 +387,7 @@ dhan.DhanFeed.prototype.connect = async function() {
             case 7: response = this.processMarketStatusPacket(data); break;
             case 50: 
                 this.processServerDisConnectionPacket(data);
+                isDhanConnected = false;
                 process.exit();
                 break;
             default:
@@ -361,6 +399,7 @@ dhan.DhanFeed.prototype.connect = async function() {
     
     this.ws.on('close', async (code, reason) => {
         console.log(`WebSocket closed with code ${code}: ${reason}`);
+        isDhanConnected = false;
         await this.sdkHelper.onClose(this.ws, code, reason.toString());
     });
 };
@@ -379,6 +418,7 @@ async function startDhanFeed() {
 
         dhanFeed.onConnect = () => {
             console.log("Connected to DhanHQ Live Market Feed WebSocket");
+            isDhanConnected = true;
         };
 
         dhanFeed.onMessage = (data) => {
@@ -399,12 +439,14 @@ async function startDhanFeed() {
 
         dhanFeed.onClose = () => {
             console.log("DhanHQ WebSocket Closed. Reconnecting in 5s...");
+            isDhanConnected = false;
             setTimeout(startDhanFeed, 5000);
         };
         
         dhanFeed.connect();
     } catch (e) {
         console.error("Failed to start DhanHQ Feed:", e);
+        isDhanConnected = false;
     }
 }
 startDhanFeed();
