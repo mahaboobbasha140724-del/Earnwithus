@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
+import Logo from '../components/Logo';
 
 export default function Home({ setSelectedStockForModal }) {
   const [activeFeatureTab, setActiveFeatureTab] = useState('scanners'); // 'scanners' | 'heatmaps' | 'rrg' | 'sentiment'
@@ -74,127 +75,62 @@ export default function Home({ setSelectedStockForModal }) {
   return (
     <div style={homeStyles.container}>
       
-      {/* 1. Hero Section */}
-      <section style={homeStyles.heroSection}>
-        <div className="page-wrapper" style={homeStyles.heroGrid}>
-          
-          {/* Hero Content */}
-          <div style={homeStyles.heroContent} className="animate-slide-up">
-            <div style={homeStyles.badge}>
-              <span className="badge-glow">Now Live: v2.4 Analytics Update</span>
-            </div>
-            <h1 style={homeStyles.heroTitle}>
-              Supercharge Your <span style={{ color: '#10b981' }}>Stock Trading</span> & Real-time Analysis
-            </h1>
-            <p style={homeStyles.heroSubtitle}>
-              Earn With Us offers institutional-grade stock scanners, options analysis, and relative rotation graphs. Effortlessly spot winning setups, track momentum trends, and make data-backed trades.
-            </p>
-            <div style={homeStyles.heroActions}>
-              <Link to="/pricing" className="btn-primary" style={homeStyles.heroBtn}>
-                Get Started for FREE <ArrowRight size={18} />
-              </Link>
-              <Link to="/pricing" className="btn-secondary" style={homeStyles.heroBtnSec}>
-                View Plans
-              </Link>
-            </div>
-            
-            {/* Stats Block */}
-            <div style={homeStyles.statsContainer}>
-              <div style={homeStyles.statItem}>
-                <div style={homeStyles.statIconBox}><Users size={18} color="#10b981" /></div>
-                <div>
-                  <div style={homeStyles.statVal}>40,000+</div>
-                  <div style={homeStyles.statLabel}>Active Traders</div>
-                </div>
+      {/* 1. Split Hero Section (Zerroday Inspired) */}
+      <section style={{ padding: '40px 0 20px 0' }}>
+        <div className="page-wrapper">
+          <div className="split-hero-container">
+            {/* Bull Panel - Analytics */}
+            <div className="split-hero-panel split-hero-bull">
+              <div className="split-hero-bull-motif"></div>
+              <div className="split-hero-badge split-hero-badge-bull">
+                🚀 Analytics Hub
               </div>
-              <div style={homeStyles.statItem}>
-                <div style={homeStyles.statIconBox}><Award size={18} color="#f59e0b" /></div>
-                <div>
-                  <div style={homeStyles.statVal}>30+</div>
-                  <div style={homeStyles.statLabel}>Unique Scanners</div>
-                </div>
+              <h1 className="split-hero-title split-hero-title-bull">
+                Supercharge Your <span style={{ color: '#10b981' }}>Stock Analysis</span>
+              </h1>
+              <p className="split-hero-subtitle">
+                Spot winning setups instantly using advanced screeners, live sector heatmaps, and Relative Rotation Graphs (RRG).
+              </p>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', zIndex: 10 }}>
+                <Link to="/scanners" className="btn-primary" style={{ background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)', border: 'none', color: '#050508', fontWeight: 'bold' }}>
+                  ⚡ Open Scanners <ArrowRight size={16} />
+                </Link>
+                <Link to="/sentiment" className="btn-secondary">
+                  Market Sentiment
+                </Link>
               </div>
             </div>
+
+            {/* Bear Panel - Simulator */}
+            <div className="split-hero-panel split-hero-bear">
+              <div className="split-hero-bear-motif"></div>
+              <div className="split-hero-badge split-hero-badge-bear">
+                🛡️ Simulator Hub
+              </div>
+              <h1 className="split-hero-title split-hero-title-bear">
+                Virtual <span style={{ color: '#ef4444' }}>Paper Trading</span>
+              </h1>
+              <p className="split-hero-subtitle">
+                Practice trading NIFTY, SENSEX, and F&amp;O setups with live virtual feeds and zero financial risk.
+              </p>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', zIndex: 10 }}>
+                <Link to="/paper-trade" className="btn-primary" style={{ background: 'linear-gradient(135deg, #ff4ecd 0%, #ae63f0 100%)', border: 'none', color: '#ffffff', fontWeight: 'bold' }}>
+                  🎮 Enter Simulator <ArrowRight size={16} />
+                </Link>
+                <Link to="/pricing" className="btn-secondary">
+                  View Premium
+                </Link>
+              </div>
+            </div>
+
+            {/* Floating Central Logo */}
+            <div className="split-hero-logo-container hidden md:flex">
+              <Logo size={44} />
+            </div>
+
+            {/* Glowing Central Seam */}
+            <div className="split-hero-seam"></div>
           </div>
-
-          {/* Hero Live Widget (Nifty 50 Chart Preview) */}
-          <div style={homeStyles.heroVisual} className="animate-fade-in">
-            <div className="glass-card" style={homeStyles.chartWidget}>
-              <div style={homeStyles.chartHeader}>
-                <div>
-                  <span style={homeStyles.chartTitle}>NIFTY 50 INDEX</span>
-                  <div style={homeStyles.chartPriceContainer}>
-                    <span style={homeStyles.chartPrice}>{liveData.NIFTY50.price.toLocaleString()}</span>
-                    <span style={{
-                      ...homeStyles.chartPriceChange,
-                      color: liveData.NIFTY50.change >= 0 ? '#10b981' : '#ef4444'
-                    }}>
-                      {liveData.NIFTY50.change >= 0 ? '+' : ''}{liveData.NIFTY50.change.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-                <div style={homeStyles.liveDotContainer}>
-                  <div style={homeStyles.liveDot} />
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8' }}>LIVE</span>
-                </div>
-              </div>
-
-              {/* Animated Mock SVG Area Chart */}
-              <div style={homeStyles.miniChartWrapper}>
-                <svg width="100%" height="150" viewBox="0 0 400 150" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="heroChartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  {/* Grid Lines */}
-                  <line x1="0" y1="37" x2="400" y2="37" stroke="rgba(255,255,255,0.02)" />
-                  <line x1="0" y1="75" x2="400" y2="75" stroke="rgba(255,255,255,0.02)" />
-                  <line x1="0" y1="112" x2="400" y2="112" stroke="rgba(255,255,255,0.02)" />
-                  {/* Line Fill */}
-                  <path d="M 0 120 L 50 110 L 100 130 L 150 95 L 200 105 L 250 65 L 300 75 L 350 40 L 400 45 L 400 150 L 0 150 Z" fill="url(#heroChartGrad)" />
-                  {/* Stroke Line */}
-                  <path d="M 0 120 L 50 110 L 100 130 L 150 95 L 200 105 L 250 65 L 300 75 L 350 40 L 400 45" fill="none" stroke="#10b981" strokeWidth="2.5" />
-                  {/* Indicator Dot */}
-                  <circle cx="400" cy="45" r="5" fill="#10b981" />
-                  <circle cx="400" cy="45" r="10" fill="none" stroke="#10b981" strokeWidth="1.5" opacity="0.5" />
-                </svg>
-              </div>
-
-              {/* Quick stock ticks */}
-              <div style={homeStyles.quickTicks}>
-                <div style={homeStyles.tickItem} onClick={() => {
-                  const stockObj = mockStocks.find(s => s.symbol === 'RELIANCE') || mockStocks[0];
-                  setSelectedStockForModal({ ...stockObj, price: liveData.RELIANCE.price, change: liveData.RELIANCE.change });
-                }}>
-                  <span style={homeStyles.tickSymbol}>RELIANCE</span>
-                  <span style={liveData.RELIANCE.change >= 0 ? homeStyles.tickValGreen : homeStyles.tickValRed}>
-                    ₹{liveData.RELIANCE.price.toLocaleString()} ({liveData.RELIANCE.change >= 0 ? '+' : ''}{liveData.RELIANCE.change.toFixed(2)}%)
-                  </span>
-                </div>
-                <div style={homeStyles.tickItem} onClick={() => {
-                  const stockObj = mockStocks.find(s => s.symbol === 'HDFCBANK') || mockStocks[3];
-                  setSelectedStockForModal({ ...stockObj, price: liveData.HDFCBANK.price, change: liveData.HDFCBANK.change });
-                }}>
-                  <span style={homeStyles.tickSymbol}>HDFCBANK</span>
-                  <span style={liveData.HDFCBANK.change >= 0 ? homeStyles.tickValGreen : homeStyles.tickValRed}>
-                    ₹{liveData.HDFCBANK.price.toLocaleString()} ({liveData.HDFCBANK.change >= 0 ? '+' : ''}{liveData.HDFCBANK.change.toFixed(2)}%)
-                  </span>
-                </div>
-                <div style={homeStyles.tickItem} onClick={() => {
-                  const stockObj = mockStocks.find(s => s.symbol === 'TCS') || mockStocks[1];
-                  setSelectedStockForModal({ ...stockObj, price: liveData.TCS.price, change: liveData.TCS.change });
-                }}>
-                  <span style={homeStyles.tickSymbol}>TCS</span>
-                  <span style={liveData.TCS.change >= 0 ? homeStyles.tickValGreen : homeStyles.tickValRed}>
-                    ₹{liveData.TCS.price.toLocaleString()} ({liveData.TCS.change >= 0 ? '+' : ''}{liveData.TCS.change.toFixed(2)}%)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </section>
 
