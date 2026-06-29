@@ -277,6 +277,44 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 let marketData = {};
 let dhanFeed = null;
 
+const DHAN_TO_YAHOO = {
+  "1333": "HDFCBANK.NS",
+  "2885": "RELIANCE.NS",
+  "11536": "TCS.NS",
+  "1594": "INFY.NS",
+  "4963": "ICICIBANK.NS",
+  "3045": "SBIN.NS",
+  "1660": "ITC.NS"
+};
+
+async function populateInitialMarketData() {
+  console.log("Populating initial market data from Yahoo Finance...");
+  try {
+    for (const [dhanId, yahooSymbol] of Object.entries(DHAN_TO_YAHOO)) {
+      const quote = await fetchYahooQuote(yahooSymbol);
+      if (quote) {
+        marketData[dhanId] = {
+          symbol: dhanId,
+          price: quote.price,
+          open: quote.price,
+          high: quote.price,
+          low: quote.price,
+          close: quote.price - quote.change,
+          volume: quote.volume
+        };
+      }
+    }
+    io.emit('initial_market_data', marketData);
+    console.log("Initial market data populated successfully!");
+  } catch (err) {
+    console.error("Failed to populate initial market data:", err);
+  }
+}
+// Populate on startup
+populateInitialMarketData();
+// Periodically refresh Yahoo fallback every 1 minute
+setInterval(populateInitialMarketData, 60000);
+
 // Monkey-patch DhanFeed to use query parameter authentication (fixes 400 Bad Request error)
 dhan.DhanFeed.prototype.connect = async function() {
     if (this.accessToken === '' || this.clientId === '') {

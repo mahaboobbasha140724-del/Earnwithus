@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { X, TrendingUp, TrendingDown, Star, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, TrendingUp, TrendingDown, Star, AlertTriangle, ShieldCheck, Briefcase } from 'lucide-react';
 
 export default function StockModal({ stock, onClose }) {
   if (!stock) return null;
 
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'options' | 'seasonality'
   
   // Generate some simulated chart points based on stock price
@@ -82,9 +84,18 @@ export default function StockModal({ stock, onClose }) {
               {isPositive ? '+' : ''}{stock.change.toFixed(2)}%
             </span>
           </div>
-          <div style={modalStyles.liveIndicator}>
-            <div style={modalStyles.liveDot} />
-            <span>LIVE DATA FEED</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+            <div style={modalStyles.liveIndicator}>
+              <div style={modalStyles.liveDot} />
+              <span>LIVE DATA FEED</span>
+            </div>
+            <button 
+              onClick={() => { onClose(); navigate(`/paper-trade?symbol=${stock.symbol}`); }} 
+              className="btn-primary" 
+              style={{ padding: '6px 12px', fontSize: '0.8rem', textTransform: 'none', letterSpacing: 'normal' }}
+            >
+              <Briefcase size={12} /> Paper Trade
+            </button>
           </div>
         </div>
 

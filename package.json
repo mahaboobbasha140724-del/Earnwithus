@@ -18,6 +18,8 @@
     "express": "^4.19.2",
     "firebase": "^12.15.0",
     "lucide-react": "^1.21.0",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",

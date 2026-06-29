@@ -1,10 +1,30 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { db, auth } from '../firebase';
-import { doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const PaperTradeContext = createContext();
+
+export const ID_MAP = {
+  "1333": "HDFCBANK",
+  "2885": "RELIANCE",
+  "11536": "TCS",
+  "1594": "INFY",
+  "4963": "ICICIBANK",
+  "3045": "SBIN",
+  "1660": "ITC"
+};
+
+export const SYMBOL_MAP = {
+  "HDFCBANK": "1333",
+  "RELIANCE": "2885",
+  "TCS": "11536",
+  "INFY": "1594",
+  "ICICIBANK": "4963",
+  "SBIN": "3045",
+  "ITC": "1660"
+};
 
 export function usePaperTrade() {
   return useContext(PaperTradeContext);
@@ -19,24 +39,54 @@ export const PaperTradeProvider = ({ children }) => {
   const [portfolio, setPortfolio] = useState({ balance: 0, invested: 0, mtm: 0 });
   const [positions, setPositions] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [publicTrades, setPublicTrades] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Custom backend URL stored in localStorage for Firebase to Render communication
+  const [backendUrl, setBackendUrl] = useState(() => {
+    return localStorage.getItem('VITE_BACKEND_URL') || import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://earn-with-us.onrender.com');
+  });
+
+  const updateBackendUrl = (url) => {
+    localStorage.setItem('VITE_BACKEND_URL', url);
+    setBackendUrl(url);
+    window.location.reload(); // Refresh to establish new WebSocket connection
+  };
 
   // Initialize Socket.io
   useEffect(() => {
-    const newSocket = io(window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin);
+    if (!backendUrl) return;
+    const newSocket = io(backendUrl);
     
     newSocket.on('initial_market_data', (data) => {
-      setMarketData(data);
+      // Map keys from numeric Dhan ID to human-readable symbol
+      const mappedData = {};
+      Object.keys(data).forEach(id => {
+        const symbol = ID_MAP[id] || id;
+        mappedData[symbol] = {
+          ...data[id],
+          symbol
+        };
+      });
+      setMarketData(mappedData);
     });
 
     newSocket.on('market_tick', (tick) => {
-      setMarketData(prev => ({ ...prev, [tick.symbol]: tick }));
+      const symbol = ID_MAP[tick.symbol] || tick.symbol;
+      setMarketData(prev => ({ 
+        ...prev, 
+        [symbol]: {
+          ...tick,
+          symbol
+        } 
+      }));
     });
 
     setSocket(newSocket);
 
     return () => newSocket.close();
-  }, []);
+  }, [backendUrl]);
 
   // Listen to Auth State and load Firestore data
   useEffect(() => {
@@ -61,15 +111,38 @@ export const PaperTradeProvider = ({ children }) => {
           snapshot.forEach(doc => pos.push({ id: doc.id, ...doc.data() }));
           setPositions(pos);
         });
-        
+        // Load Public Trades (Community Feed)
+        const qTrades = query(collection(db, 'public_trades'), orderBy('timestamp', 'desc'), limit(50));
+        const unsubPublic = onSnapshot(qTrades, (snapshot) => {
+          const trades = [];
+          snapshot.forEach(doc => trades.push({ id: doc.id, ...doc.data() }));
+          setPublicTrades(trades);
+        });
+
+        // Load Leaderboard (Users sorted by P&L or Balance)
+        // For simplicity, we just fetch all users' summaries or we can query a specific 'leaderboard' collection.
+        // We will mock this or fetch simple summaries if needed. Since 'users/{uid}/portfolio/summary' is nested,
+        // it's better to keep a central 'leaderboard' collection updated via cloud functions, but we can do client-side reads for now if small.
+        // To keep it simple, we will just fetch top balances from a root 'leaderboard' collection that we update.
+        const qLeader = query(collection(db, 'leaderboard'), orderBy('balance', 'desc'), limit(10));
+        const unsubLeader = onSnapshot(qLeader, (snapshot) => {
+           const leaders = [];
+           snapshot.forEach(doc => leaders.push({ id: doc.id, ...doc.data() }));
+           setLeaderboard(leaders);
+        });
+
         setLoading(false);
         return () => {
           unsubPortfolio();
           unsubPositions();
+          unsubPublic();
+          unsubLeader();
         };
       } else {
         setPortfolio({ balance: 0, invested: 0, mtm: 0 });
         setPositions([]);
+        setPublicTrades([]);
+        setLeaderboard([]);
         setLoading(false);
       }
     });
@@ -96,12 +169,28 @@ export const PaperTradeProvider = ({ children }) => {
     }
   }, [marketData, positions]);
 
+  // Sync balance to leaderboard collection for social ranking
+  useEffect(() => {
+    if (user && portfolio.balance) {
+      const leaderRef = doc(db, 'leaderboard', user.uid);
+      setDoc(leaderRef, {
+        displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous Trader',
+        balance: portfolio.balance,
+        mtm: portfolio.mtm || 0,
+        photoURL: user.photoURL || null,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+  }, [user, portfolio.balance, portfolio.mtm]);
+
   // Place Order Logic
-  const placeOrder = async (symbol, type, quantity, isMarket, limitPrice = 0) => {
+  const placeOrder = async ({ symbol, type, quantity, isMarket, limitPrice, target, stopLoss, rationale, isPublic }) => {
     if (!user) return { success: false, message: "Please log in first" };
     
+    // Convert symbol (e.g. RELIANCE) to ID for backend compatibility if needed, 
+    // but the frontend state is all stored in terms of human-readable symbols now!
     const price = isMarket ? marketData[symbol]?.price : limitPrice;
-    if (!price) return { success: false, message: "No live price available" };
+    if (!price) return { success: false, message: `No live price available for ${symbol}` };
 
     const requiredMargin = price * quantity;
 
@@ -112,10 +201,13 @@ export const PaperTradeProvider = ({ children }) => {
     try {
       const orderData = {
         symbol,
-        type, // BUY or SELL
+        type, 
         quantity: Number(quantity),
         orderType: isMarket ? 'MARKET' : 'LIMIT',
         price: Number(price),
+        target: target ? Number(target) : null,
+        stopLoss: stopLoss ? Number(stopLoss) : null,
+        rationale: rationale || "",
         status: isMarket ? 'EXECUTED' : 'PENDING',
         timestamp: new Date()
       };
@@ -128,14 +220,12 @@ export const PaperTradeProvider = ({ children }) => {
         // 2. Update Position
         const existingPos = positions.find(p => p.symbol === symbol);
         if (existingPos) {
-          // Complex logic for averaging or squaring off. Simple version for now:
           const posRef = doc(db, 'users', user.uid, 'positions', existingPos.id);
           let newQuantity = existingPos.quantity;
           let newType = existingPos.type;
           
           if (existingPos.type === type) {
             newQuantity += Number(quantity);
-            // new avg price calculation needed here ideally
           } else {
             newQuantity -= Number(quantity);
             if (newQuantity < 0) {
@@ -147,7 +237,12 @@ export const PaperTradeProvider = ({ children }) => {
           if (newQuantity === 0) {
             await updateDoc(posRef, { quantity: 0, status: 'CLOSED' });
           } else {
-            await updateDoc(posRef, { quantity: newQuantity, type: newType });
+            await updateDoc(posRef, { 
+              quantity: newQuantity, 
+              type: newType,
+              target: target ? Number(target) : existingPos.target,
+              stopLoss: stopLoss ? Number(stopLoss) : existingPos.stopLoss
+            });
           }
         } else {
           const positionsRef = collection(db, 'users', user.uid, 'positions');
@@ -156,6 +251,8 @@ export const PaperTradeProvider = ({ children }) => {
             type,
             quantity: Number(quantity),
             averagePrice: Number(price),
+            target: target ? Number(target) : null,
+            stopLoss: stopLoss ? Number(stopLoss) : null,
             status: 'OPEN'
           });
         }
@@ -164,6 +261,26 @@ export const PaperTradeProvider = ({ children }) => {
         const portfolioRef = doc(db, 'users', user.uid, 'portfolio', 'summary');
         const newBalance = type === 'BUY' ? portfolio.balance - requiredMargin : portfolio.balance + requiredMargin;
         await updateDoc(portfolioRef, { balance: newBalance });
+        
+        // 4. Publish to Community Feed if public
+        if (isPublic) {
+          const publicTradesRef = collection(db, 'public_trades');
+          await addDoc(publicTradesRef, {
+            userId: user.uid,
+            displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous Trader',
+            photoURL: user.photoURL || null,
+            symbol,
+            type,
+            quantity: Number(quantity),
+            price: Number(price),
+            target: target ? Number(target) : null,
+            stopLoss: stopLoss ? Number(stopLoss) : null,
+            rationale: rationale || "",
+            timestamp: serverTimestamp(),
+            likes: 0,
+            comments: 0
+          });
+        }
       }
 
       return { success: true, message: `Order placed for ${symbol}` };
@@ -173,13 +290,63 @@ export const PaperTradeProvider = ({ children }) => {
     }
   };
 
+  // Reset capital and wipe positions
+  const resetCapital = async (amount) => {
+    if (!user) return { success: false, message: "Please log in first" };
+    try {
+      // 1. Reset summary balance
+      const portfolioRef = doc(db, 'users', user.uid, 'portfolio', 'summary');
+      await updateDoc(portfolioRef, { 
+        balance: Number(amount), 
+        invested: 0, 
+        mtm: 0,
+        initialBalance: Number(amount)
+      });
+
+      // 2. Clear positions
+      const positionsRef = collection(db, 'users', user.uid, 'positions');
+      const positionsSnap = await getDocs(positionsRef);
+      const deletePromises = [];
+      positionsSnap.forEach((docSnap) => {
+        // We can either set quantity to 0 or completely delete. Setting to 0/CLOSED is cleaner.
+        deletePromises.push(updateDoc(doc(db, 'users', user.uid, 'positions', docSnap.id), {
+          quantity: 0,
+          status: 'CLOSED'
+        }));
+      });
+      await Promise.all(deletePromises);
+
+      // Add a reset log in orders
+      const ordersRef = collection(db, 'users', user.uid, 'orders');
+      await addDoc(ordersRef, {
+        symbol: "SYSTEM",
+        type: "RESET",
+        quantity: 0,
+        orderType: "RESET",
+        price: Number(amount),
+        status: "SUCCESS",
+        timestamp: new Date()
+      });
+
+      return { success: true, message: "Capital reset successfully!" };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: e.message };
+    }
+  };
+
   const value = {
     marketData,
     portfolio,
     positions,
     orders,
+    publicTrades,
+    leaderboard,
     loading,
-    placeOrder
+    backendUrl,
+    updateBackendUrl,
+    placeOrder,
+    resetCapital
   };
 
   return (
