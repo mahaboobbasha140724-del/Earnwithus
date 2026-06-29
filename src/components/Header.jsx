@@ -4,6 +4,7 @@ import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity,
 import { searchStocks } from '../data/mockStocks';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
+import Logo from './Logo';
 
 export default function Header({ setSelectedStockForModal }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -69,9 +70,7 @@ export default function Header({ setSelectedStockForModal }) {
           </button>
           
           <Link to="/" style={headerStyles.logoContainer}>
-            <div style={headerStyles.logoIcon}>
-              <TrendingUp size={20} color="#0d0f17" strokeWidth={3} />
-            </div>
+            <Logo size={32} />
             <span style={headerStyles.logoText}>
               Earn <span style={{ color: '#10b981' }}>With Us</span>
             </span>

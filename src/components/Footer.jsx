@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, Clock } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Footer() {
   return (
@@ -11,9 +12,7 @@ export default function Footer() {
           {/* Logo & About Column */}
           <div style={footerStyles.colLarge}>
             <Link to="/" style={footerStyles.logoContainer}>
-              <div style={footerStyles.logoIcon}>
-                <span style={{ fontSize: 16, fontWeight: 900, color: '#0d0f17' }}>⚡</span>
-              </div>
+              <Logo size={32} />
               <span style={footerStyles.logoText}>
                 Earn <span style={{ color: '#10b981' }}>With Us</span>
               </span>
