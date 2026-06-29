@@ -50,9 +50,19 @@ export const PaperTradeProvider = ({ children }) => {
                         window.location.hostname.startsWith('192.168.') ||
                         window.location.hostname.startsWith('10.');
     const defaultLocalUrl = `http://${window.location.hostname}:3001`;
+    
+    if (isLocalhost) {
+      const saved = localStorage.getItem('VITE_BACKEND_URL');
+      // Only return saved if it points to a local address
+      if (saved && (saved.includes('localhost') || saved.includes('127.0.0.1') || saved.includes('192.168.') || saved.includes('10.'))) {
+        return saved;
+      }
+      return defaultLocalUrl;
+    }
+    
     return localStorage.getItem('VITE_BACKEND_URL') || 
            import.meta.env.VITE_BACKEND_URL || 
-           (isLocalhost ? defaultLocalUrl : 'https://earn-with-us.onrender.com');
+           'https://earn-with-us.onrender.com';
   });
 
   const updateBackendUrl = (url) => {
@@ -64,9 +74,23 @@ export const PaperTradeProvider = ({ children }) => {
   // Initialize Socket.io
   useEffect(() => {
     if (!backendUrl) return;
+    console.log(`[Socket] Attempting to connect to backend at: ${backendUrl}`);
     const newSocket = io(backendUrl);
     
+    newSocket.on('connect', () => {
+      console.log(`[Socket] Connected successfully to: ${backendUrl}`);
+    });
+
+    newSocket.on('connect_error', (err) => {
+      console.error(`[Socket] Connection error for ${backendUrl}:`, err);
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log(`[Socket] Disconnected from ${backendUrl} (Reason: ${reason})`);
+    });
+    
     newSocket.on('initial_market_data', (data) => {
+      console.log("[Socket] Received initial market data:", data);
       // Map keys from numeric Dhan ID to human-readable symbol
       const mappedData = {};
       Object.keys(data).forEach(id => {

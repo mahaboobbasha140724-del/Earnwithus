@@ -329,6 +329,8 @@ const modalStyles = {
   modal: {
     width: '100%',
     maxWidth: '420px',
+    maxHeight: '90vh',
+    overflowY: 'auto',
     backgroundColor: '#0d0f17',
     border: '1px solid rgba(255,255,255,0.08)',
     padding: '32px',
