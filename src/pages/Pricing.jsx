@@ -144,7 +144,7 @@ export default function Pricing() {
               )}
 
               <button 
-                onClick={() => setSelectedPlan(plan)}
+                onClick={() => window.open('https://wa.me/qr/MT3HXPJWVQC3B1', '_blank')}
                 className="btn-primary" 
                 style={{ width: '100%', justifyContent: 'center', marginTop: 'auto' }}
               >
