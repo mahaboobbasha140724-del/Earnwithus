@@ -9,7 +9,7 @@ import './PaperTrade.css';
 const PRESET_STOCKS = ["HDFCBANK", "RELIANCE", "TCS", "INFY", "ICICIBANK", "SBIN", "ITC"];
 
 export default function PaperTrade() {
-  const { currentUser: user } = useAuth();
+  const { currentUser: user, isAdmin } = useAuth();
   const { 
     marketData, 
     portfolio, 
@@ -58,6 +58,13 @@ export default function PaperTrade() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [location]);
+
+  // Redirect non-admins if they try to access Connection Settings
+  useEffect(() => {
+    if (activeTab === 'settings' && !isAdmin) {
+      setActiveTab('feed');
+    }
+  }, [activeTab, isAdmin]);
 
   if (loading) {
     return <div className="loading-state">Loading Paper Trading Data...</div>;
@@ -196,9 +203,11 @@ export default function PaperTrade() {
           <button className={`tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => setActiveTab('leaderboard')}>
             <Award size={18} /> Leaderboard
           </button>
-          <button className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <Settings size={18} /> Connection Settings
-          </button>
+          {isAdmin && (
+            <button className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
+              <Settings size={18} /> Connection Settings
+            </button>
+          )}
         </div>
 
         {/* Main Content Area */}
@@ -496,7 +505,7 @@ export default function PaperTrade() {
           )}
 
           {/* CONNECTION SETTINGS */}
-          {activeTab === 'settings' && (
+          {activeTab === 'settings' && isAdmin && (
             <div className="settings-container">
               <h2>Backend Connection Settings</h2>
               <p style={{ color: '#94a3b8', marginBottom: 20 }}>
@@ -508,7 +517,7 @@ export default function PaperTrade() {
                   type="text" 
                   value={tempBackendUrl} 
                   onChange={e => setTempBackendUrl(e.target.value)} 
-                  placeholder="https://earn-with-us.onrender.com" 
+                  placeholder="https://earnwithus.onrender.com" 
                   style={{ width: '100%', marginTop: 8 }}
                 />
               </div>
@@ -527,7 +536,7 @@ export default function PaperTrade() {
                                         window.location.hostname === '127.0.0.1' || 
                                         window.location.hostname.startsWith('192.168.') ||
                                         window.location.hostname.startsWith('10.');
-                    const defaultUrl = isLocalhost ? `http://${window.location.hostname}:3001` : 'https://earn-with-us.onrender.com';
+                    const defaultUrl = isLocalhost ? `http://${window.location.hostname}:3001` : 'https://earnwithus.onrender.com';
                     setTempBackendUrl(defaultUrl);
                     updateBackendUrl(defaultUrl);
                   }}

@@ -93,7 +93,7 @@ export const PaperTradeProvider = ({ children }) => {
       return saved;
     }
     return import.meta.env.VITE_BACKEND_URL || 
-           'https://earn-with-us.onrender.com';
+           'https://earnwithus.onrender.com';
   });
 
   const updateBackendUrl = (url) => {
