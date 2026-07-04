@@ -289,7 +289,17 @@ const DHAN_TO_YAHOO = {
   "1594": "INFY.NS",
   "4963": "ICICIBANK.NS",
   "3045": "SBIN.NS",
-  "1660": "ITC.NS"
+  "1660": "ITC.NS",
+  
+  // Indices
+  "NIFTY50": "^NSEI",
+  "BANKNIFTY": "^NSEBANK",
+  "SENSEX": "^BSESN",
+  
+  // Other F&O stocks
+  "HINDUNILVR": "HINDUNILVR.NS",
+  "ONGC": "ONGC.NS",
+  "COALINDIA": "COALINDIA.NS"
 };
 
 async function populateInitialMarketData() {
@@ -316,13 +326,14 @@ async function populateInitialMarketData() {
   }
 }
 
-// Fallback polling: If Dhan WebSocket is disconnected, poll Yahoo Finance every 10 seconds for pseudo-live ticks
+// Fallback polling: Poll Yahoo Finance every 10 seconds for live ticks
 async function pollYahooFallback() {
-  if (isDhanConnected) return;
+  const targets = isDhanConnected 
+    ? Object.entries(DHAN_TO_YAHOO).filter(([key]) => isNaN(Number(key)))
+    : Object.entries(DHAN_TO_YAHOO);
   
-  console.log("DhanHQ is offline. Polling live prices from Yahoo Finance fallback...");
   try {
-    const promises = Object.entries(DHAN_TO_YAHOO).map(async ([dhanId, yahooSymbol]) => {
+    const promises = targets.map(async ([dhanId, yahooSymbol]) => {
       const quote = await fetchYahooQuote(yahooSymbol);
       if (quote) {
         const tick = {

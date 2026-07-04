@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { usePaperTrade } from '../context/PaperTradeContext';
 import { useAuth } from '../context/AuthContext';
 import { Briefcase, Activity, Clock, Users, MessageSquare, TrendingUp, TrendingDown, Target, ShieldAlert, Award, Settings } from 'lucide-react';
+import { mockStocks } from '../data/mockStocks';
 import './PaperTrade.css';
 
 const PRESET_STOCKS = ["HDFCBANK", "RELIANCE", "TCS", "INFY", "ICICIBANK", "SBIN", "ITC"];
@@ -20,11 +21,13 @@ export default function PaperTrade() {
     backendUrl,
     updateBackendUrl,
     placeOrder,
-    resetCapital 
+    resetCapital,
+    getOptionLTP
   } = usePaperTrade();
   
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('feed'); // 'feed', 'market', 'portfolio', 'leaderboard', 'settings'
+  const [foUnderlying, setFoUnderlying] = useState('NIFTY50');
   
   // Order entry modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,6 +75,23 @@ export default function PaperTrade() {
   const openOrderModal = (symbol, type = 'BUY') => {
     setSelectedSymbol(symbol);
     setOrderType(type);
+    setIsModalOpen(true);
+    setOrderMsg("");
+  };
+
+  const handleOptionTradeClick = (underlying, strike, optionType, tradeType, price) => {
+    const optionSymbol = `${underlying} ${strike} ${optionType}`;
+    setSelectedSymbol(optionSymbol);
+    setOrderType(tradeType);
+    
+    // Set default quantities (lot sizes) for index vs stock
+    let defaultQty = 1;
+    if (underlying === 'NIFTY50') defaultQty = 75;
+    else if (underlying === 'BANKNIFTY') defaultQty = 15;
+    else if (underlying === 'SENSEX') defaultQty = 10;
+    else defaultQty = 100; // Stock options default lot size
+    
+    setOrderQuantity(defaultQty);
     setIsModalOpen(true);
     setOrderMsg("");
   };
@@ -166,6 +186,9 @@ export default function PaperTrade() {
           </button>
           <button className={`tab-btn ${activeTab === 'market' ? 'active' : ''}`} onClick={() => setActiveTab('market')}>
             <Activity size={18} /> Live Market
+          </button>
+          <button className={`tab-btn ${activeTab === 'fo' ? 'active' : ''}`} onClick={() => setActiveTab('fo')}>
+            <TrendingUp size={18} /> F&O (Option Chain)
           </button>
           <button className={`tab-btn ${activeTab === 'portfolio' ? 'active' : ''}`} onClick={() => setActiveTab('portfolio')}>
             <Briefcase size={18} /> My Portfolio
@@ -272,6 +295,112 @@ export default function PaperTrade() {
             </div>
           )}
 
+          {/* F&O (OPTION CHAIN) */}
+          {activeTab === 'fo' && (() => {
+            const optionsStocks = mockStocks.filter(s => s.options);
+            const activeStock = optionsStocks.find(s => s.symbol === foUnderlying) || optionsStocks[0];
+            const { chain } = activeStock.options;
+            
+            // Try to find the live spot price from marketData or fall back
+            const spotPrice = marketData[foUnderlying]?.price || activeStock.price;
+            const changePercent = marketData[foUnderlying]?.change || activeStock.change;
+            
+            return (
+              <div className="fo-container">
+                <div className="fo-header">
+                  <div>
+                    <h2>Futures & Options (F&O)</h2>
+                    <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: 4 }}>
+                      Select an underlying to view its option chain. Click B (Buy) or S (Sell) to place a paper trade.
+                    </p>
+                  </div>
+                  <div className="fo-selector-box">
+                    <label style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>Underlying:</label>
+                    <select 
+                      value={foUnderlying} 
+                      onChange={(e) => setFoUnderlying(e.target.value)}
+                      className="fo-select"
+                    >
+                      {optionsStocks.map(s => (
+                        <option key={s.symbol} value={s.symbol}>{s.symbol} ({s.sector})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Subtab navigation */}
+                <div className="fo-subtab-container">
+                  <div className="fo-subtab active">Option Chain</div>
+                </div>
+
+                {/* Spot Price Info Bar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, marginBottom: 16, alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Spot Price: </span>
+                    <strong style={{ fontSize: '1.15rem', color: '#ffffff' }}>₹{spotPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>
+                  </div>
+                  <div className={changePercent >= 0 ? 'text-green' : 'text-red'} style={{ fontWeight: 700, fontSize: '0.9rem' }}>
+                    {changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}% Today
+                  </div>
+                </div>
+
+                {/* Option Chain Table */}
+                <div className="table-responsive" style={{ background: '#0b0910', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                  <table className="fo-table">
+                    <thead>
+                      <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                        <th colSpan="3" style={{ color: '#10b981', borderRight: '1px solid rgba(255,255,255,0.06)' }}>CALLS</th>
+                        <th style={{ color: '#f59e0b', width: '100px' }}>STRIKE</th>
+                        <th colSpan="3" style={{ color: '#ef4444', borderLeft: '1px solid rgba(255,255,255,0.06)' }}>PUTS</th>
+                      </tr>
+                      <tr style={{ fontSize: '0.75rem', color: '#64748b', background: 'rgba(0,0,0,0.2)' }}>
+                        <th>OI (QTY)</th>
+                        <th>LTP (₹)</th>
+                        <th style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>Trade</th>
+                        <th>Strike Price</th>
+                        <th style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>Trade</th>
+                        <th>LTP (₹)</th>
+                        <th>OI (QTY)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {chain.map((row, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                          {/* Calls OI */}
+                          <td style={{ color: '#94a3b8' }}>{row.callOI.toLocaleString()}</td>
+                          {/* Calls LTP */}
+                          <td style={{ color: '#10b981', fontWeight: 600 }}>₹{row.callPrice.toFixed(2)}</td>
+                          {/* Calls Actions */}
+                          <td style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                              <button className="btn-buy-xs" onClick={() => handleOptionTradeClick(foUnderlying, row.strike, 'CE', 'BUY', row.callPrice)}>B</button>
+                              <button className="btn-sell-xs" onClick={() => handleOptionTradeClick(foUnderlying, row.strike, 'CE', 'SELL', row.callPrice)}>S</button>
+                            </div>
+                          </td>
+
+                          {/* Strike Price */}
+                          <td style={{ fontWeight: 800, color: '#ffffff', backgroundColor: 'rgba(255,255,255,0.01)' }}>{row.strike}</td>
+
+                          {/* Puts Actions */}
+                          <td style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+                            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                              <button className="btn-buy-xs" onClick={() => handleOptionTradeClick(foUnderlying, row.strike, 'PE', 'BUY', row.putPrice)}>B</button>
+                              <button className="btn-sell-xs" onClick={() => handleOptionTradeClick(foUnderlying, row.strike, 'PE', 'SELL', row.putPrice)}>S</button>
+                            </div>
+                          </td>
+                          {/* Puts LTP */}
+                          <td style={{ color: '#ef4444', fontWeight: 600 }}>₹{row.putPrice.toFixed(2)}</td>
+                          {/* Puts OI */}
+                          <td style={{ color: '#94a3b8' }}>{row.putOI.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* MY PORTFOLIO */}
           {activeTab === 'portfolio' && (
             <div className="portfolio-container">
@@ -281,7 +410,9 @@ export default function PaperTrade() {
               ) : (
                 <div className="positions-list">
                   {positions.filter(p => p.quantity > 0).map(pos => {
-                    const ltp = marketData[pos.symbol]?.price || pos.averagePrice;
+                    const ltp = pos.symbol.includes(' ') 
+                      ? (getOptionLTP(pos.symbol) || pos.averagePrice) 
+                      : (marketData[pos.symbol]?.price || pos.averagePrice);
                     const pnl = pos.type === 'BUY' 
                       ? (ltp - pos.averagePrice) * pos.quantity 
                       : (pos.averagePrice - ltp) * pos.quantity;
@@ -408,10 +539,19 @@ export default function PaperTrade() {
             <form onSubmit={handleOrderSubmit}>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Stock Symbol</label>
-                  <select value={selectedSymbol} onChange={e => setSelectedSymbol(e.target.value)}>
-                    {symbols.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  <label>Symbol</label>
+                  {selectedSymbol.includes(' ') ? (
+                    <input 
+                      type="text" 
+                      value={selectedSymbol} 
+                      readOnly 
+                      style={{ background: 'rgba(255,255,255,0.05)', color: '#ffffff', cursor: 'not-allowed' }} 
+                    />
+                  ) : (
+                    <select value={selectedSymbol} onChange={e => setSelectedSymbol(e.target.value)}>
+                      {symbols.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Type</label>
@@ -423,7 +563,11 @@ export default function PaperTrade() {
               </div>
               
               <div className="live-price-indicator">
-                Current Market Price: <strong>₹{marketData[selectedSymbol]?.price?.toFixed(2) || '---'}</strong>
+                Current Market Price: <strong>₹{
+                  selectedSymbol.includes(' ') 
+                    ? (getOptionLTP(selectedSymbol)?.toFixed(2) || '---') 
+                    : (marketData[selectedSymbol]?.price?.toFixed(2) || '---')
+                }</strong>
               </div>
 
               <div className="form-row">

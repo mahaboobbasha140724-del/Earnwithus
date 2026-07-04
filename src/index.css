@@ -528,7 +528,7 @@ a {
   height: 90px;
   display: flex;
   align-items: center;
-  justifyContent: center;
+  justify-content: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 

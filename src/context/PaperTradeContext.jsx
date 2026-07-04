@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 import { db, auth } from '../firebase';
 import { doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { mockStocks } from '../data/mockStocks';
 
 const PaperTradeContext = createContext();
 
@@ -17,13 +18,31 @@ export const ID_MAP = {
 };
 
 export const SYMBOL_MAP = {
-  "HDFCBANK": "1333",
+  "HDFCBANK": "2885",
   "RELIANCE": "2885",
   "TCS": "11536",
   "INFY": "1594",
   "ICICIBANK": "4963",
   "SBIN": "3045",
   "ITC": "1660"
+};
+
+const getOptionLTP = (symbol) => {
+  const parts = symbol.split(' ');
+  if (parts.length === 3) {
+    const underlying = parts[0];
+    const strike = parseInt(parts[1]);
+    const type = parts[2]; // "CE" or "PE"
+    
+    const stock = mockStocks.find(s => s.symbol === underlying);
+    if (stock && stock.options && stock.options.chain) {
+      const row = stock.options.chain.find(r => r.strike === strike);
+      if (row) {
+        return type === 'CE' ? row.callPrice : row.putPrice;
+      }
+    }
+  }
+  return null;
 };
 
 export function usePaperTrade() {
@@ -195,7 +214,10 @@ export const PaperTradeProvider = ({ children }) => {
     if (positions.length > 0) {
       let totalMTM = 0;
       positions.forEach(pos => {
-        const currentPrice = marketData[pos.symbol]?.price;
+        let currentPrice = marketData[pos.symbol]?.price;
+        if (!currentPrice && pos.symbol.includes(' ')) {
+          currentPrice = getOptionLTP(pos.symbol);
+        }
         if (currentPrice) {
           if (pos.type === 'BUY') {
             totalMTM += (currentPrice - pos.averagePrice) * pos.quantity;
@@ -230,7 +252,10 @@ export const PaperTradeProvider = ({ children }) => {
     
     // Convert symbol (e.g. RELIANCE) to ID for backend compatibility if needed, 
     // but the frontend state is all stored in terms of human-readable symbols now!
-    const price = isMarket ? marketData[symbol]?.price : limitPrice;
+    let price = isMarket ? marketData[symbol]?.price : limitPrice;
+    if (!price && symbol.includes(' ')) {
+      price = getOptionLTP(symbol);
+    }
     if (!price) return { success: false, message: `No live price available for ${symbol}` };
 
     const requiredMargin = price * quantity;
@@ -393,7 +418,8 @@ export const PaperTradeProvider = ({ children }) => {
     backendUrl,
     updateBackendUrl,
     placeOrder,
-    resetCapital
+    resetCapital,
+    getOptionLTP
   };
 
   return (

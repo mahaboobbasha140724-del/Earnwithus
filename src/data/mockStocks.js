@@ -411,6 +411,41 @@ export const mockStocks = [
         { strike: 330, callOI: 34500, callPrice: 1.80, putPrice: 22.40, putOI: 1100 }
       ]
     }
+  },
+  {
+    symbol: "SENSEX",
+    name: "BSE Sensex Index",
+    sector: "Indices",
+    price: 65450.30,
+    change: 0.95,
+    volume: 8500000,
+    deliveryPercent: 100.0,
+    high52: 66300.00,
+    low52: 58000.00,
+    near52High: true,
+    near52Low: false,
+    gapUp: true,
+    rsi: 61.2,
+    macd: "Bullish Crossover",
+    sma200: 62000.00,
+    candlestick: "Bullish Continuation",
+    rmiSignal: "Buy",
+    rmiTimeframe: "Daily",
+    dowTrend: "Higher High",
+    seasonality: { avgReturn: 3.0, medianReturn: 2.8, annualized: 15.6, maxGain: 10.2 },
+    rrg: { x: 101.2, y: 100.8, prevX: [100.8, 100.4, 99.9, 99.5], prevY: [100.4, 100.1, 99.7, 99.2] },
+    peRatio: 23.5,
+    marketCap: "N/A",
+    options: {
+      spot: 65450.00,
+      chain: [
+        { strike: 65200, callOI: 25000, callPrice: 420.50, putPrice: 85.30, putOI: 95000 },
+        { strike: 65300, callOI: 45000, callPrice: 312.40, putPrice: 132.80, putOI: 84000 },
+        { strike: 65400, callOI: 78000, callPrice: 198.50, putPrice: 210.40, putOI: 62000 },
+        { strike: 65500, callOI: 142000, callPrice: 110.20, putPrice: 320.50, putOI: 34000 },
+        { strike: 65600, callOI: 220000, callPrice: 52.80, putPrice: 462.10, putOI: 12000 }
+      ]
+    }
   }
 ];
 
