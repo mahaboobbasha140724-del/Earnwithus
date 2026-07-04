@@ -512,12 +512,29 @@ export default function PaperTrade() {
                   style={{ width: '100%', marginTop: 8 }}
                 />
               </div>
-              <button 
-                className="btn-primary" 
-                onClick={() => updateBackendUrl(tempBackendUrl)}
-              >
-                Save & Connect Backend
-              </button>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button 
+                  className="btn-primary" 
+                  onClick={() => updateBackendUrl(tempBackendUrl)}
+                >
+                  Save & Connect Backend
+                </button>
+                <button 
+                  className="btn-secondary" 
+                  style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+                  onClick={() => {
+                    const isLocalhost = window.location.hostname === 'localhost' || 
+                                        window.location.hostname === '127.0.0.1' || 
+                                        window.location.hostname.startsWith('192.168.') ||
+                                        window.location.hostname.startsWith('10.');
+                    const defaultUrl = isLocalhost ? `http://${window.location.hostname}:3001` : 'https://earn-with-us.onrender.com';
+                    setTempBackendUrl(defaultUrl);
+                    updateBackendUrl(defaultUrl);
+                  }}
+                >
+                  Reset to Default
+                </button>
+              </div>
               <div style={{ marginTop: 24, fontSize: '0.85rem', color: '#64748b' }}>
                 Currently connected to: <code style={{ color: '#3b82f6', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 4 }}>{backendUrl}</code>
               </div>

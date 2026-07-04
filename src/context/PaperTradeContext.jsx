@@ -49,6 +49,16 @@ export function usePaperTrade() {
   return useContext(PaperTradeContext);
 }
 
+const isValidUrl = (url) => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch (e) {
+    return false;
+  }
+};
+
 export const PaperTradeProvider = ({ children }) => {
   const [marketData, setMarketData] = useState({});
   const [socket, setSocket] = useState(null);
@@ -70,17 +80,19 @@ export const PaperTradeProvider = ({ children }) => {
                         window.location.hostname.startsWith('10.');
     const defaultLocalUrl = `http://${window.location.hostname}:3001`;
     
+    const saved = localStorage.getItem('VITE_BACKEND_URL');
     if (isLocalhost) {
-      const saved = localStorage.getItem('VITE_BACKEND_URL');
-      // Only return saved if it points to a local address
-      if (saved && (saved.includes('localhost') || saved.includes('127.0.0.1') || saved.includes('192.168.') || saved.includes('10.'))) {
+      // Only return saved if it is valid and points to a local address
+      if (saved && isValidUrl(saved) && (saved.includes('localhost') || saved.includes('127.0.0.1') || saved.includes('192.168.') || saved.includes('10.'))) {
         return saved;
       }
       return defaultLocalUrl;
     }
     
-    return localStorage.getItem('VITE_BACKEND_URL') || 
-           import.meta.env.VITE_BACKEND_URL || 
+    if (saved && isValidUrl(saved)) {
+      return saved;
+    }
+    return import.meta.env.VITE_BACKEND_URL || 
            'https://earn-with-us.onrender.com';
   });
 
