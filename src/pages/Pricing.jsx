@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
-import { Check, ArrowRight, ShieldCheck, CreditCard, Sparkles, Loader2, CheckCircle2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Check, ArrowRight, ShieldCheck, CreditCard, Sparkles, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function Pricing() {
+  const { currentUser, refreshUserProfile } = useAuth();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const isTrialExpired = queryParams.get('reason') === 'trial_expired';
+
   const [selectedPlan, setSelectedPlan] = useState(null); // plan object if checkout modal open
   const [checkoutStep, setCheckoutStep] = useState('form'); // 'form' | 'processing' | 'success'
   const [cardNumber, setCardNumber] = useState('');
@@ -55,7 +64,16 @@ export default function Pricing() {
     setCheckoutStep('processing');
     
     // Simulate payment gateway delay (2.5 seconds)
-    setTimeout(() => {
+    setTimeout(async () => {
+      if (currentUser) {
+        try {
+          const userRef = doc(db, 'users', currentUser.uid);
+          await updateDoc(userRef, { role: 'premium' });
+          await refreshUserProfile();
+        } catch (err) {
+          console.error("Error upgrading user to premium:", err);
+        }
+      }
       setCheckoutStep('success');
     }, 2500);
   };
@@ -81,6 +99,19 @@ export default function Pricing() {
             Choose the subscription plan that fits your trading capital. Unlock scanners, derivatives analysis, and relative rotation graphs.
           </p>
         </div>
+
+        {/* Trial Expired Alert */}
+        {isTrialExpired && (
+          <div style={pricingStyles.trialExpiredAlert}>
+            <AlertCircle size={20} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <strong style={{ color: '#ef4444', fontSize: '1rem' }}>Your 7-Day Free Trial Has Expired</strong>
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: 4, lineHeight: 1.5 }}>
+                To continue utilizing our advanced Stock Scanners, interactive Heatmaps, Rotational Graphs (RRG), Option Chains, and Paper Trading simulator, please choose one of the Pro membership plans below.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Pricing Cards Grid */}
         <div style={pricingStyles.grid}>
@@ -304,6 +335,19 @@ export default function Pricing() {
 const pricingStyles = {
   container: {
     padding: '40px 0 64px 0',
+  },
+  trialExpiredAlert: {
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    border: '1px solid rgba(239, 68, 68, 0.2)',
+    borderRadius: '12px',
+    padding: '20px 24px',
+    marginBottom: '36px',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '16px',
+    textAlign: 'left',
+    maxWidth: '800px',
+    marginInline: 'auto',
   },
   header: {
     textAlign: 'center',

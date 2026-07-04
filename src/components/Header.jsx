@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield } from 'lucide-react';
 import { searchStocks } from '../data/mockStocks';
 import { useAuth } from '../context/AuthContext';
@@ -17,10 +17,42 @@ export default function Header({ setSelectedStockForModal }) {
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
-  const { currentUser, userProfile, isAdmin, logout } = useAuth();
+  const { currentUser, userProfile, isAdmin, isTrialActive, trialDaysLeft, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState('login');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [showTrialPopup, setShowTrialPopup] = useState(false);
+  
+  const location = useLocation();
+
+  // Listen to url search params for login/signup redirects
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const authAction = searchParams.get('authAction');
+    if (authAction === 'login' || authAction === 'signup') {
+      setAuthModalTab(authAction);
+      setIsAuthModalOpen(true);
+      
+      // Clean query params
+      const newSearch = new URLSearchParams(location.search);
+      newSearch.delete('authAction');
+      newSearch.delete('redirect');
+      const cleanSearch = newSearch.toString();
+      navigate(location.pathname + (cleanSearch ? `?${cleanSearch}` : ''), { replace: true });
+    }
+  }, [location.search, location.pathname, navigate]);
+
+  // Show trial popup once per user
+  useEffect(() => {
+    if (currentUser && isTrialActive) {
+      const shown = localStorage.getItem(`trial_popup_shown_${currentUser.uid}`);
+      if (shown !== 'true') {
+        setShowTrialPopup(true);
+      }
+    } else {
+      setShowTrialPopup(false);
+    }
+  }, [currentUser, isTrialActive]);
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -208,6 +240,11 @@ export default function Header({ setSelectedStockForModal }) {
 
           {/* Action CTAs */}
           <div className="desktop-only" style={headerStyles.actions}>
+            {currentUser && isTrialActive && (
+              <span className="badge-gold" style={{ marginRight: 12, fontSize: '0.75rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', backgroundColor: '#eab308', color: '#07080d', fontWeight: 'bold', borderRadius: '4px' }}>
+                Trial: {trialDaysLeft}d left
+              </span>
+            )}
             {currentUser ? (
               <div 
                 style={headerStyles.profileWrapper} 
@@ -380,6 +417,71 @@ export default function Header({ setSelectedStockForModal }) {
         onClose={() => setIsAuthModalOpen(false)} 
         initialTab={authModalTab} 
       />
+
+      {/* 7-Day Trial Started Popup Modal */}
+      {showTrialPopup && (
+        <div style={headerStyles.trialModalOverlay}>
+          <div className="glass-card animate-fade-in" style={headerStyles.trialModal}>
+            <div style={{ textAlign: 'center', padding: '20px 10px' }}>
+              <div style={{
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px auto',
+                border: '1px solid rgba(16, 185, 129, 0.2)'
+              }}>
+                <Activity size={32} color="#10b981" />
+              </div>
+              <h2 style={{ fontSize: '1.6rem', color: '#ffffff', fontWeight: 800, marginBottom: 12 }}>
+                🎉 7-Day Free Trial Started!
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: 24 }}>
+                Welcome to <strong>Earn With Us</strong>! Your trial has successfully started. For the next 7 days, you have unrestricted access to all our pro capabilities:
+              </p>
+              
+              <div style={{
+                textAlign: 'left',
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                borderRadius: 12,
+                padding: '16px 20px',
+                marginBottom: 28,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', color: '#e2e8f0' }}>
+                  <span style={{ color: '#10b981', fontWeight: 'bold' }}>✓</span> Real-Time Stock Scanners & Filters
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', color: '#e2e8f0' }}>
+                  <span style={{ color: '#10b981', fontWeight: 'bold' }}>✓</span> Interactive Sector Performance Heatmaps
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', color: '#e2e8f0' }}>
+                  <span style={{ color: '#10b981', fontWeight: 'bold' }}>✓</span> Relative Rotation Graph (RRG) Visualizations
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', color: '#e2e8f0' }}>
+                  <span style={{ color: '#10b981', fontWeight: 'bold' }}>✓</span> Option Chain Matrix & Paper Trading
+                </div>
+              </div>
+              
+              <button
+                className="btn-primary"
+                style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '0.95rem' }}
+                onClick={() => {
+                  localStorage.setItem('trial_popup_shown_' + currentUser.uid, 'true');
+                  setShowTrialPopup(false);
+                }}
+              >
+                Let's Start Exploring!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -732,5 +834,27 @@ const headerStyles = {
     width: '100%',
     textAlign: 'left',
     transition: '0.15s ease',
+  },
+  trialModalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(3, 4, 7, 0.85)',
+    backdropFilter: 'blur(8px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    padding: '20px'
+  },
+  trialModal: {
+    maxWidth: '480px',
+    width: '100%',
+    padding: '36px',
+    backgroundColor: '#0d0f17',
+    position: 'relative',
+    border: '1px solid rgba(255, 255, 255, 0.08)'
   }
 };

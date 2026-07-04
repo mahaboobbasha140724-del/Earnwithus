@@ -124,16 +124,45 @@ export function AuthProvider({ children }) {
     return sendPasswordResetEmail(auth, email);
   }
 
+  async function refreshUserProfile() {
+    if (currentUser) {
+      try {
+        const docRef = doc(db, 'users', currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserProfile(docSnap.data());
+        }
+      } catch (err) {
+        console.error("Error refreshing user profile:", err);
+      }
+    }
+  }
+
+  const createdAt = userProfile?.createdAt ? new Date(userProfile.createdAt) : null;
+  const elapsedMs = createdAt ? (Date.now() - createdAt.getTime()) : 0;
+  const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
+  
+  const isTrialActive = createdAt ? (elapsedMs < trialDurationMs) : false;
+  const trialDaysLeft = createdAt ? Math.max(0, Math.ceil((trialDurationMs - elapsedMs) / (24 * 60 * 60 * 1000))) : 0;
+  const isPremium = userProfile?.role === 'premium';
+  const isAdmin = userProfile?.role === 'admin' || currentUser?.email === 'mahaboobbasha140724@gmail.com';
+  const hasFeatureAccess = isAdmin || isPremium || isTrialActive;
+
   const value = {
     currentUser,
     userProfile,
-    isAdmin: userProfile?.role === 'admin' || currentUser?.email === 'mahaboobbasha140724@gmail.com',
+    isAdmin,
+    isPremium,
+    isTrialActive,
+    trialDaysLeft,
+    hasFeatureAccess,
     loading,
     signUp,
     login,
     loginWithGoogle,
     logout,
-    resetPassword
+    resetPassword,
+    refreshUserProfile
   };
 
   return (

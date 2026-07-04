@@ -6,6 +6,7 @@ import { AlertCircle, Download, X } from 'lucide-react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import StockModal from './components/StockModal';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Context
 import { AuthProvider } from './context/AuthContext';
@@ -123,17 +124,17 @@ function MainApp() {
         <Routes>
           <Route path="/" element={<Home setSelectedStockForModal={setSelectedStockForModal} />} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/features/scanners" element={<Scanners setSelectedStockForModal={setSelectedStockForModal} />} />
-          <Route path="/features/heatmaps" element={<Heatmaps setSelectedStockForModal={setSelectedStockForModal} />} />
-          <Route path="/features/rrg" element={<RRG setSelectedStockForModal={setSelectedStockForModal} />} />
-          <Route path="/features/sentiment" element={<Sentiment />} />
-          <Route path="/features/futures-options" element={<FuturesOptions setSelectedStockForModal={setSelectedStockForModal} />} />
-          <Route path="/paper-trade" element={<PaperTrade />} />
+          <Route path="/features/scanners" element={<ProtectedRoute><Scanners setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
+          <Route path="/features/heatmaps" element={<ProtectedRoute><Heatmaps setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
+          <Route path="/features/rrg" element={<ProtectedRoute><RRG setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
+          <Route path="/features/sentiment" element={<ProtectedRoute><Sentiment /></ProtectedRoute>} />
+          <Route path="/features/futures-options" element={<ProtectedRoute><FuturesOptions setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
+          <Route path="/paper-trade" element={<ProtectedRoute><PaperTrade /></ProtectedRoute>} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-conditions" element={<TermsConditions />} />
-          <Route path="/strategies" element={<Strategies />} />
+          <Route path="/strategies" element={<ProtectedRoute><Strategies /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>

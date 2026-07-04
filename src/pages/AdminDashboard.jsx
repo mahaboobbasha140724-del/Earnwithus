@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, Users, UserCheck, Clock, ArrowLeft, RefreshCw, Key } from 'lucide-react';
+import { Shield, Users, UserCheck, Clock, ArrowLeft, RefreshCw, Key, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -11,7 +11,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [stats, setStats] = useState({ total: 0, admins: 0, users: 0 });
+  const [stats, setStats] = useState({ total: 0, admins: 0, premium: 0, users: 0 });
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -26,12 +26,15 @@ export default function AdminDashboard() {
       const querySnapshot = await getDocs(collection(db, 'users'));
       const usersList = [];
       let adminCount = 0;
+      let premiumCount = 0;
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         usersList.push(data);
         if (data.role === 'admin') {
           adminCount++;
+        } else if (data.role === 'premium') {
+          premiumCount++;
         }
       });
       
@@ -41,7 +44,8 @@ export default function AdminDashboard() {
       setStats({
         total: usersList.length,
         admins: adminCount,
-        users: usersList.length - adminCount
+        premium: premiumCount,
+        users: usersList.length - adminCount - premiumCount
       });
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -64,17 +68,24 @@ export default function AdminDashboard() {
       await updateDoc(userRef, { role: newRole });
       
       setUsers(prev => prev.map(u => u.uid === userId ? { ...u, role: newRole } : u));
-      setStats(prev => {
-        const adminDiff = newRole === 'admin' ? 1 : -1;
-        return {
-          total: prev.total,
-          admins: prev.admins + adminDiff,
-          users: prev.users - adminDiff
-        };
-      });
+      fetchUsers();
     } catch (err) {
       console.error("Error updating role:", err);
       alert("Failed to update user role.");
+    }
+  };
+
+  const togglePremiumRole = async (userId, currentRole) => {
+    const newRole = currentRole === 'premium' ? 'user' : 'premium';
+    try {
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, { role: newRole });
+      
+      setUsers(prev => prev.map(u => u.uid === userId ? { ...u, role: newRole } : u));
+      fetchUsers();
+    } catch (err) {
+      console.error("Error updating premium status:", err);
+      alert("Failed to update premium status.");
     }
   };
 
@@ -136,7 +147,15 @@ export default function AdminDashboard() {
           </div>
 
           <div className="glass-card" style={adminStyles.statCard}>
-            <div style={adminStyles.statIcon}><UserCheck size={20} color="#f59e0b" /></div>
+            <div style={adminStyles.statIcon}><Sparkles size={20} color="#f59e0b" /></div>
+            <div>
+              <div style={adminStyles.statLabel}>Premium Members</div>
+              <div style={adminStyles.statVal}>{stats.premium}</div>
+            </div>
+          </div>
+
+          <div className="glass-card" style={adminStyles.statCard}>
+            <div style={adminStyles.statIcon}><UserCheck size={20} color="#64748b" /></div>
             <div>
               <div style={adminStyles.statLabel}>Standard Accounts</div>
               <div style={adminStyles.statVal}>{stats.users}</div>
@@ -189,8 +208,8 @@ export default function AdminDashboard() {
                       <td style={adminStyles.td}>
                         <span style={{
                           ...adminStyles.roleBadge,
-                          color: user.role === 'admin' ? '#10b981' : '#64748b',
-                          backgroundColor: user.role === 'admin' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.03)'
+                          color: user.role === 'admin' ? '#10b981' : user.role === 'premium' ? '#f59e0b' : '#64748b',
+                          backgroundColor: user.role === 'admin' ? 'rgba(16, 185, 129, 0.1)' : user.role === 'premium' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(255, 255, 255, 0.03)'
                         }}>
                           {user.role}
                         </span>
@@ -206,17 +225,30 @@ export default function AdminDashboard() {
                       </td>
                       <td style={{ ...adminStyles.td, textAlign: 'right' }}>
                         {user.email !== 'mahaboobbasha140724@gmail.com' ? (
-                          <button 
-                            onClick={() => toggleUserRole(user.uid, user.role)}
-                            style={{
-                              ...adminStyles.actionBtn,
-                              borderColor: user.role === 'admin' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                              color: user.role === 'admin' ? '#ef4444' : '#10b981'
-                            }}
-                          >
-                            <Key size={12} style={{ marginRight: 6 }} />
-                            {user.role === 'admin' ? 'Revoke Admin' : 'Grant Admin'}
-                          </button>
+                          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                            <button 
+                              onClick={() => toggleUserRole(user.uid, user.role)}
+                              style={{
+                                ...adminStyles.actionBtn,
+                                borderColor: user.role === 'admin' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                                color: user.role === 'admin' ? '#ef4444' : '#10b981'
+                              }}
+                            >
+                              <Shield size={12} style={{ marginRight: 6 }} />
+                              {user.role === 'admin' ? 'Revoke Admin' : 'Grant Admin'}
+                            </button>
+                            <button 
+                              onClick={() => togglePremiumRole(user.uid, user.role)}
+                              style={{
+                                ...adminStyles.actionBtn,
+                                borderColor: user.role === 'premium' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                color: user.role === 'premium' ? '#ef4444' : '#f59e0b'
+                              }}
+                            >
+                              <Sparkles size={12} style={{ marginRight: 6 }} />
+                              {user.role === 'premium' ? 'Revoke Pro' : 'Grant Pro'}
+                            </button>
+                          </div>
                         ) : (
                           <span style={{ color: '#64748b', fontSize: '0.8rem', fontStyle: 'italic', paddingRight: 10 }}>
                             Super Admin
