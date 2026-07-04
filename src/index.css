@@ -364,8 +364,8 @@ a {
     max-width: 200px;
   }
 
-  /* Pricing Grid: 2 columns -> 1 column */
-  div[style*="gridTemplateColumns: repeat(2, 1fr)"] {
+  /* Pricing Grid: 4 columns -> 1 column */
+  div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
     grid-template-columns: 1fr !important;
   }
 
