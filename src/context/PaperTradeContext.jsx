@@ -142,6 +142,15 @@ export const PaperTradeProvider = ({ children }) => {
           snapshot.forEach(doc => pos.push({ id: doc.id, ...doc.data() }));
           setPositions(pos);
         });
+
+        // Real-time listener for orders
+        const ordersRef = collection(db, 'users', currentUser.uid, 'orders');
+        const qOrders = query(ordersRef, orderBy('timestamp', 'desc'), limit(100));
+        const unsubOrders = onSnapshot(qOrders, (snapshot) => {
+          const ords = [];
+          snapshot.forEach(doc => ords.push({ id: doc.id, ...doc.data() }));
+          setOrders(ords);
+        });
         // Load Public Trades (Community Feed)
         const qTrades = query(collection(db, 'public_trades'), orderBy('timestamp', 'desc'), limit(50));
         const unsubPublic = onSnapshot(qTrades, (snapshot) => {
@@ -166,6 +175,7 @@ export const PaperTradeProvider = ({ children }) => {
         return () => {
           unsubPortfolio();
           unsubPositions();
+          unsubOrders();
           unsubPublic();
           unsubLeader();
         };
@@ -254,25 +264,31 @@ export const PaperTradeProvider = ({ children }) => {
           const posRef = doc(db, 'users', user.uid, 'positions', existingPos.id);
           let newQuantity = existingPos.quantity;
           let newType = existingPos.type;
+          let newAveragePrice = existingPos.averagePrice || price;
           
           if (existingPos.type === type) {
             newQuantity += Number(quantity);
+            newAveragePrice = (existingPos.quantity * (existingPos.averagePrice || price) + Number(quantity) * Number(price)) / newQuantity;
           } else {
             newQuantity -= Number(quantity);
             if (newQuantity < 0) {
               newType = type;
               newQuantity = Math.abs(newQuantity);
+              newAveragePrice = Number(price); // Reversal uses current price
+            } else {
+              newAveragePrice = existingPos.averagePrice || price; // Keep cost basis on reduction
             }
           }
 
           if (newQuantity === 0) {
-            await updateDoc(posRef, { quantity: 0, status: 'CLOSED' });
+            await updateDoc(posRef, { quantity: 0, status: 'CLOSED', averagePrice: 0 });
           } else {
             await updateDoc(posRef, { 
               quantity: newQuantity, 
               type: newType,
-              target: target ? Number(target) : existingPos.target,
-              stopLoss: stopLoss ? Number(stopLoss) : existingPos.stopLoss
+              averagePrice: Number(newAveragePrice.toFixed(2)),
+              target: target ? Number(target) : (existingPos.target || null),
+              stopLoss: stopLoss ? Number(stopLoss) : (existingPos.stopLoss || null)
             });
           }
         } else {

@@ -49,6 +49,19 @@ service cloud.firestore {
         allow read, write: if isAuthenticated() && request.auth.uid == userId;
       }
     }
+
+    // Rules for public_trades collection (Community Feed)
+    match /public_trades/{tradeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Rules for leaderboard collection (Social Rankings)
+    match /leaderboard/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
     
     // Deny read/write access to all other paths by default unless authenticated
     match /{document=**} {
