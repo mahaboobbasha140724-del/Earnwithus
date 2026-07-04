@@ -88,7 +88,8 @@ export default function Header({ setSelectedStockForModal }) {
   };
 
   return (
-    <header className="header-main" style={headerStyles.header}>
+    <>
+      <header className="header-main" style={headerStyles.header}>
       <div className="page-wrapper" style={headerStyles.wrapper}>
         
         {/* Left Side: Toggle & Logo */}
@@ -411,6 +412,8 @@ export default function Header({ setSelectedStockForModal }) {
         </div>
       )}
 
+      </header>
+
       {/* Authentication Modal */}
       <AuthModal 
         isOpen={isAuthModalOpen} 
@@ -482,7 +485,7 @@ export default function Header({ setSelectedStockForModal }) {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }
 
