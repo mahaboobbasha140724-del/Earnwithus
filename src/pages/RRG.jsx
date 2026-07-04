@@ -11,6 +11,32 @@ export default function RRG() {
   // Navigation: 'tracker' | 'backtester'
   const [activeTab, setActiveTab] = useState('tracker');
 
+  // --- SENSIBULL SENTIMENT DATA STATE ---
+  const [sentimentData, setSentimentData] = useState(null);
+  const [sentimentLoading, setSentimentLoading] = useState(true);
+
+  // Fetch Sensibull Live FII/DII Sentiment
+  useEffect(() => {
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+    const fetchSentiment = () => {
+      fetch(`${API_BASE}/api/market/fii-dii`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setSentimentData(data);
+          }
+          setSentimentLoading(false);
+        })
+        .catch(err => {
+          console.error("Error fetching sentiment in RRG:", err);
+          setSentimentLoading(false);
+        });
+    };
+    fetchSentiment();
+    const interval = setInterval(fetchSentiment, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   // --- TRACKER STATE ---
   const [isPlaying, setIsPlaying] = useState(false);
   const [timelineStep, setTimelineStep] = useState(104); // latest index (0 to 104)
@@ -780,6 +806,79 @@ export default function RRG() {
             {/* Right Information & List Column */}
             <div style={styles.selectorsCol}>
               
+              {/* Sensibull Sentiment Widget */}
+              <div className="glass-card" style={{ ...styles.card, border: '1px solid rgba(148, 112, 248, 0.15)', backgroundColor: 'rgba(148, 112, 248, 0.01)', display: activeTab === 'tracker' ? 'block' : 'none' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Layers size={14} color="#9470F8" />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>SENSIBULL MARKET SENTIMENT</span>
+                  </div>
+                  {sentimentData && (
+                    <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 600 }}>
+                      Live • {sentimentData.date || "Today"}
+                    </span>
+                  )}
+                </div>
+
+                {sentimentLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                    <RefreshCw className="animate-spin" size={14} color="#9470F8" />
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Scraping live index feeds...</span>
+                  </div>
+                ) : sentimentData ? (
+                  <div>
+                    {/* Sentiment Meter Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', padding: '10px 14px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.03)', marginBottom: 12 }}>
+                      <div>
+                        <span style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', fontWeight: 700, textTransform: 'uppercase' }}>Sentiment Index</span>
+                        <span style={{ 
+                          fontSize: '1.05rem', 
+                          fontWeight: 800, 
+                          color: sentimentData.sentimentScore >= 55 ? '#10b981' : sentimentData.sentimentScore <= 45 ? '#ef4444' : '#f59e0b'
+                        }}>
+                          {sentimentData.sentimentScore}% {sentimentData.sentimentScore >= 70 ? "Extreme Greed" : sentimentData.sentimentScore >= 55 ? "Greed" : sentimentData.sentimentScore >= 45 ? "Neutral" : sentimentData.sentimentScore >= 30 ? "Fear" : "Extreme Fear"}
+                        </span>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', fontWeight: 700, textTransform: 'uppercase' }}>Nifty 50 PCR</span>
+                        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff' }}>
+                          {sentimentData.pcr || '1.18'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Institutional flows cash */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      {sentimentData.flows?.slice(0, 2).map((flow, idx) => {
+                        const isBuy = flow.netValue >= 0;
+                        return (
+                          <div key={idx} style={{ padding: '8px 10px', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: 6 }}>
+                            <span style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', fontWeight: 600 }}>{flow.segment.replace(' Cash Market', '')} Net Flow</span>
+                            <span style={{ 
+                              fontSize: '0.85rem', 
+                              fontWeight: 800, 
+                              color: isBuy ? '#10b981' : '#ef4444',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 2,
+                              marginTop: 2
+                            }}>
+                              {isBuy ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                              ₹{Math.abs(flow.netValue).toLocaleString()} Cr
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0' }}>
+                    <ShieldAlert size={14} color="#ef4444" />
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Sensibull offline. Using offline rotation metrics.</span>
+                  </div>
+                )}
+              </div>
+
               {/* Asset Selectors Card */}
               <div className="glass-card" style={styles.card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
