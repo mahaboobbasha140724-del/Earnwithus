@@ -582,3 +582,32 @@ a {
     display: none !important; /* Hide logo on mobile split to avoid overlap issues */
   }
 }
+
+/* RRG Styles */
+.rrg-control-btn {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: #ffffff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.rrg-control-btn:hover {
+  background-color: #10b981 !important;
+  color: #07080d !important;
+  border-color: #10b981 !important;
+}
+
+.rrg-table-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.rrg-table-row:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
