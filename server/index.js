@@ -135,18 +135,28 @@ async function initFiiDiiCache() {
   }
 }
 
-// Background sync function for FII/DII data
-async function syncFiiDiiData() {
-  console.log("Syncing FII/DII data...");
+// Helper to parse dates into comparable formats (YYYY-MM-DD)
+function getNormalizedDateString(dateObj) {
+  if (!dateObj || isNaN(dateObj.getTime())) return null;
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Fetch and format from Sensibull
+async function fetchSensibullData() {
   try {
-    // 1. Direct fetch from Sensibull
     const response = await fetch("https://oxide.sensibull.com/v1/compute/cache/fii_dii_daily", {
       headers: {
         "User-Agent": USER_AGENT,
         "Accept": "application/json, text/plain, */*",
         "Origin": "https://web.sensibull.com",
-        "Referer": "https://web.sensibull.com/"
-      }
+        "Referer": "https://web.sensibull.com/",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
+      },
+      signal: AbortSignal.timeout(10000)
     });
 
     if (!response.ok) throw new Error(`Sensibull HTTP ${response.status}`);
@@ -179,7 +189,7 @@ async function syncFiiDiiData() {
     const netCallChange = fiiCall.net_oi_change || 0;
     const netPutChange = fiiPut.net_oi_change || 0;
 
-    // PCR calculation: sum put long current / sum call long current across participants
+    // PCR calculation
     let totalPutOI = 0;
     let totalCallOI = 0;
     const participants = ['fii', 'dii', 'pro', 'client'];
@@ -190,7 +200,7 @@ async function syncFiiDiiData() {
     });
     const calculatedPCR = totalCallOI > 0 ? Number((totalPutOI / totalCallOI).toFixed(2)) : 1.18;
 
-    // Estimate sentiment score (0 - 100) based on FII cash net view
+    // Estimate sentiment score
     let sentimentScore = 50;
     if (fiiCash.net_view === 'BULLISH') {
       sentimentScore = fiiCash.net_view_strength === 'Strong' ? 80 : 65;
@@ -198,15 +208,16 @@ async function syncFiiDiiData() {
       sentimentScore = fiiCash.net_view_strength === 'Strong' ? 20 : 35;
     }
 
-    const formattedData = {
+    return {
       success: true,
       source: "Sensibull Direct",
       date: latestDate,
+      dateStr: latestDate,
       updatedAt: rawData.year_month || "Just now",
-      nifty: dayData.nifty || 24000,
-      niftyChange: Number((dayData.nifty_change_percent || 0).toFixed(2)),
-      banknifty: dayData.banknifty || 50000,
-      bankniftyChange: Number((dayData.banknifty_change_percent || 0).toFixed(2)),
+      nifty: dayData.nifty || null,
+      niftyChange: dayData.nifty_change_percent !== undefined ? Number(dayData.nifty_change_percent.toFixed(2)) : null,
+      banknifty: dayData.banknifty || null,
+      bankniftyChange: dayData.banknifty_change_percent !== undefined ? Number(dayData.banknifty_change_percent.toFixed(2)) : null,
       nextMarketOpen: dayData.next_market_open || "",
       flows: [
         {
@@ -249,46 +260,149 @@ async function syncFiiDiiData() {
       sentimentScore: sentimentScore,
       rawDayData: dayData
     };
-
-    cachedFiiDiiData = formattedData;
-    await fs.writeFile(FII_DII_CACHE_FILE, JSON.stringify(formattedData, null, 2), 'utf-8');
-    console.log("Sensibull Direct data synced and cached successfully.");
-    return;
   } catch (error) {
-    console.error("Direct Sensibull fetch failed, trying aggregator backup...", error.message);
-    try {
-      // 2. Aggregator backup (Mr. Chartist)
-      const response = await fetch("https://fii-diidata.mrchartist.com/api/data", {
-        headers: {
-          "User-Agent": USER_AGENT,
-          "Accept": "application/json"
-        }
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      
-      const formattedData = {
-        success: true,
-        source: "Aggregator Backup",
-        date: data.date || "Today",
-        updatedAt: data._updated_at || "Just now",
-        flows: [
-          { segment: "FII Cash Market", netValue: data.fii_net || 0, buy: data.fii_buy || 0, sell: data.fii_sell || 0, action: (data.fii_net >= 0) ? "Net Buyer" : "Net Seller" },
-          { segment: "DII Cash Market", netValue: data.dii_net || 0, buy: data.dii_buy || 0, sell: data.dii_sell || 0, action: (data.dii_net >= 0) ? "Net Buyer" : "Net Seller" },
-          { segment: "FII Index Futures", netValue: data.fii_idx_fut_net || 0, action: (data.fii_idx_fut_net >= 0) ? "Net Buyer" : "Net Seller" },
-          { segment: "FII Stock Futures", netValue: data.fii_stk_fut_net || 0, action: (data.fii_stk_fut_net >= 0) ? "Net Buyer" : "Net Seller" },
-          { segment: "FII Index Options", netValue: data.fii_idx_call_net + data.fii_idx_put_net || 0, action: (data.fii_idx_call_net + data.fii_idx_put_net >= 0) ? "Net Buyer" : "Net Seller" }
-        ],
-        pcr: data.pcr || 1.18,
-        sentimentScore: data.sentiment_score || 50
-      };
+    console.error("Sensibull Direct fetch failed:", error.message);
+    return null;
+  }
+}
 
-      cachedFiiDiiData = formattedData;
-      await fs.writeFile(FII_DII_CACHE_FILE, JSON.stringify(formattedData, null, 2), 'utf-8');
-      console.log("Aggregator Backup data synced and cached successfully.");
-    } catch (backupError) {
-      console.error("Backup aggregator also failed. Using existing in-memory/file cache.", backupError.message);
+// Fetch and format from Mr. Chartist
+async function fetchMrChartistData() {
+  try {
+    const response = await fetch("https://fii-diidata.mrchartist.com/api/data", {
+      headers: {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    
+    if (!data || !data.date) {
+      throw new Error("Invalid Mr. Chartist response structure");
     }
+
+    const dateObj = new Date(data.date);
+    const normDate = getNormalizedDateString(dateObj);
+
+    if (!normDate) {
+      throw new Error(`Failed to parse Mr. Chartist date: ${data.date}`);
+    }
+
+    return {
+      success: true,
+      source: "Aggregator Backup",
+      date: data.date,
+      dateStr: normDate,
+      updatedAt: data._updated_at || "Just now",
+      nifty: data.nifty || null,
+      niftyChange: data.nifty_change !== undefined ? Number(data.nifty_change) : null,
+      banknifty: data.banknifty || null,
+      bankniftyChange: data.banknifty_change !== undefined ? Number(data.banknifty_change) : null,
+      flows: [
+        { segment: "FII Cash Market", netValue: data.fii_net || 0, buy: data.fii_buy || 0, sell: data.fii_sell || 0, action: (data.fii_net >= 0) ? "Net Buyer" : "Net Seller" },
+        { segment: "DII Cash Market", netValue: data.dii_net || 0, buy: data.dii_buy || 0, sell: data.dii_sell || 0, action: (data.dii_net >= 0) ? "Net Buyer" : "Net Seller" },
+        { segment: "FII Index Futures", netValue: data.fii_idx_fut_net || 0, action: (data.fii_idx_fut_net >= 0) ? "Net Buyer" : "Net Seller" },
+        { segment: "FII Stock Futures", netValue: data.fii_stk_fut_net || 0, action: (data.fii_stk_fut_net >= 0) ? "Net Buyer" : "Net Seller" },
+        { segment: "FII Index Options", netValue: data.fii_idx_call_net + data.fii_idx_put_net || 0, action: (data.fii_idx_call_net + data.fii_idx_put_net >= 0) ? "Net Buyer" : "Net Seller" }
+      ],
+      pcr: data.pcr || 1.18,
+      sentimentScore: data.sentiment_score || 50
+    };
+  } catch (error) {
+    console.error("Mr. Chartist Backup fetch failed:", error.message);
+    return null;
+  }
+}
+
+// Validate that FII/DII data structure contains required fields and works properly
+function isValidFiiDiiData(data) {
+  return !!(data &&
+         Array.isArray(data.flows) &&
+         data.flows.length > 0 &&
+         typeof data.pcr === 'number' &&
+         typeof data.sentimentScore === 'number');
+}
+
+// Background sync function for FII/DII data
+async function syncFiiDiiData() {
+  console.log("Syncing FII/DII data from multiple sources...");
+  
+  // Fetch from both sources in parallel
+  const [sensibullResult, mrChartistResult] = await Promise.allSettled([
+    fetchSensibullData(),
+    fetchMrChartistData()
+  ]);
+
+  const sData = sensibullResult.status === 'fulfilled' ? sensibullResult.value : null;
+  const mData = mrChartistResult.status === 'fulfilled' ? mrChartistResult.value : null;
+
+  const isSDataValid = isValidFiiDiiData(sData);
+  const isMDataValid = isValidFiiDiiData(mData);
+
+  let selectedData = null;
+
+  if (isSDataValid && isMDataValid) {
+    // Both succeeded and are valid. Compare dates.
+    // Sensibull is 1st preference: select Sensibull if its date is equal or greater.
+    if (sData.dateStr >= mData.dateStr) {
+      selectedData = sData;
+      console.log(`Selecting Sensibull Direct data (Date: ${sData.dateStr}) over Mr. Chartist (Date: ${mData.dateStr}) as 1st preference`);
+    } else {
+      selectedData = mData;
+      console.log(`Selecting Mr. Chartist data (Date: ${mData.dateStr}) over Sensibull Direct (Date: ${sData.dateStr}) because Mr. Chartist has newer data`);
+    }
+  } else if (isSDataValid) {
+    selectedData = sData;
+    console.log(`Selecting Sensibull Direct data (Date: ${sData.dateStr}) as 1st preference (Mr. Chartist is missing or invalid)`);
+  } else if (isMDataValid) {
+    selectedData = mData;
+    console.log(`Selecting Mr. Chartist data (Date: ${mData.dateStr}) because Sensibull Direct is missing or invalid`);
+  }
+
+  if (selectedData) {
+    // Populate Nifty / BankNifty from live Yahoo Finance quotes if missing in the selected source
+    if (!selectedData.nifty) {
+      const niftyObj = marketData["NIFTY50"];
+      if (niftyObj) {
+        selectedData.nifty = niftyObj.price;
+        selectedData.niftyChange = niftyObj.close > 0 ? Number((((niftyObj.price - niftyObj.close) / niftyObj.close) * 100).toFixed(2)) : 0;
+      }
+    }
+    if (!selectedData.banknifty) {
+      const bankniftyObj = marketData["BANKNIFTY"];
+      if (bankniftyObj) {
+        selectedData.banknifty = bankniftyObj.price;
+        selectedData.bankniftyChange = bankniftyObj.close > 0 ? Number((((bankniftyObj.price - bankniftyObj.close) / bankniftyObj.close) * 100).toFixed(2)) : 0;
+      }
+    }
+
+    // Compare with the currently cached data date to ensure we don't downgrade to older data
+    const isFallback = cachedFiiDiiData.fallback === true;
+    let cacheDateStr = null;
+    if (cachedFiiDiiData.date) {
+      const parsedCacheDate = new Date(cachedFiiDiiData.date);
+      if (!isNaN(parsedCacheDate.getTime())) {
+        cacheDateStr = getNormalizedDateString(parsedCacheDate);
+      }
+    }
+
+    if (isFallback || !cacheDateStr || selectedData.dateStr >= cacheDateStr) {
+      cachedFiiDiiData = selectedData;
+      try {
+        await fs.writeFile(FII_DII_CACHE_FILE, JSON.stringify(selectedData, null, 2), 'utf-8');
+        console.log(`FII/DII Cache updated with data from ${selectedData.source} for date ${selectedData.dateStr}`);
+      } catch (err) {
+        console.error("Failed to write FII/DII cache to file:", err.message);
+      }
+    } else {
+      console.log(`Fetched data (Date: ${selectedData.dateStr}) is older than current cache (Date: ${cacheDateStr}). Keeping current cache.`);
+    }
+  } else {
+    console.error("All FII/DII data sources failed. Using existing in-memory/file cache.");
   }
 }
 

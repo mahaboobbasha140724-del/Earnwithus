@@ -124,10 +124,10 @@ export default function Sentiment() {
           </div>
         </div>
 
-        {/* Spot Indices Summary from Sensibull */}
+        {/* Spot Indices Summary from Multi-Source Feeds */}
         <div className="glass-card" style={{ padding: '16px 24px', marginBottom: '24px', backgroundColor: '#0d0f17', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Sensibull Feed Status</span>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Market Feed Status</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: loading ? '#f59e0b' : '#10b981' }} />
               <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#ffffff' }}>
@@ -309,7 +309,7 @@ export default function Sentiment() {
 
         <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: '#64748b' }}>
           <Info size={14} color="#10b981" style={{ flexShrink: 0 }} />
-          <span>FII/DII cash and derivatives data is sourced directly from Sensibull open index feeds. General stock and index pricing data is updated using free public feeds (NSE, Yahoo Finance) with 15-minute delays.</span>
+          <span>FII/DII cash and derivatives data is aggregated from multiple direct indexing feeds (Sensibull, Mr. Chartist). General stock and index pricing data is updated using live free public feeds (NSE, Yahoo Finance) and WebSocket streams.</span>
         </div>
 
       </div>

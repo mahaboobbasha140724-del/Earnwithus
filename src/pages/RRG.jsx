@@ -11,11 +11,11 @@ export default function RRG() {
   // Navigation: 'tracker' | 'backtester'
   const [activeTab, setActiveTab] = useState('tracker');
 
-  // --- SENSIBULL SENTIMENT DATA STATE ---
+  // --- MARKET SENTIMENT DATA STATE ---
   const [sentimentData, setSentimentData] = useState(null);
   const [sentimentLoading, setSentimentLoading] = useState(true);
 
-  // Fetch Sensibull Live FII/DII Sentiment
+  // Fetch Market Live FII/DII Sentiment
   useEffect(() => {
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
     const fetchSentiment = () => {
@@ -806,12 +806,12 @@ export default function RRG() {
             {/* Right Information & List Column */}
             <div style={styles.selectorsCol}>
               
-              {/* Sensibull Sentiment Widget */}
+              {/* Market Sentiment Widget */}
               <div className="glass-card" style={{ ...styles.card, border: '1px solid rgba(148, 112, 248, 0.15)', backgroundColor: 'rgba(148, 112, 248, 0.01)', display: activeTab === 'tracker' ? 'block' : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Layers size={14} color="#9470F8" />
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>SENSIBULL MARKET SENTIMENT</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>MARKET SENTIMENT FEED</span>
                   </div>
                   {sentimentData && (
                     <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 600 }}>
@@ -874,7 +874,7 @@ export default function RRG() {
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0' }}>
                     <ShieldAlert size={14} color="#ef4444" />
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Sensibull offline. Using offline rotation metrics.</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Sentiment feed offline. Using offline rotation metrics.</span>
                   </div>
                 )}
               </div>
