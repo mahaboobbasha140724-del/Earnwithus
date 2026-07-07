@@ -5,11 +5,18 @@ import {
   ZoomIn, ZoomOut, Eye, HelpCircle, X, ChevronRight, BarChart2, TrendingUp
 } from 'lucide-react';
 import { niftySectors } from '../data/niftySectors';
-import { historicalRrgData } from '../data/historicalRrgData';
+import { weeklyRrgData, dailyRrgData } from '../data/historicalRrgData';
 
 export default function RRG() {
   // Navigation: 'tracker' | 'backtester'
   const [activeTab, setActiveTab] = useState('tracker');
+  
+  // Timeframe selection: 'weekly' | 'daily'
+  const [timeframe, setTimeframe] = useState('weekly');
+
+  const historicalRrgData = useMemo(() => {
+    return timeframe === 'weekly' ? weeklyRrgData : dailyRrgData;
+  }, [timeframe]);
 
   // --- MARKET SENTIMENT DATA STATE ---
   const [sentimentData, setSentimentData] = useState(null);
@@ -45,6 +52,11 @@ export default function RRG() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [timelineStep, setTimelineStep] = useState(104); // latest index (0 to 104)
   const [playbackSpeed, setPlaybackSpeed] = useState(1000); // ms per step
+
+  // Reset timeline Step when timeframe changes
+  useEffect(() => {
+    setTimelineStep(104);
+  }, [timeframe]);
   
   // Drilldown: null (sector level) or sector object (stock level)
   const [drillDownSector, setDrillDownSector] = useState(null);
@@ -598,6 +610,29 @@ export default function RRG() {
                     </button>
                   </div>
 
+                  {/* Timeframe Selector */}
+                  <div style={styles.toolbarGroup}>
+                    <span style={styles.toolbarLabel}>Timeframe:</span>
+                    <button 
+                      onClick={() => {
+                        setTimeframe('daily');
+                        setTailLength(3);
+                      }}
+                      style={{...styles.toggleBtn, ...(timeframe === 'daily' ? styles.toggleBtnActive : {})}}
+                    >
+                      Daily
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setTimeframe('weekly');
+                        setTailLength(4);
+                      }}
+                      style={{...styles.toggleBtn, ...(timeframe === 'weekly' ? styles.toggleBtnActive : {})}}
+                    >
+                      Weekly
+                    </button>
+                  </div>
+
                   {/* Tail Toggle */}
                   <div style={styles.toolbarGroup}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.75rem', color: '#94a3b8' }}>
@@ -780,15 +815,51 @@ export default function RRG() {
                 {/* Trail and Speed Selectors */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: 12 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 700 }}>TRAIL LENGTH</span>
+                    <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 700 }}>
+                      TRAIL LENGTH ({tailLength} {timeframe === 'daily' ? 'DAYS' : 'WEEKS'})
+                    </span>
                     <input 
                       type="range" 
                       min="1" 
-                      max="12" 
+                      max={timeframe === 'daily' ? 10 : 12} 
                       value={tailLength} 
                       onChange={(e) => setTailLength(Number(e.target.value))}
                       style={{ width: 80, accentColor: '#10b981', height: 4 }}
                     />
+                    {timeframe === 'daily' && (
+                      <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
+                        <button 
+                          onClick={() => setTailLength(3)}
+                          style={{
+                            backgroundColor: tailLength === 3 ? '#10b981' : 'rgba(255,255,255,0.05)',
+                            color: tailLength === 3 ? '#07080d' : '#ffffff',
+                            border: 'none',
+                            borderRadius: 3,
+                            fontSize: '0.55rem',
+                            padding: '2px 4px',
+                            cursor: 'pointer',
+                            fontWeight: 700
+                          }}
+                        >
+                          3d
+                        </button>
+                        <button 
+                          onClick={() => setTailLength(5)}
+                          style={{
+                            backgroundColor: tailLength === 5 ? '#10b981' : 'rgba(255,255,255,0.05)',
+                            color: tailLength === 5 ? '#07080d' : '#ffffff',
+                            border: 'none',
+                            borderRadius: 3,
+                            fontSize: '0.55rem',
+                            padding: '2px 4px',
+                            cursor: 'pointer',
+                            fontWeight: 700
+                          }}
+                        >
+                          5d
+                        </button>
+                      </div>
+                    )}
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

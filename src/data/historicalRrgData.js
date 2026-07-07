@@ -15,16 +15,17 @@ function createRandom(seedString) {
   };
 }
 
-export function generateHistoricalData(numWeeks = 104) {
+export function generateHistoricalData(numWeeks = 104, interval = 'weekly') {
   const data = [];
   // Initialize Nifty 50 Benchmark starting at 18000
-  const randBench = createRandom("NIFTY 50 BENCHMARK");
+  const randBench = createRandom("NIFTY 50 BENCHMARK " + interval);
   let benchPrice = 18000;
   const benchPrices = [benchPrice];
+  const stepDays = interval === 'weekly' ? 7 : 1;
   
   for (let w = 1; w <= numWeeks; w++) {
-    const weeklyDrift = 0.0015; // ~8% annual return
-    const vol = 0.015; // ~1.5% weekly vol
+    const weeklyDrift = interval === 'weekly' ? 0.0015 : 0.0002; // ~8% annual return vs smaller daily drift
+    const vol = interval === 'weekly' ? 0.015 : 0.006; // ~1.5% weekly vol vs ~0.6% daily vol
     const rand = randBench() * 2 - 1; // -1 to 1
     benchPrice = benchPrice * (1 + weeklyDrift + rand * vol);
     benchPrices.push(benchPrice);
@@ -35,17 +36,17 @@ export function generateHistoricalData(numWeeks = 104) {
   const baseDate = new Date(); // Dynamically use today's date
   for (let w = numWeeks; w >= 0; w--) {
     const d = new Date(baseDate);
-    d.setDate(baseDate.getDate() - w * 7);
+    d.setDate(baseDate.getDate() - w * stepDays);
     const dateStr = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     dateLabels.push(dateStr);
   }
 
   // Generate data for each sector
   const sectorHistory = niftySectors.map((sector) => {
-    const rand = createRandom(sector.symbol);
+    const rand = createRandom(sector.symbol + " " + interval);
     
     // Rotation parameters: Center, Radius (X, Y), speed, initial phase
-    const speed = 0.05 + rand() * 0.05; // speed of orbit (rad per week)
+    const speed = (0.05 + rand() * 0.05) * (interval === 'weekly' ? 1.0 : 0.4); // speed of orbit (rad per step)
     const rx = 2.5 + rand() * 2.0; // momentum radius
     const ry = 2.5 + rand() * 2.0; // strength radius
     const phaseOffset = rand() * Math.PI * 2; // start phase
@@ -68,8 +69,8 @@ export function generateHistoricalData(numWeeks = 104) {
       const benchRet = (benchPrices[w] - benchPrices[w-1]) / benchPrices[w-1];
       const rrgY = rrgCoords[w].y;
       // If y > 100, positive outperformance, if y < 100, negative outperformance
-      const alpha = (rrgY - 100) * 0.0035; // 1% RRG Y = ~0.35% weekly outperformance
-      const sectorRet = benchRet + alpha + (rand() - 0.5) * 0.008; // add noise
+      const alpha = (rrgY - 100) * (interval === 'weekly' ? 0.0035 : 0.0008); 
+      const sectorRet = benchRet + alpha + (rand() - 0.5) * (interval === 'weekly' ? 0.008 : 0.003); // add noise
       returns.push(sectorRet);
     }
 
@@ -82,8 +83,8 @@ export function generateHistoricalData(numWeeks = 104) {
 
     // Top constituents
     const constituentsHistory = sector.constituents.map((c) => {
-      const randStock = createRandom(c.name + sector.symbol);
-      const stockSpeed = 0.08 + randStock() * 0.06;
+      const randStock = createRandom(c.name + sector.symbol + " " + interval);
+      const stockSpeed = (0.08 + randStock() * 0.06) * (interval === 'weekly' ? 1.0 : 0.4);
       const sRx = 1.0 + randStock() * 1.2;
       const sRy = 1.0 + randStock() * 1.2;
       const stockPhase = randStock() * Math.PI * 2;
@@ -108,8 +109,8 @@ export function generateHistoricalData(numWeeks = 104) {
         const secRet = (prices[w] - prices[w-1]) / prices[w-1];
         const stockY = stockCoords[w].y;
         const secY = rrgCoords[w].y;
-        const stockAlpha = (stockY - secY) * 0.004; // outperformance of stock vs sector
-        const stockRet = secRet + stockAlpha + (randStock() - 0.5) * 0.012;
+        const stockAlpha = (stockY - secY) * (interval === 'weekly' ? 0.004 : 0.001); // outperformance of stock vs sector
+        const stockRet = secRet + stockAlpha + (randStock() - 0.5) * (interval === 'weekly' ? 0.012 : 0.005);
         sReturns.push(stockRet);
       }
 
@@ -168,5 +169,7 @@ export function generateHistoricalData(numWeeks = 104) {
   };
 }
 
-// Generate static dataset
-export const historicalRrgData = generateHistoricalData(104);
+// Generate static datasets
+export const weeklyRrgData = generateHistoricalData(104, 'weekly');
+export const dailyRrgData = generateHistoricalData(104, 'daily');
+export const historicalRrgData = weeklyRrgData;
