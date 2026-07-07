@@ -16,7 +16,11 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
   });
 
   useEffect(() => {
-    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' || 
+                        window.location.hostname.startsWith('192.168.') ||
+                        window.location.hostname.startsWith('10.');
+    const API_BASE = isLocalhost ? 'http://localhost:3001' : 'https://earnwithus.onrender.com';
     
     const fetchFO = () => {
       fetch(`${API_BASE}/api/market/fii-dii`)
