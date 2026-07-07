@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AlertCircle, Download, X } from 'lucide-react';
 
 // Components
@@ -124,6 +124,14 @@ function MainApp() {
         <Routes>
           <Route path="/" element={<Home setSelectedStockForModal={setSelectedStockForModal} />} />
           <Route path="/pricing" element={<Pricing />} />
+          
+          {/* Direct Aliases for SEO & backward compatibility */}
+          <Route path="/scanners" element={<Navigate to="/features/scanners" replace />} />
+          <Route path="/sentiment" element={<Navigate to="/features/sentiment" replace />} />
+          <Route path="/heatmaps" element={<Navigate to="/features/heatmaps" replace />} />
+          <Route path="/rrg" element={<Navigate to="/features/rrg" replace />} />
+          <Route path="/futures-options" element={<Navigate to="/features/futures-options" replace />} />
+
           <Route path="/features/scanners" element={<ProtectedRoute><Scanners setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
           <Route path="/features/heatmaps" element={<ProtectedRoute><Heatmaps setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
           <Route path="/features/rrg" element={<ProtectedRoute><RRG setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
@@ -136,6 +144,9 @@ function MainApp() {
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/strategies" element={<ProtectedRoute><Strategies /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminDashboard />} />
+
+          {/* Wildcard Fallback redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 

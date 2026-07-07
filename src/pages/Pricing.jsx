@@ -207,6 +207,35 @@ export default function Pricing() {
           </div>
         </div>
 
+        {/* Referral Reward Promo */}
+        <div className="glass-card" style={{
+          marginTop: '40px',
+          padding: '32px',
+          background: 'linear-gradient(135deg, rgba(148, 112, 248, 0.05) 0%, rgba(194, 250, 79, 0.02) 100%)',
+          border: '1px solid rgba(148, 112, 248, 0.15)',
+          borderRadius: '16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '24px'
+        }}>
+          <div>
+            <span className="badge-glow" style={{ borderColor: 'var(--color-secondary)', color: 'var(--color-secondary)' }}>Free Premium Opportunity</span>
+            <h2 style={{ fontSize: '1.5rem', color: '#ffffff', marginTop: 12, marginBottom: 8 }}>Don't want to pay? Get Pro for Free!</h2>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '640px', lineHeight: 1.6 }}>
+              Unlock <strong>7 Days of Pro Access</strong> for every 3 friends you refer to Billionaire Signals. There's no limit to the number of free weeks you can earn!
+            </p>
+          </div>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="btn-primary" 
+            style={{ background: 'linear-gradient(135deg, var(--color-secondary) 0%, #a3e635 100%)', border: 'none', color: '#050508', fontWeight: 'bold' }}
+          >
+            Get Referral Link
+          </button>
+        </div>
+
       </div>
 
       {/* Checkout Modal (Simulated payment gate) */}

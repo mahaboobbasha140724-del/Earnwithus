@@ -8,10 +8,11 @@ async function test() {
         "Referer": "https://web.sensibull.com/"
       }
     });
-    console.log("Status:", res.status);
-    const data = await res.json();
-    console.log("Data keys length:", data && data.data ? Object.keys(data.data).length : 0);
-    console.log("Year Month:", data.year_month);
+    const rawData = await res.json();
+    const dates = Object.keys(rawData.data).sort();
+    const latestDate = dates[dates.length - 1];
+    console.log("Latest date:", latestDate);
+    console.log("Cash data:", JSON.stringify(rawData.data[latestDate].cash, null, 2));
   } catch (err) {
     console.error("Fetch failed:", err.message);
   }

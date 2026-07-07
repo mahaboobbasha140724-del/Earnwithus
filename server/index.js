@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import WebSocket from 'ws';
 import * as dhan from 'dhanhq';
 import dotenv from 'dotenv';
+import fs from 'fs/promises';
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -103,9 +104,42 @@ app.get('/api/market/overview', async (req, res) => {
   }
 });
 
-// 2. Endpoint: Live FII & DII flows from Sensibull
-app.get('/api/market/fii-dii', async (req, res) => {
+// Path for local persistent cache of FII/DII data
+const FII_DII_CACHE_FILE = path.join(__dirname, 'fii-dii-cache.json');
+
+// In-memory cache with static mock fallback as default
+let cachedFiiDiiData = {
+  success: true,
+  source: "Static Mock Fallback",
+  fallback: true,
+  date: "Post-Market Hours",
+  flows: [
+    { segment: "FII Cash Market", netValue: -1240.50, action: "Net Seller" },
+    { segment: "DII Cash Market", netValue: 2150.80, action: "Net Buyer" },
+    { segment: "FII Index Futures", netValue: 480.20, action: "Net Buyer" },
+    { segment: "FII Stock Futures", netValue: 920.40, action: "Net Buyer" },
+    { segment: "FII Index Options", netValue: -850.30, action: "Net Seller" }
+  ],
+  pcr: 1.18,
+  sentimentScore: 68
+};
+
+// Initialize cache from disk on startup
+async function initFiiDiiCache() {
   try {
+    const data = await fs.readFile(FII_DII_CACHE_FILE, 'utf-8');
+    cachedFiiDiiData = JSON.parse(data);
+    console.log("Loaded FII/DII data cache from disk successfully.");
+  } catch (err) {
+    console.log("No existing FII/DII data cache found on disk, using defaults.");
+  }
+}
+
+// Background sync function for FII/DII data
+async function syncFiiDiiData() {
+  console.log("Syncing FII/DII data...");
+  try {
+    // 1. Direct fetch from Sensibull
     const response = await fetch("https://oxide.sensibull.com/v1/compute/cache/fii_dii_daily", {
       headers: {
         "User-Agent": USER_AGENT,
@@ -164,7 +198,7 @@ app.get('/api/market/fii-dii', async (req, res) => {
       sentimentScore = fiiCash.net_view_strength === 'Strong' ? 20 : 35;
     }
 
-    res.json({
+    const formattedData = {
       success: true,
       source: "Sensibull Direct",
       date: latestDate,
@@ -214,11 +248,16 @@ app.get('/api/market/fii-dii', async (req, res) => {
       pcr: calculatedPCR,
       sentimentScore: sentimentScore,
       rawDayData: dayData
-    });
+    };
+
+    cachedFiiDiiData = formattedData;
+    await fs.writeFile(FII_DII_CACHE_FILE, JSON.stringify(formattedData, null, 2), 'utf-8');
+    console.log("Sensibull Direct data synced and cached successfully.");
+    return;
   } catch (error) {
     console.error("Direct Sensibull fetch failed, trying aggregator backup...", error.message);
     try {
-      // Aggregator backup (Mr. Chartist)
+      // 2. Aggregator backup (Mr. Chartist)
       const response = await fetch("https://fii-diidata.mrchartist.com/api/data", {
         headers: {
           "User-Agent": USER_AGENT,
@@ -228,7 +267,7 @@ app.get('/api/market/fii-dii', async (req, res) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       
-      res.json({
+      const formattedData = {
         success: true,
         source: "Aggregator Backup",
         date: data.date || "Today",
@@ -242,26 +281,20 @@ app.get('/api/market/fii-dii', async (req, res) => {
         ],
         pcr: data.pcr || 1.18,
         sentimentScore: data.sentiment_score || 50
-      });
+      };
+
+      cachedFiiDiiData = formattedData;
+      await fs.writeFile(FII_DII_CACHE_FILE, JSON.stringify(formattedData, null, 2), 'utf-8');
+      console.log("Aggregator Backup data synced and cached successfully.");
     } catch (backupError) {
-      console.error("Backup aggregator also failed, returning cached mock data...", backupError.message);
-      res.json({
-        success: true,
-        source: "Static Mock Fallback",
-        fallback: true,
-        date: "Post-Market Hours",
-        flows: [
-          { segment: "FII Cash Market", netValue: -1240.50, action: "Net Seller" },
-          { segment: "DII Cash Market", netValue: 2150.80, action: "Net Buyer" },
-          { segment: "FII Index Futures", netValue: 480.20, action: "Net Buyer" },
-          { segment: "FII Stock Futures", netValue: 920.40, action: "Net Buyer" },
-          { segment: "FII Index Options", netValue: -850.30, action: "Net Seller" }
-        ],
-        pcr: 1.18,
-        sentimentScore: 68
-      });
+      console.error("Backup aggregator also failed. Using existing in-memory/file cache.", backupError.message);
     }
   }
+}
+
+// 2. Endpoint: Live FII & DII flows (served from cache)
+app.get('/api/market/fii-dii', (req, res) => {
+  res.json(cachedFiiDiiData);
 });
 
 app.get('/ping', (req, res) => {
@@ -359,6 +392,15 @@ async function pollYahooFallback() {
 populateInitialMarketData();
 // Poll every 10 seconds
 setInterval(pollYahooFallback, 10000);
+
+// Initialize FII/DII syncing
+async function startFiiDiiSync() {
+  await initFiiDiiCache();
+  await syncFiiDiiData();
+  // Poll every 15 minutes (900,000 ms)
+  setInterval(syncFiiDiiData, 900000);
+}
+startFiiDiiSync();
 
 // Monkey-patch DhanFeed to use query parameter authentication (fixes 400 Bad Request error)
 dhan.DhanFeed.prototype.connect = async function() {

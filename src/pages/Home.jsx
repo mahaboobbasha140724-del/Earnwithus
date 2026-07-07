@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart } from 'lucide-react';
+import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
 import Logo from '../components/Logo';
 
@@ -8,6 +8,26 @@ export default function Home({ setSelectedStockForModal }) {
   const [activeFeatureTab, setActiveFeatureTab] = useState('scanners'); // 'scanners' | 'heatmaps' | 'rrg' | 'sentiment'
   const [activeTraderTab, setActiveTraderTab] = useState('short'); // 'short' | 'long' | 'fo'
   const [testimonialIndex, setTestimonialIndex] = useState(0);
+
+  // Growth loops & Sentiment states
+  const [votedSentiment, setVotedSentiment] = useState(null); // null | 'bull' | 'bear'
+  const [sentimentVotes, setSentimentVotes] = useState({ bull: 64, bear: 36 });
+  const [showReferralCopySuccess, setShowReferralCopySuccess] = useState(false);
+
+  const handleCopyReferral = () => {
+    navigator.clipboard.writeText('https://billionaire-signalsb89c1.web.app/ref=trader101');
+    setShowReferralCopySuccess(true);
+    setTimeout(() => setShowReferralCopySuccess(false), 2000);
+  };
+
+  const handleVoteSentiment = (type) => {
+    if (votedSentiment) return;
+    setVotedSentiment(type);
+    setSentimentVotes({
+      bull: type === 'bull' ? 65 : 64,
+      bear: type === 'bull' ? 35 : 36
+    });
+  };
 
   const [liveData, setLiveData] = useState({
     NIFTY50: { price: 24056.00, change: 0.14 },
@@ -75,6 +95,9 @@ export default function Home({ setSelectedStockForModal }) {
   return (
     <div style={homeStyles.container}>
       
+      {/* Screen-reader-only main H1 heading for SEO Compliance */}
+      <h1 className="sr-only">Billionaire Signals - Supercharge Your Stock Analysis &amp; Virtual Paper Trading</h1>
+
       {/* 1. Split Hero Section (Zerroday Inspired) */}
       <section style={{ padding: '40px 0 20px 0' }}>
         <div className="page-wrapper">
@@ -85,17 +108,17 @@ export default function Home({ setSelectedStockForModal }) {
               <div className="split-hero-badge split-hero-badge-bull">
                 🚀 Analytics Hub
               </div>
-              <h1 className="split-hero-title split-hero-title-bull">
+              <h2 className="split-hero-title split-hero-title-bull">
                 Supercharge Your <span style={{ color: '#10b981' }}>Stock Analysis</span>
-              </h1>
+              </h2>
               <p className="split-hero-subtitle">
                 Spot winning setups instantly using advanced screeners, live sector heatmaps, and Relative Rotation Graphs (RRG).
               </p>
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', zIndex: 10 }}>
-                <Link to="/scanners" className="btn-primary" style={{ background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)', border: 'none', color: '#050508', fontWeight: 'bold' }}>
+                <Link to="/features/scanners" className="btn-primary" style={{ background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)', border: 'none', color: '#050508', fontWeight: 'bold' }}>
                   ⚡ Open Scanners <ArrowRight size={16} />
                 </Link>
-                <Link to="/sentiment" className="btn-secondary">
+                <Link to="/features/sentiment" className="btn-secondary">
                   Market Sentiment
                 </Link>
               </div>
@@ -107,9 +130,9 @@ export default function Home({ setSelectedStockForModal }) {
               <div className="split-hero-badge split-hero-badge-bear">
                 🛡️ Simulator Hub
               </div>
-              <h1 className="split-hero-title split-hero-title-bear">
+              <h2 className="split-hero-title split-hero-title-bear">
                 Virtual <span style={{ color: '#ef4444' }}>Paper Trading</span>
-              </h1>
+              </h2>
               <p className="split-hero-subtitle">
                 Practice trading NIFTY, SENSEX, and F&amp;O setups with live virtual feeds and zero financial risk.
               </p>
@@ -130,6 +153,22 @@ export default function Home({ setSelectedStockForModal }) {
 
             {/* Glowing Central Seam */}
             <div className="split-hero-seam"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Intro & Brand Overview Section */}
+      <section className="intro-section">
+        <div className="page-wrapper">
+          <div className="intro-content">
+            <span className="badge-glow" style={{ marginBottom: 12 }}>Next-Gen Trading Intelligence</span>
+            <h2 style={homeStyles.sectionTitle}>Welcome to Billionaire Signals</h2>
+            <p className="intro-text">
+              Billionaire Signals (formerly Earn With Us) is a complete ecosystem designed to give retail traders a definitive edge in the stock market. By combining institutional-grade data analytics with a realistic paper trading simulator, we empower you to formulate, backtest, and refine your market strategies with absolute confidence.
+            </p>
+            <p className="intro-text">
+              Analyze market movements using relative rotation velocity, sector strength, option chain build-ups, and participant flows. Then, seamlessly trade them in a simulated environment before deploying real capital.
+            </p>
           </div>
         </div>
       </section>
@@ -182,7 +221,7 @@ export default function Home({ setSelectedStockForModal }) {
                 <div style={homeStyles.featurePreviewText}>
                   <h3 style={{ fontSize: '1.5rem', marginBottom: 12 }}>Stock Scanners</h3>
                   <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: 20 }}>
-                    Scan and pick high-growth stocks effortlessly with advanced screeners. Filter by RSI crossovers, candlestick structures, Dow trends, volumes, and custom momentum triggers.
+                    Scan and pick high-growth stocks effortlessly with advanced screeners. Filter by RSI crossovers, candlestick structures, Dow trends, volumes, and custom momentum triggers. Our powerful engines process intraday and daily charts, letting you discover breakouts and critical moving average crossovers with absolute ease. Formulate your own scanning criteria and receive instant notifications when your favorite stocks match your strict parameters.
                   </p>
                   <ul style={homeStyles.featurePoints}>
                     <li><CheckCircle size={16} color="#10b981" /> 52-Week High & Low breakouts</li>
@@ -214,7 +253,7 @@ export default function Home({ setSelectedStockForModal }) {
                 <div style={homeStyles.featurePreviewText}>
                   <h3 style={{ fontSize: '1.5rem', marginBottom: 12 }}>Color-coded Stock Heatmaps</h3>
                   <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: 20 }}>
-                    Instantly identify outperforming sectors and stocks with a color-coded tree grid map. Easily filter by sectors, index components, and gains.
+                    Instantly identify outperforming sectors and stocks with a color-coded tree grid map. Easily filter by sectors, index components, and gains. Visually map the entire market structure in real-time, allowing you to instantly spot block deals, heavy institutional inflows, and sector rotation trends. Align your portfolio with the strongest sectors like Banking, Energy, and Information Technology.
                   </p>
                   <ul style={homeStyles.featurePoints}>
                     <li><CheckCircle size={16} color="#10b981" /> Visual tree-grid mapping</li>
@@ -254,7 +293,7 @@ export default function Home({ setSelectedStockForModal }) {
                 <div style={homeStyles.featurePreviewText}>
                   <h3 style={{ fontSize: '1.5rem', marginBottom: 12 }}>Relative Rotation Graphs (RRG)</h3>
                   <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: 20 }}>
-                    Understand stock and sector rotations relative to index benchmarks. Classify tickers into Leading, Weakening, Lagging, and Improving quadrants.
+                    Understand stock and sector rotations relative to index benchmarks. Classify tickers into Leading, Weakening, Lagging, and Improving quadrants. Relative Rotation Graphs (RRG) map the relative strength and momentum of various assets, helping you visualize leading sectors and time your entries before major breakout cycles begin. Animate historical rotation tails to track trend persistence.
                   </p>
                   <ul style={homeStyles.featurePoints}>
                     <li><CheckCircle size={16} color="#10b981" /> Quadrant scatter plot grids</li>
@@ -297,7 +336,7 @@ export default function Home({ setSelectedStockForModal }) {
                 <div style={homeStyles.featurePreviewText}>
                   <h3 style={{ fontSize: '1.5rem', marginBottom: 12 }}>Market Sentiment Indicators</h3>
                   <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: 20 }}>
-                    Understand underlying market emotions by tracking FII/DII Net Flows, open interest, and the signature Fear and Greed dials.
+                    Understand underlying market emotions by tracking FII/DII Net Flows, open interest, and the signature Fear and Greed dials. By tracking smart money positioning, options open interest (OI) concentrations, and overall market stance, you can gauge whether the index is overbought or oversold. Align your trades with smart money and institutional participant flows.
                   </p>
                   <ul style={homeStyles.featurePoints}>
                     <li><CheckCircle size={16} color="#10b981" /> Institutional Net Buyers vs. Sellers flows</li>
@@ -453,6 +492,132 @@ export default function Home({ setSelectedStockForModal }) {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Community Sentiment & Leaderboard Section */}
+      <section className="community-section">
+        <div className="page-wrapper">
+          <div style={homeStyles.sectionHeader}>
+            <span className="badge-glow" style={{ marginBottom: 12 }}>Community Hub</span>
+            <h2 style={homeStyles.sectionTitle}>Live Community Stance &amp; Leaderboard</h2>
+            <p style={homeStyles.sectionSubtitle}>
+              See what other traders are thinking. Vote on today's Nifty trend and track the top performers on our paper trading board.
+            </p>
+          </div>
+
+          <div className="community-grid">
+            {/* Sentiment Voting Widget */}
+            <div className="community-card">
+              <h3 style={{ fontSize: '1.25rem', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                📊 Nifty Today's Sentiment
+              </h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: 16 }}>
+                Where do you think Nifty is heading next? Cast your vote to see the real-time community consensus.
+              </p>
+              
+              <div className="sentiment-meter-container">
+                <div className="sentiment-meter-bar">
+                  <div className="sentiment-meter-fill" style={{ width: `${sentimentVotes.bull}%`, backgroundColor: '#10b981' }} />
+                  <div className="sentiment-meter-fill" style={{ width: `${sentimentVotes.bear}%`, backgroundColor: '#ef4444' }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginTop: 8 }}>
+                  <span style={{ color: '#10b981' }}>🟢 {sentimentVotes.bull}% Bullish</span>
+                  <span style={{ color: '#ef4444' }}>🔴 {sentimentVotes.bear}% Bearish</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+                <button 
+                  className={`btn-primary badge-glow ${votedSentiment ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                  style={{ flex: 1, backgroundColor: votedSentiment === 'bull' ? '#10b981' : 'rgba(16, 185, 129, 0.1)', color: votedSentiment === 'bull' ? '#07080d' : '#10b981', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '10px', borderRadius: '8px', cursor: votedSentiment ? 'default' : 'pointer', fontWeight: 'bold', justifyContent: 'center' }}
+                  onClick={() => handleVoteSentiment('bull')}
+                  disabled={!!votedSentiment}
+                >
+                  🐂 {votedSentiment === 'bull' ? 'Voted Bullish' : 'Bullish'}
+                </button>
+                <button 
+                  className={`btn-secondary badge-glow ${votedSentiment ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                  style={{ flex: 1, backgroundColor: votedSentiment === 'bear' ? '#ef4444' : 'rgba(239, 68, 68, 0.1)', color: votedSentiment === 'bear' ? '#ffffff' : '#ef4444', border: '1px solid rgba(239, 68, 68, 0.25)', padding: '10px', borderRadius: '8px', cursor: votedSentiment ? 'default' : 'pointer', fontWeight: 'bold', justifyContent: 'center' }}
+                  onClick={() => handleVoteSentiment('bear')}
+                  disabled={!!votedSentiment}
+                >
+                  🐻 {votedSentiment === 'bear' ? 'Voted Bearish' : 'Bearish'}
+                </button>
+              </div>
+              {votedSentiment && (
+                <p style={{ color: '#10b981', fontSize: '0.8rem', textAlign: 'center', marginTop: 12, fontWeight: 500 }}>
+                  Thank you for your vote! The consensus is updated in real-time.
+                </p>
+              )}
+            </div>
+
+            {/* Leaderboard Preview */}
+            <div className="community-card">
+              <h3 style={{ fontSize: '1.25rem', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                🏆 Top Paper Traders
+              </h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: 16 }}>
+                Top performing virtual portfolios on Billionaire Signals this week. Connect and learn from top analysts.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div className="leaderboard-preview-row">
+                  <span style={{ fontWeight: 'bold', color: '#f59e0b', fontSize: '1.1rem' }}>❶</span>
+                  <span style={{ fontWeight: 600 }}>Manish Sethia</span>
+                  <span style={{ color: '#10b981', fontWeight: 'bold', marginLeft: 'auto' }}>+42.50% P&amp;L</span>
+                </div>
+                <div className="leaderboard-preview-row">
+                  <span style={{ fontWeight: 'bold', color: '#94a3b8', fontSize: '1.1rem' }}>❷</span>
+                  <span style={{ fontWeight: 600 }}>Muskaan Kapoor</span>
+                  <span style={{ color: '#10b981', fontWeight: 'bold', marginLeft: 'auto' }}>+38.20% P&amp;L</span>
+                </div>
+                <div className="leaderboard-preview-row">
+                  <span style={{ fontWeight: 'bold', color: '#b45309', fontSize: '1.1rem' }}>❸</span>
+                  <span style={{ fontWeight: 600 }}>Sbhadip Sikdar</span>
+                  <span style={{ color: '#10b981', fontWeight: 'bold', marginLeft: 'auto' }}>+29.10% P&amp;L</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <Link to="/paper-trade" style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  Go to full Leaderboard <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Referral Growth Loop Section */}
+      <section className="referral-section">
+        <div className="page-wrapper">
+          <div className="referral-wrapper">
+            <div className="referral-content">
+              <span className="badge-glow" style={{ marginBottom: 12, borderColor: 'var(--color-secondary)', color: 'var(--color-secondary)' }}>Growth Engine</span>
+              <h2 style={{ fontSize: '2rem', marginBottom: 12, color: '#ffffff' }}>Refer Friends, Get Premium Pro Free</h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: 20 }}>
+                Share the Billionaire Signals trading workspace with your circle. When 3 friends sign up using your unique referral link, you'll instantly unlock <strong>7 Days of Pro Access</strong> for free. No credit card required.
+              </p>
+              <button 
+                onClick={handleCopyReferral} 
+                className="btn-primary" 
+                style={{ background: 'linear-gradient(135deg, var(--color-secondary) 0%, #a3e635 100%)', border: 'none', color: '#050508', fontWeight: 'bold' }}
+              >
+                {showReferralCopySuccess ? <Check size={16} /> : <Copy size={16} />}
+                {showReferralCopySuccess ? 'Referral Link Copied!' : 'Copy Unique Referral Link'}
+              </button>
+            </div>
+            
+            <div className="referral-visual">
+              <div className="glass-card" style={{ padding: '28px', textAlign: 'center', background: 'rgba(194, 250, 79, 0.04)', borderColor: 'rgba(194, 250, 79, 0.15)' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🎁</div>
+                <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#ffffff', marginBottom: 8 }}>Refer 3 Friends</div>
+                <div style={{ color: 'var(--color-secondary)', fontWeight: 700, fontSize: '1rem', marginBottom: 16 }}>Get 7 Days Pro Free</div>
+                <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', border: '1px dashed rgba(255,255,255,0.1)', padding: '10px 14px', borderRadius: '8px', fontSize: '0.8rem', color: '#ffffff', fontFamily: 'monospace', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  https://billionaire-signalsb89c1.web.app/ref=trader101
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

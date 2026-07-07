@@ -1,0 +1,366 @@
+{
+  "success": true,
+  "source": "Sensibull Direct",
+  "date": "2026-07-07",
+  "updatedAt": "2026-July",
+  "nifty": 24398.7,
+  "niftyChange": -0.13,
+  "banknifty": 58200.7,
+  "bankniftyChange": -0.16,
+  "nextMarketOpen": "2026-07-08T09:15:00+05:30",
+  "flows": [
+    {
+      "segment": "FII Cash Market",
+      "netValue": 393.19,
+      "buy": 18414.01,
+      "sell": 18020.82,
+      "action": "Net Buyer",
+      "view": "BULLISH"
+    },
+    {
+      "segment": "DII Cash Market",
+      "netValue": -383.43,
+      "buy": 18897.44,
+      "sell": 19280.87,
+      "action": "Net Seller",
+      "view": "BEARISH"
+    },
+    {
+      "segment": "FII Index Futures",
+      "netValue": 2441,
+      "outstanding": -238838,
+      "action": "Net Buyer"
+    },
+    {
+      "segment": "FII Stock Futures",
+      "netValue": 31648,
+      "outstanding": 603692,
+      "action": "Net Buyer"
+    },
+    {
+      "segment": "FII Index Options",
+      "netValue": -13112,
+      "callNetChange": 132,
+      "putNetChange": -13244,
+      "action": "Net Seller"
+    }
+  ],
+  "pcr": 1.05,
+  "sentimentScore": 65,
+  "rawDayData": {
+    "cash": {
+      "fii": {
+        "buy_sell_difference": 393.189453125,
+        "buy": 18414.009765625,
+        "sell": 18020.8203125,
+        "net_action": "BUY",
+        "net_view": "BULLISH",
+        "net_view_strength": "Mild"
+      },
+      "dii": {
+        "buy_sell_difference": -383.4296875,
+        "buy": 18897.439453125,
+        "sell": 19280.869140625,
+        "net_action": "SELL",
+        "net_view": "BEARISH",
+        "net_view_strength": "Mild"
+      }
+    },
+    "future": {
+      "fii": {
+        "quantity-wise": {
+          "net_oi": 2441,
+          "outstanding_oi": -238838,
+          "net_action": "BUY",
+          "net_view": "BULLISH",
+          "net_view_strength": "Mild",
+          "net_view_summary": "BEARISH",
+          "net_view_strength_summary": "Strong",
+          "nifty_net_oi": 2415,
+          "banknifty_net_oi": -38,
+          "finnifty_net_oi": 9,
+          "midcpnifty_net_oi": 48,
+          "niftynxt50_net_oi": 7,
+          "nifty_net_view": "BULLISH",
+          "banknifty_net_view": "BEARISH",
+          "finnifty_net_view": "BULLISH",
+          "midcpnifty_net_view": "BULLISH",
+          "niftynxt50_net_view": "BULLISH",
+          "nifty_net_action": "BUY",
+          "banknifty_net_action": "SELL",
+          "finnifty_net_action": "BUY",
+          "midcpnifty_net_action": "BUY",
+          "niftynxt50_net_action": "BUY",
+          "nifty_net_view_strength": "Medium",
+          "banknifty_net_view_strength": "Mild",
+          "finnifty_net_view_strength": "Mild",
+          "midcpnifty_net_view_strength": "Mild",
+          "niftynxt50_net_view_strength": "Mild"
+        },
+        "amount-wise": {
+          "net_oi": 390.8900146484375,
+          "net_view": "BULLISH",
+          "finnifty_net_oi": 1.4700000286102295,
+          "banknifty_net_oi": -6.57000732421875,
+          "nifty_net_oi": 386.25006103515625,
+          "midcpnifty_net_oi": 8.459999084472656,
+          "niftynxt50_net_oi": 1.2699999809265137,
+          "finnifty_net_view": "BULLISH",
+          "banknifty_net_view": "BEARISH",
+          "nifty_net_view": "BULLISH",
+          "midcpnifty_net_view": "BULLISH",
+          "niftynxt50_net_view": "BULLISH"
+        },
+        "futures_outstanding_oi": -238838,
+        "futures_outstanding_net_oi": 2441,
+        "futures_stock_outstanding_oi": 603692,
+        "futures_stock_net_oi": 31648,
+        "futures_stock_net_action": "BUY",
+        "futures_stock_net_view": "BULLISH",
+        "futures_stock_net_view_strength": "Medium",
+        "futures_stock_net_view_summary": "BULLISH",
+        "futures_stock_net_view_strength_summary": "Mild"
+      },
+      "dii": {
+        "quantity-wise": {
+          "net_oi": 3148,
+          "outstanding_oi": 69244,
+          "net_action": "BUY",
+          "net_view_summary": "BULLISH",
+          "net_view_strength_summary": "Mild",
+          "net_view": "BULLISH",
+          "net_view_strength": "Medium"
+        },
+        "futures_outstanding_oi": 69244,
+        "futures_outstanding_net_oi": 3148,
+        "futures_stock_outstanding_oi": -3992124,
+        "futures_stock_net_oi": 17840,
+        "futures_stock_net_action": "BUY",
+        "futures_stock_net_view_summary": "",
+        "futures_stock_net_view_strength_summary": "",
+        "futures_stock_net_view": "BULLISH",
+        "futures_stock_net_view_strength": "Medium"
+      },
+      "pro": {
+        "quantity-wise": {
+          "net_oi": -5116,
+          "outstanding_oi": 5435,
+          "net_action": "SELL",
+          "net_view_summary": "",
+          "net_view_strength_summary": "",
+          "net_view": "BEARISH",
+          "net_view_strength": "Medium"
+        },
+        "futures_outstanding_oi": 5435,
+        "futures_outstanding_net_oi": -5116,
+        "futures_stock_outstanding_oi": 472922,
+        "futures_stock_net_oi": -20597,
+        "futures_stock_net_action": "SELL",
+        "futures_stock_net_view_summary": "",
+        "futures_stock_net_view_strength_summary": "",
+        "futures_stock_net_view": "BEARISH",
+        "futures_stock_net_view_strength": "Medium"
+      },
+      "client": {
+        "quantity-wise": {
+          "net_oi": -473,
+          "outstanding_oi": 164159,
+          "net_action": "SELL",
+          "net_view_summary": "BULLISH",
+          "net_view_strength_summary": "Medium",
+          "net_view": "BEARISH",
+          "net_view_strength": "Mild"
+        },
+        "futures_outstanding_oi": 164159,
+        "futures_outstanding_net_oi": -473,
+        "futures_stock_outstanding_oi": 2915510,
+        "futures_stock_net_oi": -28891,
+        "futures_stock_net_action": "SELL",
+        "futures_stock_net_view_summary": "",
+        "futures_stock_net_view_strength_summary": "",
+        "futures_stock_net_view": "BEARISH",
+        "futures_stock_net_view_strength": "Medium"
+      }
+    },
+    "option": {
+      "fii": {
+        "call": {
+          "long": {
+            "oi_current": 355937,
+            "oi_change": -125877
+          },
+          "short": {
+            "oi_current": 544458,
+            "oi_change": -126009
+          },
+          "net_oi": -188521,
+          "net_oi_change": 132,
+          "net_oi_change_action": "BUY",
+          "net_oi_change_view_summary": "BEARISH",
+          "net_oi_change_view_summary_strength": "Medium",
+          "net_oi_change_view": "BULLISH",
+          "net_oi_change_view_strength": "Mild"
+        },
+        "put": {
+          "long": {
+            "oi_current": 718833,
+            "oi_change": -255139
+          },
+          "short": {
+            "oi_current": 275050,
+            "oi_change": -241895
+          },
+          "net_oi": 443783,
+          "net_oi_change": -13244,
+          "net_oi_change_action": "SELL",
+          "net_oi_change_view_summary": "",
+          "net_oi_change_view_summary_strength": "",
+          "net_oi_change_view": "BULLISH",
+          "net_oi_change_view_strength": "Medium"
+        },
+        "overall_net_oi": -632304,
+        "overall_net_oi_change": 13376,
+        "overall_net_oi_change_action": "BUY",
+        "overall_net_oi_change_view_summary": "BEARISH",
+        "overall_net_oi_change_view_summary_strength": "Medium",
+        "overall_net_oi_change_view": "BULLISH",
+        "overall_net_oi_change_view_strength": "Mild"
+      },
+      "dii": {
+        "call": {
+          "long": {
+            "oi_current": 5290,
+            "oi_change": 1095
+          },
+          "short": {
+            "oi_current": 90,
+            "oi_change": -710
+          },
+          "net_oi": 5200,
+          "net_oi_change": 1805,
+          "net_oi_change_action": "BUY",
+          "net_oi_change_view_summary": "BULLISH",
+          "net_oi_change_view_summary_strength": "Mild",
+          "net_oi_change_view": "BULLISH",
+          "net_oi_change_view_strength": "Mild"
+        },
+        "put": {
+          "long": {
+            "oi_current": 26027,
+            "oi_change": 12
+          },
+          "short": {
+            "oi_current": 229,
+            "oi_change": -1550
+          },
+          "net_oi": 25798,
+          "net_oi_change": 1562,
+          "net_oi_change_action": "BUY",
+          "net_oi_change_view_summary": "BEARISH",
+          "net_oi_change_view_summary_strength": "Mild",
+          "net_oi_change_view": "BEARISH",
+          "net_oi_change_view_strength": "Mild"
+        },
+        "overall_net_oi": -20598,
+        "overall_net_oi_change": 243,
+        "overall_net_oi_change_action": "BUY",
+        "overall_net_oi_change_view_summary": "",
+        "overall_net_oi_change_view_summary_strength": "",
+        "overall_net_oi_change_view": "BULLISH",
+        "overall_net_oi_change_view_strength": "Mild"
+      },
+      "pro": {
+        "call": {
+          "long": {
+            "oi_current": 583538,
+            "oi_change": -379033
+          },
+          "short": {
+            "oi_current": 571546,
+            "oi_change": -253200
+          },
+          "net_oi": 11992,
+          "net_oi_change": -125833,
+          "net_oi_change_action": "SELL",
+          "net_oi_change_view_summary": "BEARISH",
+          "net_oi_change_view_summary_strength": "Medium",
+          "net_oi_change_view": "BEARISH",
+          "net_oi_change_view_strength": "Strong"
+        },
+        "put": {
+          "long": {
+            "oi_current": 632342,
+            "oi_change": -614535
+          },
+          "short": {
+            "oi_current": 587027,
+            "oi_change": -627972
+          },
+          "net_oi": 45315,
+          "net_oi_change": 13437,
+          "net_oi_change_action": "BUY",
+          "net_oi_change_view_summary": "BEARISH",
+          "net_oi_change_view_summary_strength": "Mild",
+          "net_oi_change_view": "BEARISH",
+          "net_oi_change_view_strength": "Medium"
+        },
+        "overall_net_oi": -33323,
+        "overall_net_oi_change": -139270,
+        "overall_net_oi_change_action": "SELL",
+        "overall_net_oi_change_view_summary": "BEARISH",
+        "overall_net_oi_change_view_summary_strength": "Medium",
+        "overall_net_oi_change_view": "BEARISH",
+        "overall_net_oi_change_view_strength": "Mild"
+      },
+      "client": {
+        "call": {
+          "long": {
+            "oi_current": 1803242,
+            "oi_change": -998408
+          },
+          "short": {
+            "oi_current": 1631914,
+            "oi_change": -1122304
+          },
+          "net_oi": 171328,
+          "net_oi_change": 123896,
+          "net_oi_change_action": "BUY",
+          "net_oi_change_view_summary": "BULLISH",
+          "net_oi_change_view_summary_strength": "Strong",
+          "net_oi_change_view": "BULLISH",
+          "net_oi_change_view_strength": "Strong"
+        },
+        "put": {
+          "long": {
+            "oi_current": 1500941,
+            "oi_change": -1899744
+          },
+          "short": {
+            "oi_current": 2015837,
+            "oi_change": -1897990
+          },
+          "net_oi": -514896,
+          "net_oi_change": -1754,
+          "net_oi_change_action": "SELL",
+          "net_oi_change_view_summary": "BULLISH",
+          "net_oi_change_view_summary_strength": "Medium",
+          "net_oi_change_view": "BULLISH",
+          "net_oi_change_view_strength": "Mild"
+        },
+        "overall_net_oi": 686224,
+        "overall_net_oi_change": 125650,
+        "overall_net_oi_change_action": "BUY",
+        "overall_net_oi_change_view_summary": "BULLISH",
+        "overall_net_oi_change_view_summary_strength": "Strong",
+        "overall_net_oi_change_view": "BULLISH",
+        "overall_net_oi_change_view_strength": "Mild"
+      }
+    },
+    "date": "2026-07-07",
+    "nifty": 24398.7,
+    "nifty_change_percent": -0.12955197121612183,
+    "banknifty": 58200.7,
+    "banknifty_change_percent": -0.1557688513762777,
+    "next_market_open": "2026-07-08T09:15:00+05:30"
+  }
+}

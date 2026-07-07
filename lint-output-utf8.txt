@@ -1,0 +1,678 @@
+﻿
+> earn-with-us@0.0.0 lint
+> oxlint
+
+
+  ! eslint(no-unused-vars): Variable 'dhanObj' is declared but never used. Unused variables should start with a '_'.
+    ,-[test-dhan.js:9:11]
+  8 |   try {
+  9 |     const dhanObj = new dhan.DhanHqClient({
+    :           ^^^|^^^
+    :              `-- 'dhanObj' is declared here
+ 10 |       clientId: process.env.DHAN_CLIENT_ID,
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Identifier 'ShieldCheck' is imported but never used.
+   ,-[src/pages/AboutUs.jsx:2:26]
+ 1 | import React from 'react';
+ 2 | import { Award, Compass, ShieldCheck, Heart } from 'lucide-react';
+   :                          ^^^^^|^^^^^
+   :                               `-- 'ShieldCheck' is imported here
+ 3 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ShieldCheck' is imported but never used.
+   ,-[src/pages/Pricing.jsx:3:29]
+ 2 | import { useLocation } from 'react-router-dom';
+ 3 | import { Check, ArrowRight, ShieldCheck, CreditCard, Sparkles, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+   :                             ^^^^^|^^^^^
+   :                                  `-- 'ShieldCheck' is imported here
+ 4 | import { useAuth } from '../context/AuthContext';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Sparkles' is imported but never used.
+   ,-[src/pages/Pricing.jsx:3:54]
+ 2 | import { useLocation } from 'react-router-dom';
+ 3 | import { Check, ArrowRight, ShieldCheck, CreditCard, Sparkles, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+   :                                                      ^^^^|^^^
+   :                                                          `-- 'Sparkles' is imported here
+ 4 | import { useAuth } from '../context/AuthContext';
+   `----
+  help: Consider removing this import.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/context/AuthContext.jsx:17:17]
+ 16 | 
+ 17 | export function useAuth() {
+    :                 ^^^^^^^
+ 18 |   return useContext(AuthContext);
+    `----
+
+  ! eslint(no-unused-vars): Identifier 'Star' is imported but never used.
+   ,-[src/components/StockModal.jsx:3:39]
+ 2 | import { useNavigate } from 'react-router-dom';
+ 3 | import { X, TrendingUp, TrendingDown, Star, AlertTriangle, ShieldCheck, Briefcase } from 'lucide-react';
+   :                                       ^^|^
+   :                                         `-- 'Star' is imported here
+ 4 | 
+   `----
+  help: Consider removing this import.
+
+  x react-hooks(rules-of-hooks): React Hook "useNavigate" is called conditionally. React Hooks must be called in the exact same order in every component render.
+   ,-[src/components/StockModal.jsx:8:20]
+ 7 | 
+ 8 |   const navigate = useNavigate();
+   :                    ^^^^^^|^^^^^^
+   :                          `-- This Hook call is not reachable on every render path.
+ 9 |   const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'options' | 'seasonality'
+   `----
+  help: Move the Hook call before the condition, or call it unconditionally and branch inside the Hook/effect instead.
+
+  x react-hooks(rules-of-hooks): React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render.
+    ,-[src/components/StockModal.jsx:9:37]
+  8 |   const navigate = useNavigate();
+  9 |   const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'options' | 'seasonality'
+    :                                     ^^^^^^^^|^^^^^^^^
+    :                                             `-- This Hook call is not reachable on every render path.
+ 10 |   
+    `----
+  help: Move the Hook call before the condition, or call it unconditionally and branch inside the Hook/effect instead.
+
+  ! eslint(no-unused-vars): Identifier 'Key' is imported but never used.
+   ,-[src/pages/AdminDashboard.jsx:3:65]
+ 2 | import { useNavigate, Link } from 'react-router-dom';
+ 3 | import { Shield, Users, UserCheck, Clock, ArrowLeft, RefreshCw, Key, Sparkles } from 'lucide-react';
+   :                                                                 ^|^
+   :                                                                  `-- 'Key' is imported here
+ 4 | import { useAuth } from '../context/AuthContext';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'currentUser' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/AdminDashboard.jsx:9:11]
+  8 | export default function AdminDashboard() {
+  9 |   const { currentUser, userProfile, isAdmin } = useAuth();
+    :           ^^^^^|^^^^^
+    :                `-- 'currentUser' is declared here
+ 10 |   const navigate = useNavigate();
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'userProfile' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/AdminDashboard.jsx:9:24]
+  8 | export default function AdminDashboard() {
+  9 |   const { currentUser, userProfile, isAdmin } = useAuth();
+    :                        ^^^^^|^^^^^
+    :                             `-- 'userProfile' is declared here
+ 10 |   const navigate = useNavigate();
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'data' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/data/historicalRrgData.js:19:9]
+ 18 | export function generateHistoricalData(numWeeks = 104) {
+ 19 |   const data = [];
+    :         ^^|^
+    :           `-- 'data' is declared here
+ 20 |   // Initialize Nifty 50 Benchmark starting at 18000
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Identifier 'AlertCircle' is imported but never used.
+   ,-[src/App.jsx:3:10]
+ 2 | import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+ 3 | import { AlertCircle, Download, X } from 'lucide-react';
+   :          ^^^^^|^^^^^
+   :               `-- 'AlertCircle' is imported here
+ 4 | 
+   `----
+  help: Consider removing this import.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/pages/PrivacyPolicy.jsx:50:10]
+ 49 | };
+ 50 | export { legalStyles };
+    :          ^^^^^^^^^^^
+    `----
+
+  ! eslint(no-unused-vars): Identifier 'Grid' is imported but never used.
+   ,-[src/pages/Heatmaps.jsx:2:10]
+ 1 | import React, { useState } from 'react';
+ 2 | import { Grid, Filter, Info, Eye } from 'lucide-react';
+   :          ^^|^
+   :            `-- 'Grid' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Filter' is imported but never used.
+   ,-[src/pages/Heatmaps.jsx:2:16]
+ 1 | import React, { useState } from 'react';
+ 2 | import { Grid, Filter, Info, Eye } from 'lucide-react';
+   :                ^^^|^^
+   :                   `-- 'Filter' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingUp' is imported but never used.
+   ,-[src/components/Header.jsx:3:40]
+ 2 | import { Link, useNavigate, useLocation } from 'react-router-dom';
+ 3 | import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield } from 'lucide-react';
+   :                                        ^^^^^|^^^^
+   :                                             `-- 'TrendingUp' is imported here
+ 4 | import { searchStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingDown' is imported but never used.
+   ,-[src/components/Header.jsx:3:52]
+ 2 | import { Link, useNavigate, useLocation } from 'react-router-dom';
+ 3 | import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield } from 'lucide-react';
+   :                                                    ^^^^^^|^^^^^
+   :                                                          `-- 'TrendingDown' is imported here
+ 4 | import { searchStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Star' is imported but never used.
+   ,-[src/components/Header.jsx:3:66]
+ 2 | import { Link, useNavigate, useLocation } from 'react-router-dom';
+ 3 | import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield } from 'lucide-react';
+   :                                                                  ^^|^
+   :                                                                    `-- 'Star' is imported here
+ 4 | import { searchStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'User' is imported but never used.
+   ,-[src/components/Header.jsx:3:82]
+ 2 | import { Link, useNavigate, useLocation } from 'react-router-dom';
+ 3 | import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield } from 'lucide-react';
+   :                                                                                  ^^|^
+   :                                                                                    `-- 'User' is imported here
+ 4 | import { searchStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ShieldCheck' is imported but never used.
+   ,-[src/pages/FuturesOptions.jsx:2:10]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { ShieldCheck, Info, ChevronRight, Activity, TrendingUp, HelpCircle } from 'lucide-react';
+   :          ^^^^^|^^^^^
+   :               `-- 'ShieldCheck' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ChevronRight' is imported but never used.
+   ,-[src/pages/FuturesOptions.jsx:2:29]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { ShieldCheck, Info, ChevronRight, Activity, TrendingUp, HelpCircle } from 'lucide-react';
+   :                             ^^^^^^|^^^^^
+   :                                   `-- 'ChevronRight' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Activity' is imported but never used.
+   ,-[src/pages/FuturesOptions.jsx:2:43]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { ShieldCheck, Info, ChevronRight, Activity, TrendingUp, HelpCircle } from 'lucide-react';
+   :                                           ^^^^|^^^
+   :                                               `-- 'Activity' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingUp' is imported but never used.
+   ,-[src/pages/FuturesOptions.jsx:2:53]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { ShieldCheck, Info, ChevronRight, Activity, TrendingUp, HelpCircle } from 'lucide-react';
+   :                                                     ^^^^^|^^^^
+   :                                                          `-- 'TrendingUp' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'HelpCircle' is imported but never used.
+   ,-[src/pages/FuturesOptions.jsx:2:65]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { ShieldCheck, Info, ChevronRight, Activity, TrendingUp, HelpCircle } from 'lucide-react';
+   :                                                                 ^^^^^|^^^^
+   :                                                                      `-- 'HelpCircle' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'PieChart' is imported but never used.
+   ,-[src/pages/Sentiment.jsx:2:10]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { PieChart, TrendingUp, TrendingDown, Info, ShieldAlert, Award } from 'lucide-react';
+   :          ^^^^|^^^
+   :              `-- 'PieChart' is imported here
+ 3 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingUp' is imported but never used.
+   ,-[src/pages/Sentiment.jsx:2:20]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { PieChart, TrendingUp, TrendingDown, Info, ShieldAlert, Award } from 'lucide-react';
+   :                    ^^^^^|^^^^
+   :                         `-- 'TrendingUp' is imported here
+ 3 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingDown' is imported but never used.
+   ,-[src/pages/Sentiment.jsx:2:32]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { PieChart, TrendingUp, TrendingDown, Info, ShieldAlert, Award } from 'lucide-react';
+   :                                ^^^^^^|^^^^^
+   :                                      `-- 'TrendingDown' is imported here
+ 3 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ShieldAlert' is imported but never used.
+   ,-[src/pages/Sentiment.jsx:2:52]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { PieChart, TrendingUp, TrendingDown, Info, ShieldAlert, Award } from 'lucide-react';
+   :                                                    ^^^^^|^^^^^
+   :                                                         `-- 'ShieldAlert' is imported here
+ 3 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Award' is imported but never used.
+   ,-[src/pages/Sentiment.jsx:2:65]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { PieChart, TrendingUp, TrendingDown, Info, ShieldAlert, Award } from 'lucide-react';
+   :                                                                 ^^|^^
+   :                                                                   `-- 'Award' is imported here
+ 3 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Activity' is imported but never used.
+   ,-[src/pages/Scanners.jsx:2:64]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Search, SlidersHorizontal, ArrowUpDown, ChevronRight, Activity, Filter, Info } from 'lucide-react';
+   :                                                                ^^^^|^^^
+   :                                                                    `-- 'Activity' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Filter' is imported but never used.
+   ,-[src/pages/Scanners.jsx:2:74]
+ 1 | import React, { useState, useEffect } from 'react';
+ 2 | import { Search, SlidersHorizontal, ArrowUpDown, ChevronRight, Activity, Filter, Info } from 'lucide-react';
+   :                                                                          ^^^|^^
+   :                                                                             `-- 'Filter' is imported here
+ 3 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'getDoc' is imported but never used.
+   ,-[src/context/PaperTradeContext.jsx:4:15]
+ 3 | import { db, auth } from '../firebase';
+ 4 | import { doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
+   :               ^^^|^^
+   :                  `-- 'getDoc' is imported here
+ 5 | import { onAuthStateChanged } from 'firebase/auth';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Catch parameter 'e' is caught but never used.
+    ,-[src/context/PaperTradeContext.jsx:57:12]
+ 56 |     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+ 57 |   } catch (e) {
+    :            |
+    :            `-- 'e' is declared here
+ 58 |     return false;
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Variable 'socket' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/context/PaperTradeContext.jsx:64:10]
+ 63 |   const [marketData, setMarketData] = useState({});
+ 64 |   const [socket, setSocket] = useState(null);
+    :          ^^^|^^
+    :             `-- 'socket' is declared here
+ 65 |   
+    `----
+  help: Consider removing this declaration.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/context/PaperTradeContext.jsx:10:14]
+  9 | 
+ 10 | export const ID_MAP = {
+    :              ^^^^^^
+ 11 |   "1333": "HDFCBANK",
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/context/PaperTradeContext.jsx:20:14]
+ 19 | 
+ 20 | export const SYMBOL_MAP = {
+    :              ^^^^^^^^^^
+ 21 |   "HDFCBANK": "2885",
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/context/PaperTradeContext.jsx:48:17]
+ 47 | 
+ 48 | export function usePaperTrade() {
+    :                 ^^^^^^^^^^^^^
+ 49 |   return useContext(PaperTradeContext);
+    `----
+
+  ! eslint(no-unused-vars): Identifier 'TrendingUp' is imported but never used.
+   ,-[src/pages/Home.jsx:3:10]
+ 2 | import { Link } from 'react-router-dom';
+ 3 | import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
+   :          ^^^^^|^^^^
+   :               `-- 'TrendingUp' is imported here
+ 4 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Award' is imported but never used.
+   ,-[src/pages/Home.jsx:3:22]
+ 2 | import { Link } from 'react-router-dom';
+ 3 | import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
+   :                      ^^|^^
+   :                        `-- 'Award' is imported here
+ 4 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Users' is imported but never used.
+   ,-[src/pages/Home.jsx:3:29]
+ 2 | import { Link } from 'react-router-dom';
+ 3 | import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
+   :                             ^^|^^
+   :                               `-- 'Users' is imported here
+ 4 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Play' is imported but never used.
+   ,-[src/pages/Home.jsx:3:61]
+ 2 | import { Link } from 'react-router-dom';
+ 3 | import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
+   :                                                             ^^|^
+   :                                                               `-- 'Play' is imported here
+ 4 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Star' is imported but never used.
+   ,-[src/pages/Home.jsx:3:67]
+ 2 | import { Link } from 'react-router-dom';
+ 3 | import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
+   :                                                                   ^^|^
+   :                                                                     `-- 'Star' is imported here
+ 4 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'BarChart2' is imported but never used.
+   ,-[src/pages/Home.jsx:3:125]
+ 2 | import { Link } from 'react-router-dom';
+ 3 | import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
+   :                                                                                                                             ^^^^|^^^^
+   :                                                                                                                                 `-- 'BarChart2' is imported here
+ 4 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'liveData' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/Home.jsx:32:10]
+ 31 | 
+ 32 |   const [liveData, setLiveData] = useState({
+    :          ^^^^|^^^
+    :              `-- 'liveData' is declared here
+ 33 |     NIFTY50: { price: 24056.00, change: 0.14 },
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'loadingLive' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/Home.jsx:39:10]
+ 38 |   });
+ 39 |   const [loadingLive, setLoadingLive] = useState(true);
+    :          ^^^^^|^^^^^
+    :               `-- 'loadingLive' is declared here
+ 40 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'energyStocks' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/Home.jsx:91:9]
+ 90 |   // Get some stocks for mini previews
+ 91 |   const energyStocks = mockStocks.filter(s => s.sector === 'Energy').slice(0, 3);
+    :         ^^^^^^|^^^^^
+    :               `-- 'energyStocks' is declared here
+ 92 |   const techStocks = mockStocks.filter(s => s.sector === 'Information Technology').slice(0, 3);
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'techStocks' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/Home.jsx:92:9]
+ 91 |   const energyStocks = mockStocks.filter(s => s.sector === 'Energy').slice(0, 3);
+ 92 |   const techStocks = mockStocks.filter(s => s.sector === 'Information Technology').slice(0, 3);
+    :         ^^^^^|^^^^
+    :              `-- 'techStocks' is declared here
+ 93 |   const finStocks = mockStocks.filter(s => s.sector === 'Financial Services').slice(0, 3);
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'finStocks' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/Home.jsx:93:9]
+ 92 |   const techStocks = mockStocks.filter(s => s.sector === 'Information Technology').slice(0, 3);
+ 93 |   const finStocks = mockStocks.filter(s => s.sector === 'Financial Services').slice(0, 3);
+    :         ^^^^|^^^^
+    :             `-- 'finStocks' is declared here
+ 94 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Identifier 'Flame' is imported but never used.
+   ,-[src/pages/Strategies.jsx:3:20]
+ 2 | import { 
+ 3 |   Compass, Layers, Flame, ShieldCheck, TrendingUp, Percent, Clock, AlertCircle, 
+   :                    ^^|^^
+   :                      `-- 'Flame' is imported here
+ 4 |   BookOpen, ChevronRight, CheckCircle, Info, Copy, Check 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Percent' is imported but never used.
+   ,-[src/pages/Strategies.jsx:3:52]
+ 2 | import { 
+ 3 |   Compass, Layers, Flame, ShieldCheck, TrendingUp, Percent, Clock, AlertCircle, 
+   :                                                    ^^^|^^^
+   :                                                       `-- 'Percent' is imported here
+ 4 |   BookOpen, ChevronRight, CheckCircle, Info, Copy, Check 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Clock' is imported but never used.
+   ,-[src/pages/Strategies.jsx:3:61]
+ 2 | import { 
+ 3 |   Compass, Layers, Flame, ShieldCheck, TrendingUp, Percent, Clock, AlertCircle, 
+   :                                                             ^^|^^
+   :                                                               `-- 'Clock' is imported here
+ 4 |   BookOpen, ChevronRight, CheckCircle, Info, Copy, Check 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'AlertCircle' is imported but never used.
+   ,-[src/pages/Strategies.jsx:3:68]
+ 2 | import { 
+ 3 |   Compass, Layers, Flame, ShieldCheck, TrendingUp, Percent, Clock, AlertCircle, 
+   :                                                                    ^^^^^|^^^^^
+   :                                                                         `-- 'AlertCircle' is imported here
+ 4 |   BookOpen, ChevronRight, CheckCircle, Info, Copy, Check 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'BookOpen' is imported but never used.
+   ,-[src/pages/Strategies.jsx:4:3]
+ 3 |   Compass, Layers, Flame, ShieldCheck, TrendingUp, Percent, Clock, AlertCircle, 
+ 4 |   BookOpen, ChevronRight, CheckCircle, Info, Copy, Check 
+   :   ^^^^|^^^
+   :       `-- 'BookOpen' is imported here
+ 5 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Clock' is imported but never used.
+   ,-[src/pages/PaperTrade.jsx:5:31]
+ 4 | import { useAuth } from '../context/AuthContext';
+ 5 | import { Briefcase, Activity, Clock, Users, MessageSquare, TrendingUp, TrendingDown, Target, ShieldAlert, Award, Settings } from 'lucide-react';
+   :                               ^^|^^
+   :                                 `-- 'Clock' is imported here
+ 6 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Users' is imported but never used.
+   ,-[src/pages/PaperTrade.jsx:5:38]
+ 4 | import { useAuth } from '../context/AuthContext';
+ 5 | import { Briefcase, Activity, Clock, Users, MessageSquare, TrendingUp, TrendingDown, Target, ShieldAlert, Award, Settings } from 'lucide-react';
+   :                                      ^^|^^
+   :                                        `-- 'Users' is imported here
+ 6 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'TrendingDown' is imported but never used.
+   ,-[src/pages/PaperTrade.jsx:5:72]
+ 4 | import { useAuth } from '../context/AuthContext';
+ 5 | import { Briefcase, Activity, Clock, Users, MessageSquare, TrendingUp, TrendingDown, Target, ShieldAlert, Award, Settings } from 'lucide-react';
+   :                                                                        ^^^^^^|^^^^^
+   :                                                                              `-- 'TrendingDown' is imported here
+ 6 | import { mockStocks } from '../data/mockStocks';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Parameter 'price' is declared but never used. Unused parameters should start with a '_'.
+    ,-[src/pages/PaperTrade.jsx:89:78]
+ 88 | 
+ 89 |   const handleOptionTradeClick = (underlying, strike, optionType, tradeType, price) => {
+    :                                                                              ^^|^^
+    :                                                                                `-- 'price' is declared here
+ 90 |     const optionSymbol = `${underlying} ${strike} ${optionType}`;
+    `----
+  help: Consider removing this parameter.
+
+  ! eslint(no-unused-vars): Identifier 'useMemo' is imported but never used.
+   ,-[src/pages/RRG.jsx:1:38]
+ 1 | import React, { useState, useEffect, useMemo } from 'react';
+   :                                      ^^^|^^^
+   :                                         `-- 'useMemo' is imported here
+ 2 | import { 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ArrowRight' is imported but never used.
+   ,-[src/pages/RRG.jsx:3:49]
+ 2 | import { 
+ 3 |   Compass, Play, Pause, RotateCcw, Info, Check, ArrowRight, ShieldAlert,
+   :                                                 ^^^^^|^^^^
+   :                                                      `-- 'ArrowRight' is imported here
+ 4 |   Sliders, Calendar, ArrowUpRight, ArrowDownRight, RefreshCw, Layers,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Calendar' is imported but never used.
+   ,-[src/pages/RRG.jsx:4:12]
+ 3 |   Compass, Play, Pause, RotateCcw, Info, Check, ArrowRight, ShieldAlert,
+ 4 |   Sliders, Calendar, ArrowUpRight, ArrowDownRight, RefreshCw, Layers,
+   :            ^^^^|^^^
+   :                `-- 'Calendar' is imported here
+ 5 |   ZoomIn, ZoomOut, Eye, HelpCircle, X, ChevronRight, BarChart2, TrendingUp
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ZoomIn' is imported but never used.
+   ,-[src/pages/RRG.jsx:5:3]
+ 4 |   Sliders, Calendar, ArrowUpRight, ArrowDownRight, RefreshCw, Layers,
+ 5 |   ZoomIn, ZoomOut, Eye, HelpCircle, X, ChevronRight, BarChart2, TrendingUp
+   :   ^^^|^^
+   :      `-- 'ZoomIn' is imported here
+ 6 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ZoomOut' is imported but never used.
+   ,-[src/pages/RRG.jsx:5:11]
+ 4 |   Sliders, Calendar, ArrowUpRight, ArrowDownRight, RefreshCw, Layers,
+ 5 |   ZoomIn, ZoomOut, Eye, HelpCircle, X, ChevronRight, BarChart2, TrendingUp
+   :           ^^^|^^^
+   :              `-- 'ZoomOut' is imported here
+ 6 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Eye' is imported but never used.
+   ,-[src/pages/RRG.jsx:5:20]
+ 4 |   Sliders, Calendar, ArrowUpRight, ArrowDownRight, RefreshCw, Layers,
+ 5 |   ZoomIn, ZoomOut, Eye, HelpCircle, X, ChevronRight, BarChart2, TrendingUp
+   :                    ^|^
+   :                     `-- 'Eye' is imported here
+ 6 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'HelpCircle' is imported but never used.
+   ,-[src/pages/RRG.jsx:5:25]
+ 4 |   Sliders, Calendar, ArrowUpRight, ArrowDownRight, RefreshCw, Layers,
+ 5 |   ZoomIn, ZoomOut, Eye, HelpCircle, X, ChevronRight, BarChart2, TrendingUp
+   :                         ^^^^^|^^^^
+   :                              `-- 'HelpCircle' is imported here
+ 6 | } from 'lucide-react';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'niftySectors' is imported but never used.
+   ,-[src/pages/RRG.jsx:7:10]
+ 6 | } from 'lucide-react';
+ 7 | import { niftySectors } from '../data/niftySectors';
+   :          ^^^^^^|^^^^^
+   :                `-- 'niftySectors' is imported here
+ 8 | import { historicalRrgData } from '../data/historicalRrgData';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'assetPrices' is assigned a value but never used. Unused variables should start with a '_'.
+      ,-[src/pages/RRG.jsx:1616:31]
+ 1615 |                           // Find sector or stock coordinates
+ 1616 |                           let assetPrices = [];
+      :                               ^^^^^|^^^^^
+      :                                    `-- 'assetPrices' is declared here
+ 1617 |                           let assetRrg = [];
+ 1618 |                           
+ 1619 |                           const sec = historicalRrgData.sectors.find(s => s.symbol === assetSymbol);
+ 1620 |                           if (sec) {
+ 1621 |                             assetPrices = sec.prices;
+ 1622 |                             assetRrg = sec.rrg;
+ 1623 |                           } else {
+ 1624 |                             historicalRrgData.sectors.forEach(s => {
+ 1625 |                               const c = s.constituents.find(st => st.symbol === assetSymbol);
+ 1626 |                               if (c) {
+ 1627 |                                 assetPrices = c.prices;
+      :                                 ^^^^^|^^^^^
+      :                                      `-- it was last assigned here
+ 1628 |                                 assetRrg = c.rrg;
+      `----
+  help: Did you mean to use this variable?
+
+Found 65 warnings and 2 errors.
+Finished in 26ms on 35 files with 91 rules using 12 threads.

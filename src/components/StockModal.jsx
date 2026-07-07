@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { X, TrendingUp, TrendingDown, Star, AlertTriangle, ShieldCheck, Briefcase } from 'lucide-react';
 
 export default function StockModal({ stock, onClose }) {
-  if (!stock) return null;
-
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'options' | 'seasonality'
+
+  if (!stock) return null;
   
   // Generate some simulated chart points based on stock price
   const basePrice = stock.price;
