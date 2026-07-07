@@ -32,7 +32,7 @@ export function generateHistoricalData(numWeeks = 104) {
 
   // Create date labels
   const dateLabels = [];
-  const baseDate = new Date(2026, 6, 4); // Starting date (today is July 4, 2026)
+  const baseDate = new Date(); // Dynamically use today's date
   for (let w = numWeeks; w >= 0; w--) {
     const d = new Date(baseDate);
     d.setDate(baseDate.getDate() - w * 7);
