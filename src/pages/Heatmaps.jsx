@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
 import { Grid, Filter, Info, Eye } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
+import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function Heatmaps({ setSelectedStockForModal }) {
+  const { marketData } = usePaperTrade();
   const [activeSectorFilter, setActiveSectorFilter] = useState('all'); // 'all' | 'Energy' | 'IT' | 'Financials' | 'Consumer'
 
   // Filter stocks
   const getSectorStocks = () => {
-    let result = mockStocks.filter(s => s.sector !== 'Indices'); // Exclude Nifty/BankNifty indices
+    const mergedStocks = mockStocks.map(s => {
+      const live = marketData[s.symbol];
+      if (live) {
+        return {
+          ...s,
+          price: live.price,
+          change: live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change,
+          volume: live.volume || s.volume
+        };
+      }
+      return s;
+    });
+
+    let result = mergedStocks.filter(s => s.sector !== 'Indices'); // Exclude Nifty/BankNifty indices
     if (activeSectorFilter === 'Energy') return result.filter(s => s.sector === 'Energy');
     if (activeSectorFilter === 'IT') return result.filter(s => s.sector === 'Information Technology');
     if (activeSectorFilter === 'Financials') return result.filter(s => s.sector === 'Financial Services');

@@ -1,17 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, TrendingUp, TrendingDown, Star, AlertTriangle, ShieldCheck, Briefcase } from 'lucide-react';
+import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function StockModal({ stock, onClose }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'options' | 'seasonality'
+  const { marketData, getOptionLTP } = usePaperTrade();
 
   if (!stock) return null;
   
-  // Generate some simulated chart points based on stock price
-  const basePrice = stock.price;
-  const changePercent = stock.change;
+  const liveStock = marketData[stock.symbol];
+  const basePrice = liveStock ? liveStock.price : stock.price;
+  const changePercent = liveStock 
+    ? (liveStock.close > 0 ? Number((((liveStock.price - liveStock.close) / liveStock.close) * 100).toFixed(2)) : stock.change)
+    : stock.change;
   const isPositive = changePercent >= 0;
+  
+  const dynamicOptionsChain = (stock.options && stock.options.chain)
+    ? stock.options.chain.map(row => {
+        const callSymbol = `${stock.symbol} ${row.strike} CE`;
+        const putSymbol = `${stock.symbol} ${row.strike} PE`;
+        return {
+          ...row,
+          callPrice: getOptionLTP(callSymbol) || row.callPrice,
+          putPrice: getOptionLTP(putSymbol) || row.putPrice
+        };
+      })
+    : [];
   
   // Create simulated historical prices (10 days)
   const days = ['10d ago', '8d ago', '6d ago', '4d ago', '2d ago', 'Yesterday', 'Today'];
@@ -57,9 +73,9 @@ export default function StockModal({ stock, onClose }) {
               <h3 style={modalStyles.symbol}>{stock.symbol}</h3>
               <span style={{
                 ...modalStyles.badge,
-                backgroundColor: stock.change >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                color: stock.change >= 0 ? '#10b981' : '#ef4444',
-                border: `1px solid ${stock.change >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+                backgroundColor: changePercent >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                color: changePercent >= 0 ? '#10b981' : '#ef4444',
+                border: `1px solid ${changePercent >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
               }}>
                 {stock.sector}
               </span>
@@ -75,13 +91,13 @@ export default function StockModal({ stock, onClose }) {
         {/* Real-time Pricing */}
         <div style={modalStyles.priceBlock}>
           <div style={modalStyles.priceContainer}>
-            <span style={modalStyles.price}>₹{stock.price.toFixed(2)}</span>
+            <span style={modalStyles.price}>₹{basePrice.toFixed(2)}</span>
             <span style={{
               ...modalStyles.change,
               color: isPositive ? '#10b981' : '#ef4444'
             }}>
               {isPositive ? <TrendingUp size={16} style={{ marginRight: 4 }} /> : <TrendingDown size={16} style={{ marginRight: 4 }} />}
-              {isPositive ? '+' : ''}{stock.change.toFixed(2)}%
+              {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
@@ -212,7 +228,7 @@ export default function StockModal({ stock, onClose }) {
               {stock.options ? (
                 <div style={modalStyles.optionsContainer}>
                   <div style={modalStyles.optionsMeta}>
-                    <span>Spot Price: <strong style={{ color: '#ffffff' }}>₹{stock.options.spot.toFixed(2)}</strong></span>
+                    <span>Spot Price: <strong style={{ color: '#ffffff' }}>₹{basePrice.toFixed(2)}</strong></span>
                     <span style={{ color: '#f59e0b', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <ShieldCheck size={14} /> Options Chain simulated for research
                     </span>
@@ -234,7 +250,7 @@ export default function StockModal({ stock, onClose }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {stock.options.chain.map((row, i) => (
+                        {dynamicOptionsChain.map((row, i) => (
                           <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                             <td style={{ color: '#94a3b8' }}>{row.callOI.toLocaleString()}</td>
                             <td style={{ color: '#10b981', fontWeight: 600 }}>₹{row.callPrice.toFixed(2)}</td>

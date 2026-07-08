@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronLeft, ChevronRight, Activity, Grid, Compass, BarChart2, PieChart, Copy, Check } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
 import Logo from '../components/Logo';
+import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function Home({ setSelectedStockForModal }) {
+  const { marketData } = usePaperTrade();
   const [activeFeatureTab, setActiveFeatureTab] = useState('scanners'); // 'scanners' | 'heatmaps' | 'rrg' | 'sentiment'
   const [activeTraderTab, setActiveTraderTab] = useState('short'); // 'short' | 'long' | 'fo'
   const [testimonialIndex, setTestimonialIndex] = useState(0);
@@ -89,6 +91,20 @@ export default function Home({ setSelectedStockForModal }) {
 
   const handleNextTestimonial = () => {
     setTestimonialIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const getLiveStock = (s) => {
+    if (!s) return s;
+    const live = marketData[s.symbol];
+    if (live) {
+      return {
+        ...s,
+        price: live.price,
+        change: live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change,
+        volume: live.volume || s.volume
+      };
+    }
+    return s;
   };
 
   // Get some stocks for mini previews
@@ -239,13 +255,16 @@ export default function Home({ setSelectedStockForModal }) {
                 <div style={homeStyles.featurePreviewVisual}>
                   <div style={homeStyles.miniTableCard}>
                     <div style={homeStyles.miniTableHeader}>Price Scanners (52W Highs)</div>
-                    {mockStocks.slice(0, 4).map(s => (
-                      <div key={s.symbol} style={homeStyles.miniTableRow} onClick={() => setSelectedStockForModal(s)}>
-                        <span>{s.symbol}</span>
-                        <span style={{ color: '#10b981', fontWeight: 600 }}>₹{s.price.toFixed(2)}</span>
-                        <span className="badge-glow" style={{ padding: '2px 8px', fontSize: '0.65rem' }}>Breakout</span>
-                      </div>
-                    ))}
+                    {mockStocks.slice(0, 4).map(s => {
+                      const liveStock = getLiveStock(s);
+                      return (
+                        <div key={liveStock.symbol} style={homeStyles.miniTableRow} onClick={() => setSelectedStockForModal(liveStock)}>
+                          <span>{liveStock.symbol}</span>
+                          <span style={{ color: '#10b981', fontWeight: 600 }}>₹{liveStock.price.toFixed(2)}</span>
+                          <span className="badge-glow" style={{ padding: '2px 8px', fontSize: '0.65rem' }}>Breakout</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -269,24 +288,42 @@ export default function Home({ setSelectedStockForModal }) {
                   </Link>
                 </div>
                 <div style={homeStyles.featurePreviewVisual}>
-                  <div style={homeStyles.miniHeatmapGrid}>
-                    <div style={{...homeStyles.miniHeatmapBox, backgroundColor: 'rgba(16,185,129,0.85)'}} onClick={() => setSelectedStockForModal(mockStocks[3])}>
-                      <span>HDFCBANK</span>
-                      <strong>+2.1%</strong>
-                    </div>
-                    <div style={{...homeStyles.miniHeatmapBox, backgroundColor: 'rgba(16,185,129,0.65)'}} onClick={() => setSelectedStockForModal(mockStocks[4])}>
-                      <span>ICICIBANK</span>
-                      <strong>+1.8%</strong>
-                    </div>
-                    <div style={{...homeStyles.miniHeatmapBox, backgroundColor: 'rgba(16,185,129,0.5)'}} onClick={() => setSelectedStockForModal(mockStocks[0])}>
-                      <span>RELIANCE</span>
-                      <strong>+1.4%</strong>
-                    </div>
-                    <div style={{...homeStyles.miniHeatmapBox, backgroundColor: 'rgba(239,68,68,0.7)'}} onClick={() => setSelectedStockForModal(mockStocks[1])}>
-                      <span>TCS</span>
-                      <strong>-0.8%</strong>
-                    </div>
-                  </div>
+                  {(() => {
+                    const liveHDFC = getLiveStock(mockStocks[3]);
+                    const liveICICI = getLiveStock(mockStocks[4]);
+                    const liveReliance = getLiveStock(mockStocks[0]);
+                    const liveTCS = getLiveStock(mockStocks[1]);
+
+                    const getBoxStyle = (change, baseOpacity) => {
+                      const isPos = change >= 0;
+                      return {
+                        ...homeStyles.miniHeatmapBox,
+                        backgroundColor: isPos ? `rgba(16,185,129,${baseOpacity})` : `rgba(239,68,68,${baseOpacity})`,
+                        cursor: 'pointer'
+                      };
+                    };
+
+                    return (
+                      <div style={homeStyles.miniHeatmapGrid}>
+                        <div style={getBoxStyle(liveHDFC.change, 0.85)} onClick={() => setSelectedStockForModal(liveHDFC)}>
+                          <span>HDFCBANK</span>
+                          <strong>{liveHDFC.change >= 0 ? '+' : ''}{liveHDFC.change.toFixed(1)}%</strong>
+                        </div>
+                        <div style={getBoxStyle(liveICICI.change, 0.65)} onClick={() => setSelectedStockForModal(liveICICI)}>
+                          <span>ICICIBANK</span>
+                          <strong>{liveICICI.change >= 0 ? '+' : ''}{liveICICI.change.toFixed(1)}%</strong>
+                        </div>
+                        <div style={getBoxStyle(liveReliance.change, 0.5)} onClick={() => setSelectedStockForModal(liveReliance)}>
+                          <span>RELIANCE</span>
+                          <strong>{liveReliance.change >= 0 ? '+' : ''}{liveReliance.change.toFixed(1)}%</strong>
+                        </div>
+                        <div style={getBoxStyle(liveTCS.change, 0.7)} onClick={() => setSelectedStockForModal(liveTCS)}>
+                          <span>TCS</span>
+                          <strong>{liveTCS.change >= 0 ? '+' : ''}{liveTCS.change.toFixed(1)}%</strong>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}

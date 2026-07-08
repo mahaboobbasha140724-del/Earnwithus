@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Info, ChevronRight, Activity, TrendingUp, HelpCircle } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
+import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function FuturesOptions({ setSelectedStockForModal }) {
+  const { marketData, getOptionLTP } = usePaperTrade();
   // Filter stocks that have options chain data
   const optionsStocks = mockStocks.filter(s => s.options);
   const [selectedSymbol, setSelectedSymbol] = useState('NIFTY50');
@@ -49,14 +51,30 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
   const activeStock = optionsStocks.find(s => s.symbol === selectedSymbol) || optionsStocks[0];
   const { chain } = activeStock.options;
 
-  const isNifty = selectedSymbol === 'NIFTY50';
-  const liveSpot = isNifty ? liveFII.nifty : liveFII.banknifty;
-  const liveChange = isNifty ? liveFII.niftyChange : liveFII.bankniftyChange;
-  const livePCR = isNifty ? liveFII.pcr : 1.12; // Bank Nifty PCR fallback or calculation
+  const liveStock = marketData[selectedSymbol];
+  const liveSpot = liveStock 
+    ? liveStock.price 
+    : (selectedSymbol === 'NIFTY50' ? liveFII.nifty : (selectedSymbol === 'BANKNIFTY' ? liveFII.banknifty : activeStock.price));
+  const liveChange = liveStock 
+    ? (liveStock.close > 0 ? Number((((liveStock.price - liveStock.close) / liveStock.close) * 100).toFixed(2)) : activeStock.change)
+    : (selectedSymbol === 'NIFTY50' ? liveFII.niftyChange : (selectedSymbol === 'BANKNIFTY' ? liveFII.bankniftyChange : activeStock.change));
+  const livePCR = selectedSymbol === 'NIFTY50' ? liveFII.pcr : (selectedSymbol === 'BANKNIFTY' ? 1.12 : 1.05);
+
+  const dynamicChain = chain.map(row => {
+    const callSymbol = `${selectedSymbol} ${row.strike} CE`;
+    const putSymbol = `${selectedSymbol} ${row.strike} PE`;
+    const callPrice = getOptionLTP(callSymbol) || row.callPrice;
+    const putPrice = getOptionLTP(putSymbol) || row.putPrice;
+    return {
+      ...row,
+      callPrice,
+      putPrice
+    };
+  });
 
   // Calculate total Call vs Put OI for analytics chart
-  const totalCallOI = chain.reduce((acc, row) => acc + row.callOI, 0);
-  const totalPutOI = chain.reduce((acc, row) => acc + row.putOI, 0);
+  const totalCallOI = dynamicChain.reduce((acc, row) => acc + row.callOI, 0);
+  const totalPutOI = dynamicChain.reduce((acc, row) => acc + row.putOI, 0);
   const maxOI = Math.max(totalCallOI, totalPutOI);
 
   return (
@@ -146,7 +164,7 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {chain.map((row, idx) => (
+                  {dynamicChain.map((row, idx) => (
                     <tr key={idx} style={foStyles.tr}>
                       <td style={{ color: '#94a3b8' }}>{row.callOI.toLocaleString()}</td>
                       <td style={{ color: '#10b981', fontWeight: 600 }}>₹{row.callPrice.toFixed(2)}</td>

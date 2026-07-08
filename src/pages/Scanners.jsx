@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, ArrowUpDown, ChevronRight, Activity, Filter, Info } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
+import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function Scanners({ setSelectedStockForModal }) {
+  const { marketData } = usePaperTrade();
   const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'price' | 'volume' | 'technical' | 'candlestick' | 'rmi' | 'dow' | 'seasonality'
   const [activeSubFilter, setActiveSubFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,7 +55,20 @@ export default function Scanners({ setSelectedStockForModal }) {
 
   // Run filters
   useEffect(() => {
-    let result = [...mockStocks];
+    const mergedStocks = mockStocks.map(s => {
+      const live = marketData[s.symbol];
+      if (live) {
+        return {
+          ...s,
+          price: live.price,
+          change: live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change,
+          volume: live.volume || s.volume
+        };
+      }
+      return s;
+    });
+
+    let result = [...mergedStocks];
 
     // Filter by Category
     if (activeCategory !== 'all') {
@@ -121,7 +136,7 @@ export default function Scanners({ setSelectedStockForModal }) {
     });
 
     setFilteredStocks(result);
-  }, [activeCategory, activeSubFilter, searchQuery, sortField, sortDirection]);
+  }, [activeCategory, activeSubFilter, searchQuery, sortField, sortDirection, marketData]);
 
   // Handle category shift (resets sub-filter)
   const handleCategoryChange = (cat) => {

@@ -27,7 +27,7 @@ export const SYMBOL_MAP = {
   "ITC": "1660"
 };
 
-const getOptionLTP = (symbol) => {
+const getOptionLTPStatic = (symbol) => {
   const parts = symbol.split(' ');
   if (parts.length === 3) {
     const underlying = parts[0];
@@ -71,6 +71,37 @@ export const PaperTradeProvider = ({ children }) => {
   const [publicTrades, setPublicTrades] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const getOptionLTP = (symbol) => {
+    const parts = symbol.split(' ');
+    if (parts.length === 3) {
+      const underlying = parts[0];
+      const strike = parseInt(parts[1]);
+      const type = parts[2]; // "CE" or "PE"
+      
+      const stock = mockStocks.find(s => s.symbol === underlying);
+      if (stock && stock.options && stock.options.chain) {
+        const row = stock.options.chain.find(r => r.strike === strike);
+        if (row) {
+          const baseOptionPrice = type === 'CE' ? row.callPrice : row.putPrice;
+          const baseUnderlyingPrice = stock.price;
+          const liveUnderlying = marketData[underlying];
+          if (liveUnderlying && liveUnderlying.price) {
+            const shift = liveUnderlying.price - baseUnderlyingPrice;
+            let adjustedPrice;
+            if (type === 'CE') {
+              adjustedPrice = baseOptionPrice + (shift * 0.5);
+            } else {
+              adjustedPrice = baseOptionPrice - (shift * 0.5);
+            }
+            return Math.max(0.05, Number(adjustedPrice.toFixed(2)));
+          }
+          return baseOptionPrice;
+        }
+      }
+    }
+    return null;
+  };
   
   // Custom backend URL stored in localStorage for Firebase to Render communication
   const [backendUrl, setBackendUrl] = useState(() => {
