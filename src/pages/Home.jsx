@@ -6,7 +6,7 @@ import Logo from '../components/Logo';
 import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function Home({ setSelectedStockForModal }) {
-  const { marketData } = usePaperTrade();
+  const { marketData, backendUrl } = usePaperTrade();
   const [activeFeatureTab, setActiveFeatureTab] = useState('scanners'); // 'scanners' | 'heatmaps' | 'rrg' | 'sentiment'
   const [activeTraderTab, setActiveTraderTab] = useState('short'); // 'short' | 'long' | 'fo'
   const [testimonialIndex, setTestimonialIndex] = useState(0);
@@ -41,14 +41,9 @@ export default function Home({ setSelectedStockForModal }) {
   const [loadingLive, setLoadingLive] = useState(true);
 
   useEffect(() => {
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' || 
-                        window.location.hostname.startsWith('192.168.') ||
-                        window.location.hostname.startsWith('10.');
-    const API_BASE = isLocalhost ? 'http://localhost:3001' : 'https://earnwithus.onrender.com';
-    
+    if (!backendUrl) return;
     const fetchOverview = () => {
-      fetch(`${API_BASE}/api/market/overview`)
+      fetch(`${backendUrl}/api/market/overview`)
         .then(res => res.json())
         .then(resData => {
           if (resData.success && resData.data) {
@@ -70,12 +65,12 @@ export default function Home({ setSelectedStockForModal }) {
           console.error("Failed to fetch live quotes on home:", err);
           setLoadingLive(false);
         });
-    };
+      };
 
-    fetchOverview();
-    const interval = setInterval(fetchOverview, 15000); // Real-time updates: poll every 15s
-    return () => clearInterval(interval);
-  }, []);
+      fetchOverview();
+      const interval = setInterval(fetchOverview, 15000); // Real-time updates: poll every 15s
+      return () => clearInterval(interval);
+  }, [backendUrl]);
 
   // Auto rotate testimonials
   useEffect(() => {
@@ -100,7 +95,7 @@ export default function Home({ setSelectedStockForModal }) {
       return {
         ...s,
         price: live.price,
-        change: live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change,
+        change: live.change !== undefined ? live.change : (live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change),
         volume: live.volume || s.volume
       };
     }

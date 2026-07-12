@@ -45,7 +45,24 @@ const TICKER_MAP = {
   'HINDUNILVR.NS': 'HINDUNILVR',
   'SBIN.NS': 'SBIN',
   'ONGC.NS': 'ONGC',
-  'COALINDIA.NS': 'COALINDIA'
+  'COALINDIA.NS': 'COALINDIA',
+  'AXISBANK.NS': 'AXISBANK',
+  'KOTAKBANK.NS': 'KOTAKBANK',
+  'HCLTECH.NS': 'HCLTECH',
+  'WIPRO.NS': 'WIPRO',
+  'TECHM.NS': 'TECHM',
+  'M&M.NS': 'M&M',
+  'TATAMOTORS.NS': 'TATAMOTORS',
+  'MARUTI.NS': 'MARUTI',
+  'BAJAJ-AUTO.NS': 'BAJAJ-AUTO',
+  'EICHERMOT.NS': 'EICHERMOT',
+  'NESTLEIND.NS': 'NESTLEIND',
+  'BRITANNIA.NS': 'BRITANNIA',
+  'TATACONSUM.NS': 'TATACONSUM',
+  'TATASTEEL.NS': 'TATASTEEL',
+  'HINDALCO.NS': 'HINDALCO',
+  'JSWSTEEL.NS': 'JSWSTEEL',
+  'NATIONALUM.NS': 'NATIONALUM'
 };
 
 // Fetch live stock details from Yahoo Finance Chart API
@@ -89,18 +106,31 @@ async function fetchYahooQuote(yahooSymbol) {
 
 // 1. Endpoint: Live Stock Market Overview
 app.get('/api/market/overview', async (req, res) => {
-  const symbols = Object.keys(TICKER_MAP);
   try {
+    const cachedData = Object.values(marketData);
+    if (cachedData.length > 0) {
+      return res.json({
+        success: true,
+        timestamp: new Date(),
+        data: cachedData
+      });
+    }
+    
+    // Fallback: If cache is empty, fetch live once
+    const symbols = Object.keys(TICKER_MAP);
     const quotes = await Promise.all(symbols.map(fetchYahooQuote));
     const validQuotes = quotes.filter(q => q !== null);
+    validQuotes.forEach(q => {
+      marketData[q.symbol] = q;
+    });
     
     res.json({
       success: true,
       timestamp: new Date(),
       data: validQuotes
     });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -446,7 +476,29 @@ const DHAN_TO_YAHOO = {
   // Other F&O stocks
   "HINDUNILVR": "HINDUNILVR.NS",
   "ONGC": "ONGC.NS",
-  "COALINDIA": "COALINDIA.NS"
+  "COALINDIA": "COALINDIA.NS",
+  "AXISBANK": "AXISBANK.NS",
+  "KOTAKBANK": "KOTAKBANK.NS",
+  "HCLTECH": "HCLTECH.NS",
+  "WIPRO": "WIPRO.NS",
+  "TECHM": "TECHM.NS",
+  "M&M": "M&M.NS",
+  "TATAMOTORS": "TATAMOTORS.NS",
+  "MARUTI": "MARUTI.NS",
+  "BAJAJ-AUTO": "BAJAJ-AUTO.NS",
+  "EICHERMOT": "EICHERMOT.NS",
+  "NESTLEIND": "NESTLEIND.NS",
+  "BRITANNIA": "BRITANNIA.NS",
+  "TATACONSUM": "TATACONSUM.NS",
+  "TATASTEEL": "TATASTEEL.NS",
+  "HINDALCO": "HINDALCO.NS",
+  "JSWSTEEL": "JSWSTEEL.NS",
+  "NATIONALUM": "NATIONALUM.NS",
+  "SUNPHARMA": "SUNPHARMA.NS",
+  "CIPLA": "CIPLA.NS",
+  "DRREDDY": "DRREDDY.NS",
+  "DIVISLAB": "DIVISLAB.NS",
+  "LUPIN": "LUPIN.NS"
 };
 
 async function populateInitialMarketData() {
@@ -462,7 +514,8 @@ async function populateInitialMarketData() {
           high: quote.high,
           low: quote.low,
           close: quote.close,
-          volume: quote.volume
+          volume: quote.volume,
+          change: quote.change
         };
       }
     }
@@ -490,7 +543,8 @@ async function pollYahooFallback() {
           high: quote.high,
           low: quote.low,
           close: quote.close,
-          volume: quote.volume
+          volume: quote.volume,
+          change: quote.change
         };
         marketData[dhanId] = tick;
         io.emit('market_tick', tick);
@@ -597,7 +651,8 @@ async function startDhanFeed() {
                     high: data.High,
                     low: data.Low,
                     close: data.Close,
-                    volume: data.Volume
+                    volume: data.Volume,
+                    change: data.Close > 0 ? Number((((data.LTP - data.Close) / data.Close) * 100).toFixed(2)) : 0
                 };
                 marketData[data.SecurityId] = tick;
                 io.emit('market_tick', tick);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Grid, Filter, Info, Eye } from 'lucide-react';
 import { mockStocks } from '../data/mockStocks';
+import { niftySectors } from '../data/niftySectors';
 import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function Heatmaps({ setSelectedStockForModal }) {
@@ -9,13 +10,52 @@ export default function Heatmaps({ setSelectedStockForModal }) {
 
   // Filter stocks
   const getSectorStocks = () => {
+    if (activeSectorFilter === 'all') {
+      return niftySectors.map(s => {
+        let live = null;
+        if (s.symbol === 'NIFTY BANK') {
+          live = marketData['BANKNIFTY'];
+        } else {
+          live = marketData[s.symbol];
+        }
+
+        if (live) {
+          return {
+            ...s,
+            price: live.price,
+            change: live.change !== undefined ? live.change : (live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change),
+            high52: s.price * 1.08,
+            low52: s.price * 0.92,
+            peRatio: 22.5,
+            marketCap: "N/A",
+            rmiSignal: "Buy",
+            dowTrend: "Higher High",
+            seasonality: { avgReturn: 2.1, medianReturn: 1.8, annualized: 11.5, maxGain: 8.2 },
+            sector: 'Sector Index'
+          };
+        }
+
+        return {
+          ...s,
+          high52: s.price * 1.08,
+          low52: s.price * 0.92,
+          peRatio: 22.5,
+          marketCap: "N/A",
+          rmiSignal: "Buy",
+          dowTrend: "Higher High",
+          seasonality: { avgReturn: 2.1, medianReturn: 1.8, annualized: 11.5, maxGain: 8.2 },
+          sector: 'Sector Index'
+        };
+      });
+    }
+
     const mergedStocks = mockStocks.map(s => {
       const live = marketData[s.symbol];
       if (live) {
         return {
           ...s,
           price: live.price,
-          change: live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change,
+          change: live.change !== undefined ? live.change : (live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change),
           volume: live.volume || s.volume
         };
       }
@@ -27,6 +67,9 @@ export default function Heatmaps({ setSelectedStockForModal }) {
     if (activeSectorFilter === 'IT') return result.filter(s => s.sector === 'Information Technology');
     if (activeSectorFilter === 'Financials') return result.filter(s => s.sector === 'Financial Services');
     if (activeSectorFilter === 'Consumer') return result.filter(s => s.sector === 'Consumer Goods');
+    if (activeSectorFilter === 'Auto') return result.filter(s => s.sector === 'Automobile');
+    if (activeSectorFilter === 'Metal') return result.filter(s => s.sector === 'Metals');
+    if (activeSectorFilter === 'Pharma') return result.filter(s => s.sector === 'Pharmaceuticals');
     return result;
   };
 
@@ -93,6 +136,24 @@ export default function Heatmaps({ setSelectedStockForModal }) {
             >
               Consumer Goods
             </button>
+            <button 
+              style={{...heatmapStyles.filterBtn, backgroundColor: activeSectorFilter === 'Auto' ? '#10b981' : 'transparent', color: activeSectorFilter === 'Auto' ? '#07080d' : '#94a3b8'}}
+              onClick={() => setActiveSectorFilter('Auto')}
+            >
+              Automobile
+            </button>
+            <button 
+              style={{...heatmapStyles.filterBtn, backgroundColor: activeSectorFilter === 'Metal' ? '#10b981' : 'transparent', color: activeSectorFilter === 'Metal' ? '#07080d' : '#94a3b8'}}
+              onClick={() => setActiveSectorFilter('Metal')}
+            >
+              Metals
+            </button>
+            <button 
+              style={{...heatmapStyles.filterBtn, backgroundColor: activeSectorFilter === 'Pharma' ? '#10b981' : 'transparent', color: activeSectorFilter === 'Pharma' ? '#07080d' : '#94a3b8'}}
+              onClick={() => setActiveSectorFilter('Pharma')}
+            >
+              Pharma Sectors
+            </button>
           </div>
         </div>
 
@@ -120,6 +181,20 @@ export default function Heatmaps({ setSelectedStockForModal }) {
             <span style={heatmapStyles.legendText}>&gt; +2%</span>
           </div>
         </div>
+
+        {activeSectorFilter !== 'all' && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.02)', padding: '12px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: '16px' }}>
+            <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+              Filtering by <strong>{activeSectorFilter === 'IT' ? 'Information Technology' : activeSectorFilter === 'Energy' ? 'Energy' : activeSectorFilter === 'Financials' ? 'Financial Services' : activeSectorFilter === 'Consumer' ? 'Consumer Goods' : activeSectorFilter === 'Auto' ? 'Automobile' : activeSectorFilter === 'Metal' ? 'Metals' : activeSectorFilter === 'Pharma' ? 'Pharmaceuticals' : activeSectorFilter}</strong>
+            </span>
+            <button 
+              onClick={() => setActiveSectorFilter('all')}
+              style={{ border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+            >
+              Clear Filter
+            </button>
+          </div>
+        )}
 
         {/* Heatmap Grid Panel */}
         <div className="glass-card" style={heatmapStyles.gridPanel}>

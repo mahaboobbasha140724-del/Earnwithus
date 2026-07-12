@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, TrendingUp, TrendingDown, Info, ShieldAlert, Award } from 'lucide-react';
+import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function Sentiment() {
+  const { backendUrl, marketData } = usePaperTrade();
+
   const [flowData, setFlowData] = useState([
     { segment: "FII Cash Market", netValue: -1240.50, action: "Net Seller" },
     { segment: "DII Cash Market", netValue: 2150.80, action: "Net Buyer" },
@@ -21,14 +24,10 @@ export default function Sentiment() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' || 
-                        window.location.hostname.startsWith('192.168.') ||
-                        window.location.hostname.startsWith('10.');
-    const API_BASE = isLocalhost ? 'http://localhost:3001' : 'https://earnwithus.onrender.com';
+    if (!backendUrl) return;
     
     const fetchSentiment = () => {
-      fetch(`${API_BASE}/api/market/fii-dii`)
+      fetch(`${backendUrl}/api/market/fii-dii`)
         .then(res => res.json())
         .then(resData => {
           if (resData.success) {
@@ -55,7 +54,7 @@ export default function Sentiment() {
     fetchSentiment();
     const interval = setInterval(fetchSentiment, 15000); // Real-time updates: poll every 15s
     return () => clearInterval(interval);
-  }, []);
+  }, [backendUrl]);
 
   // Custom mock sector sentiment levels
   const sectorSentiment = [
@@ -104,10 +103,11 @@ export default function Sentiment() {
   };
 
   const getPcrInterpretation = (pcrVal) => {
-    if (pcrVal >= 1.25) return { text: `${pcrVal} - Highly Bullish`, color: '#10b981' };
-    if (pcrVal >= 1.0) return { text: `${pcrVal} - Bullish`, color: '#0ea5e9' };
+    if (pcrVal >= 1.4) return { text: `${pcrVal} - Extremely Overbought (Bearish reversal)`, color: '#ef4444' };
+    if (pcrVal >= 1.15) return { text: `${pcrVal} - Overbought (Bullish tone)`, color: '#10b981' };
     if (pcrVal >= 0.85) return { text: `${pcrVal} - Neutral`, color: '#f59e0b' };
-    return { text: `${pcrVal} - Bearish`, color: '#ef4444' };
+    if (pcrVal >= 0.6) return { text: `${pcrVal} - Oversold (Bullish reversal)`, color: '#10b981' };
+    return { text: `${pcrVal} - Extremely Oversold`, color: '#ef4444' };
   };
 
   const fgInterpret = getFgInterpretation(sentimentScore);
@@ -117,21 +117,11 @@ export default function Sentiment() {
     <div style={sentimentStyles.container} className="animate-fade-in">
       <div className="page-wrapper">
         
-        {/* Page Header */}
-        <div style={sentimentStyles.header}>
+        {/* Page Header Card */}
+        <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', backgroundColor: '#0d0f17', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px' }}>
           <div>
-            <span className="badge-glow">MARKET PSYCHOLOGY</span>
-            <h1 style={{ fontSize: '2.25rem', marginTop: 8 }}>Market Sentiment Indicators</h1>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginTop: 4 }}>
-              Understand underlying market emotions by tracking institutional Net Flows, Put-Call ratios, and Volatility indexes.
-            </p>
-          </div>
-        </div>
-
-        {/* Spot Indices Summary from Multi-Source Feeds */}
-        <div className="glass-card" style={{ padding: '16px 24px', marginBottom: '24px', backgroundColor: '#0d0f17', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Market Feed Status</span>
+            <span className="badge-glow" style={{ marginBottom: 10 }}>Market Sentiment Engine</span>
+            <h1 style={{ fontSize: '2.25rem', marginTop: 4 }}>Live Participant Sentiment</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: loading ? '#f59e0b' : '#10b981' }} />
               <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#ffffff' }}>
@@ -145,9 +135,9 @@ export default function Sentiment() {
             <div>
               <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>NIFTY SPOT</span>
               <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>
-                {nifty.toLocaleString()}
-                <span style={{ fontSize: '0.8rem', color: niftyChange >= 0 ? '#10b981' : '#ef4444', marginLeft: '6px' }}>
-                  {niftyChange >= 0 ? '+' : ''}{niftyChange}%
+                {(marketData["NIFTY50"]?.price || nifty).toLocaleString()}
+                <span style={{ fontSize: '0.8rem', color: ((marketData["NIFTY50"]?.change !== undefined ? marketData["NIFTY50"].change : niftyChange) >= 0) ? '#10b981' : '#ef4444', marginLeft: '6px' }}>
+                  {(marketData["NIFTY50"]?.change !== undefined ? marketData["NIFTY50"].change : niftyChange) >= 0 ? '+' : ''}{(marketData["NIFTY50"]?.change !== undefined ? marketData["NIFTY50"].change : niftyChange)}%
                 </span>
               </div>
             </div>
@@ -155,9 +145,9 @@ export default function Sentiment() {
             <div>
               <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>BANKNIFTY SPOT</span>
               <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>
-                {banknifty.toLocaleString()}
-                <span style={{ fontSize: '0.8rem', color: bankniftyChange >= 0 ? '#10b981' : '#ef4444', marginLeft: '6px' }}>
-                  {bankniftyChange >= 0 ? '+' : ''}{bankniftyChange}%
+                {(marketData["BANKNIFTY"]?.price || banknifty).toLocaleString()}
+                <span style={{ fontSize: '0.8rem', color: ((marketData["BANKNIFTY"]?.change !== undefined ? marketData["BANKNIFTY"].change : bankniftyChange) >= 0) ? '#10b981' : '#ef4444', marginLeft: '6px' }}>
+                  {(marketData["BANKNIFTY"]?.change !== undefined ? marketData["BANKNIFTY"].change : bankniftyChange) >= 0 ? '+' : ''}{(marketData["BANKNIFTY"]?.change !== undefined ? marketData["BANKNIFTY"].change : bankniftyChange)}%
                 </span>
               </div>
             </div>

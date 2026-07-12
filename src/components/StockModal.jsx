@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, TrendingUp, TrendingDown, Star, AlertTriangle, ShieldCheck, Briefcase } from 'lucide-react';
 import { usePaperTrade } from '../context/PaperTradeContext';
+import { mockStocks } from '../data/mockStocks';
 
 export default function StockModal({ stock, onClose }) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'options' | 'seasonality'
-  const { marketData, getOptionLTP } = usePaperTrade();
+  const isSectorIndex = stock && stock.sector === 'Sector Index';
+  const [activeTab, setActiveTab] = useState(isSectorIndex ? 'constituents' : 'chart'); // 'constituents' | 'chart' | 'options' | 'seasonality'
+  const { marketData, getOptionLTP, getOptionChain } = usePaperTrade();
 
   if (!stock) return null;
   
@@ -17,16 +19,8 @@ export default function StockModal({ stock, onClose }) {
     : stock.change;
   const isPositive = changePercent >= 0;
   
-  const dynamicOptionsChain = (stock.options && stock.options.chain)
-    ? stock.options.chain.map(row => {
-        const callSymbol = `${stock.symbol} ${row.strike} CE`;
-        const putSymbol = `${stock.symbol} ${row.strike} PE`;
-        return {
-          ...row,
-          callPrice: getOptionLTP(callSymbol) || row.callPrice,
-          putPrice: getOptionLTP(putSymbol) || row.putPrice
-        };
-      })
+  const dynamicOptionsChain = (stock.options)
+    ? getOptionChain(stock.symbol, basePrice)
     : [];
   
   // Create simulated historical prices (10 days)
@@ -117,18 +111,28 @@ export default function StockModal({ stock, onClose }) {
 
         {/* Navigation Tabs */}
         <div style={modalStyles.tabs}>
+          {isSectorIndex && (
+            <button 
+              style={{...modalStyles.tabBtn, borderBottomColor: activeTab === 'constituents' ? '#10b981' : 'transparent', color: activeTab === 'constituents' ? '#ffffff' : '#64748b'}}
+              onClick={() => setActiveTab('constituents')}
+            >
+              Constituent Stocks
+            </button>
+          )}
           <button 
             style={{...modalStyles.tabBtn, borderBottomColor: activeTab === 'chart' ? '#10b981' : 'transparent', color: activeTab === 'chart' ? '#ffffff' : '#64748b'}}
             onClick={() => setActiveTab('chart')}
           >
             Technical Chart
           </button>
-          <button 
-            style={{...modalStyles.tabBtn, borderBottomColor: activeTab === 'options' ? '#10b981' : 'transparent', color: activeTab === 'options' ? '#ffffff' : '#64748b'}}
-            onClick={() => setActiveTab('options')}
-          >
-            Options Chain (Simulated)
-          </button>
+          {!isSectorIndex && (
+            <button 
+              style={{...modalStyles.tabBtn, borderBottomColor: activeTab === 'options' ? '#10b981' : 'transparent', color: activeTab === 'options' ? '#ffffff' : '#64748b'}}
+              onClick={() => setActiveTab('options')}
+            >
+              Options Chain (Simulated)
+            </button>
+          )}
           <button 
             style={{...modalStyles.tabBtn, borderBottomColor: activeTab === 'seasonality' ? '#10b981' : 'transparent', color: activeTab === 'seasonality' ? '#ffffff' : '#64748b'}}
             onClick={() => setActiveTab('seasonality')}
@@ -194,11 +198,15 @@ export default function StockModal({ stock, onClose }) {
               <div style={modalStyles.statsGrid}>
                 <div style={modalStyles.statItem}>
                   <div style={modalStyles.statLabel}>52W High</div>
-                  <div style={modalStyles.statVal}>₹{stock.high52.toFixed(2)}</div>
+                  <div style={modalStyles.statVal}>
+                    {stock.high52 !== undefined ? `₹${stock.high52.toFixed(2)}` : 'N/A'}
+                  </div>
                 </div>
                 <div style={modalStyles.statItem}>
                   <div style={modalStyles.statLabel}>52W Low</div>
-                  <div style={modalStyles.statVal}>₹{stock.low52.toFixed(2)}</div>
+                  <div style={modalStyles.statVal}>
+                    {stock.low52 !== undefined ? `₹${stock.low52.toFixed(2)}` : 'N/A'}
+                  </div>
                 </div>
                 <div style={modalStyles.statItem}>
                   <div style={modalStyles.statLabel}>PE Ratio</div>
@@ -306,6 +314,62 @@ export default function StockModal({ stock, onClose }) {
               </div>
             </div>
           )}
+
+          {/* Constituents Tab */}
+          {isSectorIndex && activeTab === 'constituents' && (() => {
+            const sectorNameMap = {
+              "NIFTY BANK": "Financial Services",
+              "NIFTY IT": "Information Technology",
+              "NIFTY AUTO": "Automobile",
+              "NIFTY FMCG": "Consumer Goods",
+              "NIFTY METAL": "Metals",
+              "NIFTY PHARMA": "Pharmaceuticals",
+              "NIFTY REALTY": "Real Estate"
+            };
+            const sectorName = sectorNameMap[stock.symbol] || stock.name;
+            const sectorStocks = mockStocks.filter(s => s.sector === sectorName).map(s => {
+              const live = marketData[s.symbol];
+              return {
+                ...s,
+                price: live ? live.price : s.price,
+                change: live ? (live.change !== undefined ? live.change : (live.close > 0 ? Number((((live.price - live.close) / live.close) * 100).toFixed(2)) : s.change)) : s.change
+              };
+            });
+
+            return (
+              <div style={{ padding: '10px 0' }}>
+                <h4 style={{ marginBottom: 12, color: '#ffffff', fontSize: '1rem' }}>Stocks in {stock.name} Sector</h4>
+                {sectorStocks.length === 0 ? (
+                  <p style={{ color: '#64748b', fontSize: '0.85rem' }}>No stocks listed in this mock sector yet.</p>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={modalStyles.optionsTable}>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: 'left' }}>SYMBOL</th>
+                          <th style={{ textAlign: 'left' }}>COMPANY NAME</th>
+                          <th style={{ textAlign: 'right' }}>LTP (₹)</th>
+                          <th style={{ textAlign: 'right' }}>CHANGE (%)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sectorStocks.map((s, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                            <td style={{ fontWeight: 700, color: '#ffffff', textAlign: 'left' }}>{s.symbol}</td>
+                            <td style={{ color: '#94a3b8', textAlign: 'left' }}>{s.name}</td>
+                            <td style={{ fontWeight: 600, color: '#ffffff', textAlign: 'right' }}>₹{s.price.toFixed(2)}</td>
+                            <td style={{ fontWeight: 600, color: s.change >= 0 ? '#10b981' : '#ef4444', textAlign: 'right' }}>
+                              {s.change >= 0 ? '+' : ''}{s.change.toFixed(2)}%
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
         </div>
 

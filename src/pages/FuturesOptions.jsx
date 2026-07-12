@@ -4,7 +4,7 @@ import { mockStocks } from '../data/mockStocks';
 import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function FuturesOptions({ setSelectedStockForModal }) {
-  const { marketData, getOptionLTP } = usePaperTrade();
+  const { marketData, getOptionLTP, getOptionChain, backendUrl } = usePaperTrade();
   // Filter stocks that have options chain data
   const optionsStocks = mockStocks.filter(s => s.options);
   const [selectedSymbol, setSelectedSymbol] = useState('NIFTY50');
@@ -18,14 +18,9 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
   });
 
   useEffect(() => {
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' || 
-                        window.location.hostname.startsWith('192.168.') ||
-                        window.location.hostname.startsWith('10.');
-    const API_BASE = isLocalhost ? 'http://localhost:3001' : 'https://earnwithus.onrender.com';
-    
+    if (!backendUrl) return;
     const fetchFO = () => {
-      fetch(`${API_BASE}/api/market/fii-dii`)
+      fetch(`${backendUrl}/api/market/fii-dii`)
         .then(res => res.json())
         .then(resData => {
           if (resData.success) {
@@ -46,31 +41,20 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
     fetchFO();
     const interval = setInterval(fetchFO, 15000); // Real-time updates: poll every 15s
     return () => clearInterval(interval);
-  }, []);
+  }, [backendUrl]);
 
   const activeStock = optionsStocks.find(s => s.symbol === selectedSymbol) || optionsStocks[0];
-  const { chain } = activeStock.options;
 
   const liveStock = marketData[selectedSymbol];
   const liveSpot = liveStock 
     ? liveStock.price 
     : (selectedSymbol === 'NIFTY50' ? liveFII.nifty : (selectedSymbol === 'BANKNIFTY' ? liveFII.banknifty : activeStock.price));
   const liveChange = liveStock 
-    ? (liveStock.close > 0 ? Number((((liveStock.price - liveStock.close) / liveStock.close) * 100).toFixed(2)) : activeStock.change)
+    ? (liveStock.change !== undefined ? liveStock.change : (liveStock.close > 0 ? Number((((liveStock.price - liveStock.close) / liveStock.close) * 100).toFixed(2)) : activeStock.change))
     : (selectedSymbol === 'NIFTY50' ? liveFII.niftyChange : (selectedSymbol === 'BANKNIFTY' ? liveFII.bankniftyChange : activeStock.change));
   const livePCR = selectedSymbol === 'NIFTY50' ? liveFII.pcr : (selectedSymbol === 'BANKNIFTY' ? 1.12 : 1.05);
 
-  const dynamicChain = chain.map(row => {
-    const callSymbol = `${selectedSymbol} ${row.strike} CE`;
-    const putSymbol = `${selectedSymbol} ${row.strike} PE`;
-    const callPrice = getOptionLTP(callSymbol) || row.callPrice;
-    const putPrice = getOptionLTP(putSymbol) || row.putPrice;
-    return {
-      ...row,
-      callPrice,
-      putPrice
-    };
-  });
+  const dynamicChain = getOptionChain(selectedSymbol, liveSpot);
 
   // Calculate total Call vs Put OI for analytics chart
   const totalCallOI = dynamicChain.reduce((acc, row) => acc + row.callOI, 0);

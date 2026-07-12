@@ -6,8 +6,11 @@ import {
 } from 'lucide-react';
 import { niftySectors } from '../data/niftySectors';
 import { weeklyRrgData, dailyRrgData } from '../data/historicalRrgData';
+import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function RRG() {
+  const { backendUrl } = usePaperTrade();
+
   // Navigation: 'tracker' | 'backtester'
   const [activeTab, setActiveTab] = useState('tracker');
   
@@ -24,13 +27,9 @@ export default function RRG() {
 
   // Fetch Market Live FII/DII Sentiment
   useEffect(() => {
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' || 
-                        window.location.hostname.startsWith('192.168.') ||
-                        window.location.hostname.startsWith('10.');
-    const API_BASE = isLocalhost ? 'http://localhost:3001' : 'https://earnwithus.onrender.com';
+    if (!backendUrl) return;
     const fetchSentiment = () => {
-      fetch(`${API_BASE}/api/market/fii-dii`)
+      fetch(`${backendUrl}/api/market/fii-dii`)
         .then(res => res.json())
         .then(data => {
           if (data.success) {
@@ -46,7 +45,7 @@ export default function RRG() {
     fetchSentiment();
     const interval = setInterval(fetchSentiment, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [backendUrl]);
 
   // --- TRACKER STATE ---
   const [isPlaying, setIsPlaying] = useState(false);

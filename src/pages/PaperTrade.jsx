@@ -22,7 +22,8 @@ export default function PaperTrade() {
     updateBackendUrl,
     placeOrder,
     resetCapital,
-    getOptionLTP
+    getOptionLTP,
+    getOptionChain
   } = usePaperTrade();
   
   const location = useLocation();
@@ -308,11 +309,11 @@ export default function PaperTrade() {
           {activeTab === 'fo' && (() => {
             const optionsStocks = mockStocks.filter(s => s.options);
             const activeStock = optionsStocks.find(s => s.symbol === foUnderlying) || optionsStocks[0];
-            const { chain } = activeStock.options;
             
             // Try to find the live spot price from marketData or fall back
             const spotPrice = marketData[foUnderlying]?.price || activeStock.price;
             const changePercent = marketData[foUnderlying]?.change || activeStock.change;
+            const chain = getOptionChain(foUnderlying, spotPrice);
             
             return (
               <div className="fo-container">

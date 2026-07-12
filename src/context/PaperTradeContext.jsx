@@ -27,6 +27,45 @@ export const SYMBOL_MAP = {
   "ITC": "1660"
 };
 
+const calculateOptionPrice = (underlyingSymbol, strike, type, livePrice) => {
+  const isIndex = underlyingSymbol === 'NIFTY50' || underlyingSymbol === 'BANKNIFTY' || underlyingSymbol === 'SENSEX';
+  const atmExtrinsic = isIndex ? (livePrice * 0.015) : (livePrice * 0.03);
+  const distance = (livePrice - strike) / livePrice;
+  const volatility = isIndex ? 0.02 : 0.04;
+  const timeValue = atmExtrinsic * Math.exp(-Math.pow(distance / volatility, 2));
+  
+  let intrinsic = 0;
+  if (type === 'CE') {
+    intrinsic = Math.max(0, livePrice - strike);
+  } else {
+    intrinsic = Math.max(0, strike - livePrice);
+  }
+  
+  const totalPrice = intrinsic + timeValue;
+  return Math.max(0.05, Number(totalPrice.toFixed(2)));
+};
+
+const getDeterministicOI = (symbol, strike, type, livePrice) => {
+  const isIndex = symbol === 'NIFTY50' || symbol === 'BANKNIFTY' || symbol === 'SENSEX';
+  const baseOI = isIndex ? 150000 : 15000;
+  
+  let seed = 0;
+  for (let i = 0; i < symbol.length; i++) {
+    seed += symbol.charCodeAt(i);
+  }
+  seed = (seed + strike) % 100;
+  
+  const variance = 0.7 + (seed / 300);
+  const distance = (strike - livePrice) / livePrice;
+  
+  const skew = type === 'CE' 
+    ? (distance > 0 ? 1.4 : 0.6) 
+    : (distance < 0 ? 1.4 : 0.6);
+     
+  const oi = baseOI * variance * skew * Math.exp(-Math.pow(distance / 0.02, 2));
+  return Math.round(Math.max(baseOI * 0.1, oi));
+};
+
 const getOptionLTPStatic = (symbol) => {
   const parts = symbol.split(' ');
   if (parts.length === 3) {
@@ -35,12 +74,8 @@ const getOptionLTPStatic = (symbol) => {
     const type = parts[2]; // "CE" or "PE"
     
     const stock = mockStocks.find(s => s.symbol === underlying);
-    if (stock && stock.options && stock.options.chain) {
-      const row = stock.options.chain.find(r => r.strike === strike);
-      if (row) {
-        return type === 'CE' ? row.callPrice : row.putPrice;
-      }
-    }
+    const spotPrice = stock?.price || 100;
+    return calculateOptionPrice(underlying, strike, type, spotPrice);
   }
   return null;
 };
@@ -79,28 +114,53 @@ export const PaperTradeProvider = ({ children }) => {
       const strike = parseInt(parts[1]);
       const type = parts[2]; // "CE" or "PE"
       
+      const liveUnderlying = marketData[underlying];
       const stock = mockStocks.find(s => s.symbol === underlying);
-      if (stock && stock.options && stock.options.chain) {
-        const row = stock.options.chain.find(r => r.strike === strike);
-        if (row) {
-          const baseOptionPrice = type === 'CE' ? row.callPrice : row.putPrice;
-          const baseUnderlyingPrice = stock.price;
-          const liveUnderlying = marketData[underlying];
-          if (liveUnderlying && liveUnderlying.price) {
-            const shift = liveUnderlying.price - baseUnderlyingPrice;
-            let adjustedPrice;
-            if (type === 'CE') {
-              adjustedPrice = baseOptionPrice + (shift * 0.5);
-            } else {
-              adjustedPrice = baseOptionPrice - (shift * 0.5);
-            }
-            return Math.max(0.05, Number(adjustedPrice.toFixed(2)));
-          }
-          return baseOptionPrice;
-        }
-      }
+      const spotPrice = liveUnderlying?.price || stock?.price || 100;
+      
+      return calculateOptionPrice(underlying, strike, type, spotPrice);
     }
     return null;
+  };
+
+  const getOptionChain = (symbol, spotPrice) => {
+    let step = 10;
+    if (symbol === 'NIFTY50' || symbol === 'BANKNIFTY' || symbol === 'SENSEX') {
+      step = 100;
+    } else if (spotPrice < 100) {
+      step = 1;
+    } else if (spotPrice < 500) {
+      step = 5;
+    } else if (spotPrice < 1000) {
+      step = 10;
+    } else if (spotPrice < 3000) {
+      step = 20;
+    } else if (spotPrice < 10000) {
+      step = 50;
+    } else {
+      step = 100;
+    }
+
+    const atmStrike = Math.round(spotPrice / step) * step;
+    const chain = [];
+    
+    for (let i = -3; i <= 3; i++) {
+      const strike = atmStrike + (i * step);
+      const callPrice = calculateOptionPrice(symbol, strike, 'CE', spotPrice);
+      const putPrice = calculateOptionPrice(symbol, strike, 'PE', spotPrice);
+      const callOI = getDeterministicOI(symbol, strike, 'CE', spotPrice);
+      const putOI = getDeterministicOI(symbol, strike, 'PE', spotPrice);
+      
+      chain.push({
+        strike,
+        callPrice,
+        putPrice,
+        callOI,
+        putOI
+      });
+    }
+    
+    return chain;
   };
   
   // Custom backend URL stored in localStorage for Firebase to Render communication
@@ -462,7 +522,8 @@ export const PaperTradeProvider = ({ children }) => {
     updateBackendUrl,
     placeOrder,
     resetCapital,
-    getOptionLTP
+    getOptionLTP,
+    getOptionChain
   };
 
   return (
