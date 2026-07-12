@@ -4,12 +4,115 @@ import { TrendingUp, Award, Users, CheckCircle, ArrowRight, Play, Star, ChevronL
 import { mockStocks } from '../data/mockStocks';
 import Logo from '../components/Logo';
 import { usePaperTrade } from '../context/PaperTradeContext';
+import { useAuth } from '../context/AuthContext';
+
+// Mock Expert Research calls dataset
+const expertCalls = [
+  {
+    id: 1,
+    symbol: "RELIANCE",
+    name: "Reliance Industries Ltd.",
+    type: "BUY",
+    entry: "₹2930 - ₹2950",
+    target: "₹3120",
+    stopLoss: "₹2870",
+    timeframe: "Swing (1-3 Weeks)",
+    logic: "Cup and Handle breakout pattern on daily timeframe. Volume accumulation indicators show positive institutional bias.",
+    expert: "Anjali Gupta, CFA",
+    firm: "Metro Wealth Securities",
+    date: "2026-07-12",
+    status: "Active",
+    premium: false
+  },
+  {
+    id: 2,
+    symbol: "TCS",
+    name: "Tata Consultancy Services Ltd.",
+    type: "BUY",
+    entry: "₹3930 - ₹3960",
+    target: "₹4200",
+    stopLoss: "₹3820",
+    timeframe: "Swing (2-4 Weeks)",
+    logic: "Strong support base confirmed at the 200-day EMA. Bullish RSI divergence on daily charts suggests reversal potential.",
+    expert: "Sanjay Mehta, CMT",
+    firm: "Alpha Advisory Group",
+    date: "2026-07-11",
+    status: "Active",
+    premium: false
+  },
+  {
+    id: 3,
+    symbol: "HDFCBANK",
+    name: "HDFC Bank Ltd.",
+    type: "BUY",
+    entry: "₹1510 - ₹1525",
+    target: "₹1600",
+    stopLoss: "₹1475",
+    timeframe: "Short Term (1-2 Weeks)",
+    logic: "Descending channel breakout on the 4-hour chart. Options Put-Call Ratio (PCR) has bottomed out and is turning bullish.",
+    expert: "Mohit Shah",
+    firm: "Derivative Analyst Corp",
+    date: "2026-07-10",
+    status: "Target Achieved",
+    premium: false
+  },
+  {
+    id: 4,
+    symbol: "INFY",
+    name: "Infosys Ltd.",
+    type: "BUY",
+    entry: "₹1620 - ₹1635",
+    target: "₹1780",
+    stopLoss: "₹1570",
+    timeframe: "Positional (1-2 Months)",
+    logic: "Post-earnings consolidation breakout with heavy FII buying flows. Accumulation seen in key call option strikes.",
+    expert: "Ravi Shastri",
+    firm: "Prime Research Head",
+    date: "2026-07-12",
+    status: "Active",
+    premium: true
+  },
+  {
+    id: 5,
+    symbol: "TATAMOTORS",
+    name: "Tata Motors Ltd.",
+    type: "BUY",
+    entry: "₹950 - ₹965",
+    target: "₹1080",
+    stopLoss: "₹910",
+    timeframe: "Swing (2-3 Weeks)",
+    logic: "Bullish pennant breakout on daily chart accompanied by positive sector momentum in the Nifty Auto Index.",
+    expert: "Dr. Rohit Sharma, CFA",
+    firm: "FinTech Capital",
+    date: "2026-07-12",
+    status: "Active",
+    premium: true
+  },
+  {
+    id: 6,
+    symbol: "SBIN",
+    name: "State Bank of India",
+    type: "BUY",
+    entry: "₹780 - ₹795",
+    target: "₹850",
+    stopLoss: "₹755",
+    timeframe: "Swing (3-4 Weeks)",
+    logic: "Ascending triangle breakout pattern confirmed on weekly charts with higher-than-average volume expansion.",
+    expert: "Vikram Malhotra, CMT",
+    firm: "Elite Traders Lab",
+    date: "2026-07-08",
+    status: "Active",
+    premium: false
+  }
+];
 
 export default function Home({ setSelectedStockForModal }) {
   const { marketData, backendUrl } = usePaperTrade();
+  const { hasFeatureAccess } = useAuth();
   const [activeFeatureTab, setActiveFeatureTab] = useState('scanners'); // 'scanners' | 'heatmaps' | 'rrg' | 'sentiment'
   const [activeTraderTab, setActiveTraderTab] = useState('short'); // 'short' | 'long' | 'fo'
   const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const [callFilter, setCallFilter] = useState('all'); // 'all' | 'active' | 'achieved'
 
   // Growth loops & Sentiment states
   const [votedSentiment, setVotedSentiment] = useState(null); // null | 'bull' | 'bear'
@@ -107,6 +210,13 @@ export default function Home({ setSelectedStockForModal }) {
   const techStocks = mockStocks.filter(s => s.sector === 'Information Technology').slice(0, 3);
   const finStocks = mockStocks.filter(s => s.sector === 'Financial Services').slice(0, 3);
 
+  // Filter Expert Calls based on selected tab filter
+  const filteredCalls = expertCalls.filter(call => {
+    if (callFilter === 'active') return call.status === 'Active';
+    if (callFilter === 'achieved') return call.status === 'Target Achieved';
+    return true;
+  });
+
   return (
     <div style={homeStyles.container}>
       
@@ -184,6 +294,176 @@ export default function Home({ setSelectedStockForModal }) {
             <p className="intro-text">
               Analyze market movements using relative rotation velocity, sector strength, option chain build-ups, and participant flows. Then, seamlessly trade them in a simulated environment before deploying real capital.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Recommended Stock Expert Research Market Calls Section */}
+      <section style={homeStyles.expertCallsSection}>
+        <div className="page-wrapper">
+          <div style={homeStyles.sectionHeader}>
+            <span className="badge-glow" style={{ marginBottom: 12, borderColor: '#10b981', color: '#10b981' }}>
+              🎯 Live Analyst Signals
+            </span>
+            <h2 style={homeStyles.sectionTitle}>Expert Research &amp; Market Calls</h2>
+            <p style={homeStyles.sectionSubtitle}>
+              Institutional-grade technical and fundamental trade setups from SEBI-registered research analysts and market veterans.
+            </p>
+          </div>
+
+          {/* Filter Toggles */}
+          <div style={homeStyles.filterContainer}>
+            <div style={homeStyles.callTabs}>
+              <button 
+                style={{
+                  ...homeStyles.callTabBtn, 
+                  backgroundColor: callFilter === 'all' ? 'rgba(16,185,129,0.1)' : 'transparent', 
+                  color: callFilter === 'all' ? '#10b981' : '#94a3b8', 
+                  borderColor: callFilter === 'all' ? '#10b981' : 'rgba(255,255,255,0.08)'
+                }}
+                onClick={() => setCallFilter('all')}
+              >
+                All Recommendations
+              </button>
+              <button 
+                style={{
+                  ...homeStyles.callTabBtn, 
+                  backgroundColor: callFilter === 'active' ? 'rgba(16,185,129,0.1)' : 'transparent', 
+                  color: callFilter === 'active' ? '#10b981' : '#94a3b8', 
+                  borderColor: callFilter === 'active' ? '#10b981' : 'rgba(255,255,255,0.08)'
+                }}
+                onClick={() => setCallFilter('active')}
+              >
+                🟢 Active Calls
+              </button>
+              <button 
+                style={{
+                  ...homeStyles.callTabBtn, 
+                  backgroundColor: callFilter === 'achieved' ? 'rgba(16,185,129,0.1)' : 'transparent', 
+                  color: callFilter === 'achieved' ? '#10b981' : '#94a3b8', 
+                  borderColor: callFilter === 'achieved' ? '#10b981' : 'rgba(255,255,255,0.08)'
+                }}
+                onClick={() => setCallFilter('achieved')}
+              >
+                🏆 Target Achieved
+              </button>
+            </div>
+          </div>
+
+          {/* Cards Grid */}
+          <div style={homeStyles.callsGrid}>
+            {filteredCalls.map((call) => {
+              const isLocked = call.premium && !hasFeatureAccess;
+              
+              return (
+                <div 
+                  key={call.id} 
+                  className="glass-card" 
+                  style={{
+                    ...homeStyles.callCard,
+                    ...(call.premium ? homeStyles.premiumCallCard : {})
+                  }}
+                >
+                  {/* Top Header */}
+                  <div style={homeStyles.callCardHeader}>
+                    <div>
+                      <div style={homeStyles.callSymbolRow}>
+                        <span style={homeStyles.callSymbol}>{call.symbol}</span>
+                        {call.premium && (
+                          <span style={homeStyles.premiumTag}>👑 PREMIUM</span>
+                        )}
+                      </div>
+                      <div style={homeStyles.callName}>{call.name}</div>
+                    </div>
+                    <div>
+                      <span 
+                        style={{
+                          ...homeStyles.callStatusBadge,
+                          backgroundColor: call.status === 'Active' ? 'rgba(16,185,129,0.1)' : 'rgba(14,165,233,0.1)',
+                          color: call.status === 'Active' ? '#10b981' : '#0ea5e9',
+                          borderColor: call.status === 'Active' ? 'rgba(16,185,129,0.2)' : 'rgba(14,165,233,0.2)',
+                        }}
+                      >
+                        {call.status === 'Active' ? '🟢 Active' : '🏆 Target Met'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Body Info */}
+                  <div style={{ position: 'relative', minHeight: '180px', marginTop: '16px' }}>
+                    {isLocked && (
+                      /* Lock Screen Overlay */
+                      <div style={homeStyles.lockOverlay}>
+                        <div style={{ fontSize: '1.75rem', marginBottom: '8px' }}>🔒</div>
+                        <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, marginBottom: '6px' }}>Premium Analyst Call</h4>
+                        <p style={{ color: '#94a3b8', fontSize: '0.75rem', maxWidth: '240px', marginBottom: '16px', lineHeight: 1.4 }}>
+                          This high-conviction trade setup is locked. Unlock all expert research calls, live scanners, and RRG signals.
+                        </p>
+                        <Link to="/pricing" className="btn-primary" style={{ padding: '6px 16px', fontSize: '0.8rem', background: 'linear-gradient(135deg, #ff4ecd 0%, #ae63f0 100%)', border: 'none', color: '#ffffff', fontWeight: 'bold' }}>
+                          Unlock with Pro
+                        </Link>
+                      </div>
+                    )}
+
+                    {/* Content (Blurred if locked) */}
+                    <div style={{ filter: isLocked ? 'blur(5px)' : 'none', opacity: isLocked ? 0.3 : 1, transition: '0.2s ease', pointerEvents: isLocked ? 'none' : 'auto' }}>
+                      <div style={homeStyles.callActionRow}>
+                        <span style={{
+                          ...homeStyles.callActionBtn,
+                          backgroundColor: call.type === 'BUY' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                          color: call.type === 'BUY' ? '#10b981' : '#ef4444'
+                        }}>
+                          {call.type}
+                        </span>
+                        <span style={homeStyles.callTimeframe}>{call.timeframe}</span>
+                      </div>
+
+                      {/* Trade Levels */}
+                      <div style={homeStyles.callLevelsRow}>
+                        <div style={homeStyles.levelCol}>
+                          <div style={homeStyles.levelLabel}>Entry Range</div>
+                          <div style={homeStyles.levelVal}>{call.entry}</div>
+                        </div>
+                        <div style={homeStyles.levelCol}>
+                          <div style={homeStyles.levelLabel}>Target</div>
+                          <div style={{ ...homeStyles.levelVal, color: '#10b981' }}>{call.target}</div>
+                        </div>
+                        <div style={homeStyles.levelCol}>
+                          <div style={homeStyles.levelLabel}>Stop Loss</div>
+                          <div style={{ ...homeStyles.levelVal, color: '#ef4444' }}>{call.stopLoss}</div>
+                        </div>
+                      </div>
+
+                      {/* Rationale Logic */}
+                      <div style={{ marginTop: '16px', padding: '10px', backgroundColor: 'rgba(0,0,0,0.15)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Research Rationale</div>
+                        <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.4, margin: 0 }}>
+                          {call.logic}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Footer: Analyst Info */}
+                  <div style={{
+                    ...homeStyles.callCardFooter,
+                    filter: isLocked ? 'blur(2px)' : 'none',
+                    opacity: isLocked ? 0.3 : 1
+                  }}>
+                    <div style={homeStyles.analystAvatar}>
+                      {call.expert[0]}
+                    </div>
+                    <div>
+                      <div style={homeStyles.analystName}>{call.expert}</div>
+                      <div style={homeStyles.analystFirm}>{call.firm}</div>
+                    </div>
+                    <div style={{ marginLeft: 'auto', fontSize: '0.75rem', color: '#64748b' }}>
+                      {call.date}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1289,5 +1569,180 @@ const homeStyles = {
     borderRadius: '50%',
     cursor: 'pointer',
     transition: '0.2s',
+  },
+  expertCallsSection: {
+    padding: '60px 0',
+    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+    background: 'radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.02) 0%, transparent 80%)'
+  },
+  filterContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '32px'
+  },
+  callTabs: {
+    display: 'flex',
+    gap: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    padding: '4px',
+    borderRadius: '10px',
+    border: '1px solid rgba(255, 255, 255, 0.06)'
+  },
+  callTabBtn: {
+    padding: '10px 20px',
+    borderRadius: '8px',
+    border: '1px solid transparent',
+    fontWeight: 600,
+    fontSize: '0.85rem',
+    cursor: 'pointer',
+    transition: '0.2s ease',
+  },
+  callsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+    gap: '24px',
+    marginTop: '20px'
+  },
+  callCard: {
+    padding: '24px',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+  },
+  premiumCallCard: {
+    border: '1px solid rgba(245, 158, 11, 0.15)',
+    boxShadow: '0 0 15px rgba(245, 158, 11, 0.03)'
+  },
+  callCardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+    paddingBottom: '12px'
+  },
+  callSymbolRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  },
+  callSymbol: {
+    fontSize: '1.25rem',
+    fontWeight: 800,
+    color: '#ffffff',
+    letterSpacing: '0.02em'
+  },
+  premiumTag: {
+    fontSize: '0.65rem',
+    fontWeight: 800,
+    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    color: '#000000',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    letterSpacing: '0.05em'
+  },
+  callName: {
+    fontSize: '0.75rem',
+    color: '#64748b',
+    marginTop: '2px'
+  },
+  callStatusBadge: {
+    fontSize: '0.7rem',
+    fontWeight: 700,
+    padding: '3px 8px',
+    borderRadius: '20px',
+    border: '1px solid',
+  },
+  callActionRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginTop: '12px'
+  },
+  callActionBtn: {
+    fontSize: '0.8rem',
+    fontWeight: 800,
+    padding: '4px 10px',
+    borderRadius: '4px',
+    letterSpacing: '0.05em'
+  },
+  callTimeframe: {
+    fontSize: '0.8rem',
+    color: '#94a3b8',
+    fontWeight: 500
+  },
+  callLevelsRow: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr',
+    gap: '12px',
+    marginTop: '16px',
+    borderTop: '1px dashed rgba(255, 255, 255, 0.05)',
+    borderBottom: '1px dashed rgba(255, 255, 255, 0.05)',
+    padding: '12px 0'
+  },
+  levelCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px'
+  },
+  levelLabel: {
+    fontSize: '0.65rem',
+    color: '#64748b',
+    textTransform: 'uppercase',
+    fontWeight: 600
+  },
+  levelVal: {
+    fontSize: '0.9rem',
+    fontWeight: 700,
+    color: '#ffffff'
+  },
+  callCardFooter: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginTop: '20px',
+    paddingTop: '14px',
+    borderTop: '1px solid rgba(255, 255, 255, 0.06)'
+  },
+  analystAvatar: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.9rem',
+    color: '#10b981',
+    fontWeight: 700
+  },
+  analystName: {
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    color: '#ffffff'
+  },
+  analystFirm: {
+    fontSize: '0.7rem',
+    color: '#64748b'
+  },
+  lockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(10, 11, 16, 0.75)',
+    backdropFilter: 'blur(4px)',
+    textAlign: 'center',
+    padding: '16px',
+    borderRadius: '8px'
   }
 };
