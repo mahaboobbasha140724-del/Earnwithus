@@ -9,7 +9,7 @@ import { weeklyRrgData, dailyRrgData } from '../data/historicalRrgData';
 import { usePaperTrade } from '../context/PaperTradeContext';
 
 export default function RRG() {
-  const { backendUrl } = usePaperTrade();
+  const { backendUrl, marketData } = usePaperTrade();
 
   // Navigation: 'tracker' | 'backtester'
   const [activeTab, setActiveTab] = useState('tracker');
@@ -51,6 +51,14 @@ export default function RRG() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [timelineStep, setTimelineStep] = useState(104); // latest index (0 to 104)
   const [playbackSpeed, setPlaybackSpeed] = useState(1000); // ms per step
+
+  // Helper to resolve live price if we are on the latest timeline step
+  const getLivePrice = (symbol, fallbackPrice) => {
+    if (timelineStep === historicalRrgData.weeks && marketData && marketData[symbol]?.price) {
+      return marketData[symbol].price;
+    }
+    return fallbackPrice;
+  };
 
   // Reset timeline Step when timeframe changes
   useEffect(() => {
@@ -1041,7 +1049,7 @@ export default function RRG() {
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <div style={{ textAlign: 'right', fontSize: '0.75rem' }}>
-                              <div style={{ fontWeight: 600 }}>₹{stock.prices[timelineStep].toLocaleString()}</div>
+                              <div style={{ fontWeight: 600 }}>₹{getLivePrice(stock.symbol, stock.prices[timelineStep]).toLocaleString()}</div>
                               <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
                                 X: {coord.x.toFixed(1)} | Y: {coord.y.toFixed(1)}
                               </div>
@@ -1097,7 +1105,7 @@ export default function RRG() {
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <div style={{ textAlign: 'right', fontSize: '0.75rem' }}>
-                              <div style={{ fontWeight: 600 }}>₹{Math.round(sec.prices[timelineStep]).toLocaleString()}</div>
+                              <div style={{ fontWeight: 600 }}>₹{Math.round(getLivePrice(sec.symbol, sec.prices[timelineStep])).toLocaleString()}</div>
                               <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
                                 X: {coord.x.toFixed(1)} | Y: {coord.y.toFixed(1)}
                               </div>
@@ -1123,9 +1131,9 @@ export default function RRG() {
                         <p style={{ color: '#64748b', fontSize: '0.75rem', marginTop: 2 }}>Stock Ticker: {focusedStock.symbol}</p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>₹{focusedStock.prices[timelineStep].toLocaleString()}</div>
-                        <div style={{ color: focusedStock.prices[timelineStep] >= focusedStock.prices[Math.max(0, timelineStep-1)] ? '#10b981' : '#ef4444', fontSize: '0.8rem', fontWeight: 600, marginTop: 2 }}>
-                          {focusedStock.prices[timelineStep] >= focusedStock.prices[Math.max(0, timelineStep-1)] ? '▲ Upward' : '▼ Downward'}
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>₹{getLivePrice(focusedStock.symbol, focusedStock.prices[timelineStep]).toLocaleString()}</div>
+                        <div style={{ color: getLivePrice(focusedStock.symbol, focusedStock.prices[timelineStep]) >= focusedStock.prices[Math.max(0, timelineStep-1)] ? '#10b981' : '#ef4444', fontSize: '0.8rem', fontWeight: 600, marginTop: 2 }}>
+                          {getLivePrice(focusedStock.symbol, focusedStock.prices[timelineStep]) >= focusedStock.prices[Math.max(0, timelineStep-1)] ? '▲ Upward' : '▼ Downward'}
                         </div>
                       </div>
                     </div>
@@ -1160,7 +1168,7 @@ export default function RRG() {
                         <p style={{ color: '#64748b', fontSize: '0.75rem', marginTop: 2 }}>Sector Index: {focusedSector.symbol}</p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>₹{Math.round(focusedSector.prices[timelineStep]).toLocaleString()}</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>₹{Math.round(getLivePrice(focusedSector.symbol, focusedSector.prices[timelineStep])).toLocaleString()}</div>
                         <button 
                           onClick={() => setDrillDownSector(focusedSector)}
                           style={styles.drillBtn}

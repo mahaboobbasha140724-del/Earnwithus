@@ -137,6 +137,20 @@ export function generateHistoricalData(numWeeks = 104, interval = 'weekly') {
       if (ticker === 'MAHINDRAMAHINDRA') ticker = 'M&M';
       if (ticker === 'SUNPHARMACEUTICALINDUSTRIES') ticker = 'SUNPHARMA';
       if (ticker === 'ZEEENTERTAINMENTENTERPRISES') ticker = 'ZEEL';
+      if (ticker === 'KOTAKMAHINDRABANK') ticker = 'KOTAKBANK';
+      if (ticker === 'INFOSYS') ticker = 'INFY';
+      if (ticker === 'HCLTECHNOLOGIES') ticker = 'HCLTECH';
+      if (ticker === 'TECHMAHINDRA') ticker = 'TECHM';
+      if (ticker === 'MARUTISUZUKI') ticker = 'MARUTI';
+      if (ticker === 'BAJAJAUTO') ticker = 'BAJAJ-AUTO';
+      if (ticker === 'EICHERMOTORS') ticker = 'EICHERMOT';
+      if (ticker === 'NESTLE') ticker = 'NESTLEIND';
+      if (ticker === 'BRITANNIAINDUSTRIES') ticker = 'BRITANNIA';
+      if (ticker === 'TATACONSUMERPRODUCTS') ticker = 'TATACONSUM';
+      if (ticker === 'HINDALCOINDUSTRIES') ticker = 'HINDALCO';
+      if (ticker === 'NATIONALALUMINIUM') ticker = 'NATIONALUM';
+      if (ticker === 'DRREDDYSLABORATORIES') ticker = 'DRREDDY';
+      if (ticker === 'DIVISLABORATORIES') ticker = 'DIVISLAB';
 
       return {
         name: c.name,
