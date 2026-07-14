@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 import http from 'http';
 import { Server } from 'socket.io';
 import WebSocket from 'ws';
-import * as dhan from 'dhanhq';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
 dotenv.config();
@@ -454,19 +453,17 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
   });
 }
 
-// DhanHQ WebSocket Integration
+// Live Market Data Integration (Yahoo Finance Polling)
 let marketData = {};
-let dhanFeed = null;
-let isDhanConnected = false;
 
 const DHAN_TO_YAHOO = {
-  "1333": "HDFCBANK.NS",
-  "2885": "RELIANCE.NS",
-  "11536": "TCS.NS",
-  "1594": "INFY.NS",
-  "4963": "ICICIBANK.NS",
-  "3045": "SBIN.NS",
-  "1660": "ITC.NS",
+  "HDFCBANK": "HDFCBANK.NS",
+  "RELIANCE": "RELIANCE.NS",
+  "TCS": "TCS.NS",
+  "INFY": "INFY.NS",
+  "ICICIBANK": "ICICIBANK.NS",
+  "SBIN": "SBIN.NS",
+  "ITC": "ITC.NS",
   
   // Indices & Sectors
   "NIFTY50": "^NSEI",
@@ -537,11 +534,9 @@ async function populateInitialMarketData() {
   }
 }
 
-// Fallback polling: Poll Yahoo Finance every 10 seconds for live ticks
+// Poll Yahoo Finance every 10 seconds for live ticks
 async function pollYahooFallback() {
-  const targets = isDhanConnected 
-    ? Object.entries(DHAN_TO_YAHOO).filter(([key]) => isNaN(Number(key)))
-    : Object.entries(DHAN_TO_YAHOO);
+  const targets = Object.entries(DHAN_TO_YAHOO);
   
   try {
     const promises = targets.map(async ([dhanId, yahooSymbol]) => {
@@ -563,7 +558,7 @@ async function pollYahooFallback() {
     });
     await Promise.all(promises);
   } catch (err) {
-    console.error("Failed to poll Yahoo Finance fallback:", err.message);
+    console.error("Failed to poll Yahoo Finance live updates:", err.message);
   }
 }
 
@@ -580,109 +575,6 @@ async function startFiiDiiSync() {
   setInterval(syncFiiDiiData, 900000);
 }
 startFiiDiiSync();
-
-// Monkey-patch DhanFeed to use query parameter authentication (fixes 400 Bad Request error)
-dhan.DhanFeed.prototype.connect = async function() {
-    if (this.accessToken === '' || this.clientId === '') {
-        console.error('Access Token or Client ID is missing');
-        isDhanConnected = false;
-        return;
-    }
-    
-    const WSS_URL_WITH_AUTH = `wss://api-feed.dhan.co?version=2&token=${this.accessToken}&clientId=${this.clientId}&authType=2`;
-    this.ws = new WebSocket(WSS_URL_WITH_AUTH);
-    
-    this.ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-        isDhanConnected = false;
-        setTimeout(() => {
-            console.log('WEBSOCKET_CLOSE: reconnecting...');
-            this.connect();
-        }, 5000);
-    });
-    
-    this.ws.on('open', async () => {
-        console.log('WebSocket connection established & authorized successfully via query parameters');
-        isDhanConnected = true;
-        await this.sdkHelper.onConnectionEstablished(this.ws);
-    });
-    
-    this.ws.on('message', async (data) => {
-        let response;
-        const responseCode = data.readUInt8(0);
-        switch (responseCode) {
-            case 2: response = this.processTickerPacket(data); break;
-            case 3: response = this.processMarketDepthPacket(data); break;
-            case 4: response = this.processQuotePacket(data); break;
-            case 5: response = this.processOIDataPacket(data); break;
-            case 6: response = this.processPrevClosePacket(data); break;
-            case 7: response = this.processMarketStatusPacket(data); break;
-            case 50: 
-                this.processServerDisConnectionPacket(data);
-                isDhanConnected = false;
-                process.exit();
-                break;
-            default:
-                console.warn(`Unknown response code: ${responseCode}`);
-                response = null;
-        }
-        await this.sdkHelper.onMessageReceived(response);
-    });
-    
-    this.ws.on('close', async (code, reason) => {
-        console.log(`WebSocket closed with code ${code}: ${reason}`);
-        isDhanConnected = false;
-        await this.sdkHelper.onClose(this.ws, code, reason.toString());
-    });
-};
-
-async function startDhanFeed() {
-    try {
-        dhanFeed = new dhan.DhanFeed(process.env.DHAN_CLIENT_ID, process.env.DHAN_ACCESS_TOKEN, [
-            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "1333" }, // HDFCBANK
-            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "2885" }, // RELIANCE
-            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "11536" }, // TCS
-            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "1594" }, // INFY
-            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "4963" }, // ICICIBANK
-            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "3045" }, // SBIN
-            { ExchangeSegment: dhan.ExchangeSegment.NSE_EQ, SecurityId: "1660" }  // ITC
-        ], "Quote");
-
-        dhanFeed.onConnect = () => {
-            console.log("Connected to DhanHQ Live Market Feed WebSocket");
-            isDhanConnected = true;
-        };
-
-        dhanFeed.onMessage = (data) => {
-            if (data && data.LTP) {
-                const tick = {
-                    symbol: data.SecurityId, // Will map to ticker string on frontend
-                    price: data.LTP,
-                    open: data.Open,
-                    high: data.High,
-                    low: data.Low,
-                    close: data.Close,
-                    volume: data.Volume,
-                    change: data.Close > 0 ? Number((((data.LTP - data.Close) / data.Close) * 100).toFixed(2)) : 0
-                };
-                marketData[data.SecurityId] = tick;
-                io.emit('market_tick', tick);
-            }
-        };
-
-        dhanFeed.onClose = () => {
-            console.log("DhanHQ WebSocket Closed. Reconnecting in 5s...");
-            isDhanConnected = false;
-            setTimeout(startDhanFeed, 5000);
-        };
-        
-        dhanFeed.connect();
-    } catch (e) {
-        console.error("Failed to start DhanHQ Feed:", e);
-        isDhanConnected = false;
-    }
-}
-startDhanFeed();
 
 // Socket.io Handlers
 io.on('connection', (socket) => {
