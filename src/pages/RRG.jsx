@@ -172,6 +172,31 @@ export default function RRG() {
   const getCoordinates = (symbol, step) => {
     const sector = historicalRrgData.sectors.find(s => s.symbol === symbol);
     if (!sector || !sector.rrg[step]) return { x: 100, y: 100 };
+    
+    // Adjust with live market data if available for the latest step
+    if (step === historicalRrgData.weeks && marketData && marketData[symbol]?.price) {
+      const livePrice = marketData[symbol].price;
+      const fallbackPrice = sector.prices[step];
+      
+      const liveBenchPrice = marketData["NIFTY50"]?.price || historicalRrgData.benchmark.prices[step];
+      const fallbackBenchPrice = historicalRrgData.benchmark.prices[step];
+      
+      const fallbackRS = fallbackPrice / fallbackBenchPrice;
+      const liveRS = livePrice / liveBenchPrice;
+      
+      if (fallbackRS > 0) {
+        const yRatio = liveRS / fallbackRS;
+        const baseCoord = sector.rrg[step];
+        const adjustedY = baseCoord.y * yRatio;
+        const adjustedX = baseCoord.x + (adjustedY - baseCoord.y) * 0.5;
+        
+        return {
+          x: Math.min(105, Math.max(95, adjustedX)),
+          y: Math.min(105, Math.max(95, adjustedY))
+        };
+      }
+    }
+    
     return sector.rrg[step];
   };
 
@@ -179,6 +204,32 @@ export default function RRG() {
     if (!drillDownSector) return { x: 100, y: 100 };
     const stock = drillDownSector.constituents.find(c => c.symbol === stockSymbol);
     if (!stock || !stock.rrg[step]) return { x: 100, y: 100 };
+    
+    // Adjust with live market data if available for the latest step
+    if (step === historicalRrgData.weeks && marketData && marketData[stockSymbol]?.price) {
+      const livePrice = marketData[stockSymbol].price;
+      const fallbackPrice = stock.prices[step];
+      
+      const benchSymbol = drillDownSector.symbol;
+      const liveBenchPrice = marketData[benchSymbol]?.price || drillDownSector.prices[step];
+      const fallbackBenchPrice = drillDownSector.prices[step];
+      
+      const fallbackRS = fallbackPrice / fallbackBenchPrice;
+      const liveRS = livePrice / liveBenchPrice;
+      
+      if (fallbackRS > 0) {
+        const yRatio = liveRS / fallbackRS;
+        const baseCoord = stock.rrg[step];
+        const adjustedY = baseCoord.y * yRatio;
+        const adjustedX = baseCoord.x + (adjustedY - baseCoord.y) * 0.5;
+        
+        return {
+          x: Math.min(105, Math.max(95, adjustedX)),
+          y: Math.min(105, Math.max(95, adjustedY))
+        };
+      }
+    }
+    
     return stock.rrg[step];
   };
 
