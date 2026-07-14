@@ -193,6 +193,37 @@ export const PaperTradeProvider = ({ children }) => {
     window.location.reload(); // Refresh to establish new WebSocket connection
   };
 
+  // Fetch initial market data from REST API as fallback/immediate load
+  useEffect(() => {
+    if (!backendUrl) return;
+    const fetchInitialData = () => {
+      fetch(`${backendUrl}/api/market/overview`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            console.log("[REST] Loaded initial market data:", data.data);
+            const mappedData = {};
+            data.data.forEach(tick => {
+              const symbol = ID_MAP[tick.symbol] || tick.symbol;
+              mappedData[symbol] = {
+                ...tick,
+                symbol
+              };
+            });
+            setMarketData(prev => ({
+              ...mappedData,
+              ...prev // Socket updates override REST values
+            }));
+          }
+        })
+        .catch(err => console.error("Failed to fetch initial market overview:", err));
+    };
+    fetchInitialData();
+    // Poll every 30 seconds as fallback/backup update
+    const interval = setInterval(fetchInitialData, 30000);
+    return () => clearInterval(interval);
+  }, [backendUrl]);
+
   // Initialize Socket.io
   useEffect(() => {
     if (!backendUrl) return;
