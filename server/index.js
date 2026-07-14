@@ -65,7 +65,65 @@ const TICKER_MAP = {
 };
 
 // Fetch live stock details from Yahoo Finance Chart API
+async function fetchMarketstackQuote(symbol) {
+  const apiKey = process.env.MARKETSTACK_API_KEY;
+  if (!apiKey) return null;
+  
+  try {
+    // Strip Yahoo .NS suffix and map to Marketstack format
+    let cleanSymbol = symbol;
+    if (symbol.endsWith('.NS')) {
+      cleanSymbol = symbol.replace('.NS', '.XNSE');
+    }
+    
+    // Marketstack supports clean symbol format (e.g. RELIANCE) on XNSE exchange
+    // We can also query indices, but for standard stocks we query v1 intraday
+    const url = `https://api.marketstack.com/v1/intraday/latest?access_key=${apiKey}&symbols=${cleanSymbol}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Marketstack HTTP ${res.status}`);
+    const data = await res.json();
+    
+    if (!data || !data.data || !data.data[0]) {
+      throw new Error("Invalid Marketstack data structure");
+    }
+    
+    const tick = data.data[0];
+    const price = tick.last || tick.close || tick.open;
+    const open = tick.open || price;
+    const high = tick.high || price;
+    const low = tick.low || price;
+    const close = tick.close || price;
+    const volume = tick.volume || 0;
+    const change = close > 0 ? ((price - close) / close) * 100 : 0;
+    
+    return {
+      price: Number(price.toFixed(2)),
+      change: Number(change.toFixed(2)),
+      open: Number(open.toFixed(2)),
+      high: Number(high.toFixed(2)),
+      low: Number(low.toFixed(2)),
+      close: Number(close.toFixed(2)),
+      volume: volume
+    };
+  } catch (err) {
+    console.error(`Failed to fetch Marketstack quote for ${symbol}:`, err.message);
+    return null;
+  }
+}
+
 async function fetchYahooQuote(yahooSymbol) {
+  // If Marketstack is explicitly configured as the primary data source
+  if (process.env.USE_MARKETSTACK === 'true' && process.env.MARKETSTACK_API_KEY) {
+    const msQuote = await fetchMarketstackQuote(yahooSymbol);
+    if (msQuote) {
+      return {
+        symbol: TICKER_MAP[yahooSymbol] || yahooSymbol,
+        yahooSymbol,
+        ...msQuote
+      };
+    }
+  }
+
   try {
     const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`, {
       headers: { 'User-Agent': USER_AGENT }
@@ -99,6 +157,19 @@ async function fetchYahooQuote(yahooSymbol) {
     };
   } catch (err) {
     console.error(`Failed to fetch Yahoo quote for ${yahooSymbol}:`, err.message);
+    
+    // Fallback to Marketstack if Yahoo Finance fails and key is set
+    if (process.env.MARKETSTACK_API_KEY) {
+      console.log(`Attempting Marketstack fallback for ${yahooSymbol}...`);
+      const msQuote = await fetchMarketstackQuote(yahooSymbol);
+      if (msQuote) {
+        return {
+          symbol: TICKER_MAP[yahooSymbol] || yahooSymbol,
+          yahooSymbol,
+          ...msQuote
+        };
+      }
+    }
     return null;
   }
 }
