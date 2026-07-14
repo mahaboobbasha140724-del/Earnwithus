@@ -172,24 +172,6 @@ export default function RRG() {
   const getCoordinates = (symbol, step) => {
     const sector = historicalRrgData.sectors.find(s => s.symbol === symbol);
     if (!sector || !sector.rrg[step]) return { x: 100, y: 100 };
-    
-    // Adjust with live market data if available for the latest step
-    if (step === historicalRrgData.weeks && marketData && marketData[symbol]) {
-      const baseCoord = sector.rrg[step];
-      const assetChange = marketData[symbol].change || 0;
-      const benchChange = marketData["NIFTY50"]?.change || 0;
-      const outperformance = assetChange - benchChange;
-      
-      // Shift coordinates relative to the daily outperformance vs benchmark
-      const adjustedX = baseCoord.x + outperformance * 0.3;
-      const adjustedY = baseCoord.y + outperformance * 0.2;
-      
-      return {
-        x: Math.min(108, Math.max(92, adjustedX)),
-        y: Math.min(108, Math.max(92, adjustedY))
-      };
-    }
-    
     return sector.rrg[step];
   };
 
@@ -197,24 +179,6 @@ export default function RRG() {
     if (!drillDownSector) return { x: 100, y: 100 };
     const stock = drillDownSector.constituents.find(c => c.symbol === stockSymbol);
     if (!stock || !stock.rrg[step]) return { x: 100, y: 100 };
-    
-    // Adjust with live market data if available for the latest step
-    if (step === historicalRrgData.weeks && marketData && marketData[stockSymbol]) {
-      const baseCoord = stock.rrg[step];
-      const stockChange = marketData[stockSymbol].change || 0;
-      const benchSymbol = drillDownSector.symbol;
-      const benchChange = marketData[benchSymbol]?.change || 0;
-      const outperformance = stockChange - benchChange;
-      
-      const adjustedX = baseCoord.x + outperformance * 0.3;
-      const adjustedY = baseCoord.y + outperformance * 0.2;
-      
-      return {
-        x: Math.min(108, Math.max(92, adjustedX)),
-        y: Math.min(108, Math.max(92, adjustedY))
-      };
-    }
-    
     return stock.rrg[step];
   };
 
