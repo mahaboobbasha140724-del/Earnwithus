@@ -130,8 +130,8 @@ export function generateHistoricalData(numWeeks = 104, interval = 'weekly') {
         .replace(/ Limited$/, '')
         .replace(/[^a-zA-Z0-9]/g, '')
         .toUpperCase();
-      if (ticker.length > 10) ticker = ticker.substring(0, 10);
-      if (ticker === 'STATEBANKOFINDIA') ticker = 'SBIN';
+      
+      if (ticker === 'STATEBANKOF' || ticker === 'STATEBANKOFINDIA') ticker = 'SBIN';
       if (ticker === 'TATACONSULTANCYSERVICES') ticker = 'TCS';
       if (ticker === 'HINDUSTANUNILEVER') ticker = 'HINDUNILVR';
       if (ticker === 'MAHINDRAMAHINDRA') ticker = 'M&M';
@@ -151,6 +151,10 @@ export function generateHistoricalData(numWeeks = 104, interval = 'weekly') {
       if (ticker === 'NATIONALALUMINIUM') ticker = 'NATIONALUM';
       if (ticker === 'DRREDDYSLABORATORIES') ticker = 'DRREDDY';
       if (ticker === 'DIVISLABORATORIES') ticker = 'DIVISLAB';
+      if (ticker === 'COAL') ticker = 'COALINDIA';
+      if (ticker === 'RELIANCEINDUSTRIES' || ticker === 'RELIANCEIN') ticker = 'RELIANCE';
+
+      if (ticker.length > 10) ticker = ticker.substring(0, 10);
 
       return {
         name: c.name,
