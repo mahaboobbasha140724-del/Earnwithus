@@ -174,27 +174,20 @@ export default function RRG() {
     if (!sector || !sector.rrg[step]) return { x: 100, y: 100 };
     
     // Adjust with live market data if available for the latest step
-    if (step === historicalRrgData.weeks && marketData && marketData[symbol]?.price) {
-      const livePrice = marketData[symbol].price;
-      const fallbackPrice = sector.prices[step];
+    if (step === historicalRrgData.weeks && marketData && marketData[symbol]) {
+      const baseCoord = sector.rrg[step];
+      const assetChange = marketData[symbol].change || 0;
+      const benchChange = marketData["NIFTY50"]?.change || 0;
+      const outperformance = assetChange - benchChange;
       
-      const liveBenchPrice = marketData["NIFTY50"]?.price || historicalRrgData.benchmark.prices[step];
-      const fallbackBenchPrice = historicalRrgData.benchmark.prices[step];
+      // Shift coordinates relative to the daily outperformance vs benchmark
+      const adjustedX = baseCoord.x + outperformance * 0.3;
+      const adjustedY = baseCoord.y + outperformance * 0.2;
       
-      const fallbackRS = fallbackPrice / fallbackBenchPrice;
-      const liveRS = livePrice / liveBenchPrice;
-      
-      if (fallbackRS > 0) {
-        const yRatio = liveRS / fallbackRS;
-        const baseCoord = sector.rrg[step];
-        const adjustedY = baseCoord.y * yRatio;
-        const adjustedX = baseCoord.x + (adjustedY - baseCoord.y) * 0.5;
-        
-        return {
-          x: Math.min(105, Math.max(95, adjustedX)),
-          y: Math.min(105, Math.max(95, adjustedY))
-        };
-      }
+      return {
+        x: Math.min(108, Math.max(92, adjustedX)),
+        y: Math.min(108, Math.max(92, adjustedY))
+      };
     }
     
     return sector.rrg[step];
@@ -206,28 +199,20 @@ export default function RRG() {
     if (!stock || !stock.rrg[step]) return { x: 100, y: 100 };
     
     // Adjust with live market data if available for the latest step
-    if (step === historicalRrgData.weeks && marketData && marketData[stockSymbol]?.price) {
-      const livePrice = marketData[stockSymbol].price;
-      const fallbackPrice = stock.prices[step];
-      
+    if (step === historicalRrgData.weeks && marketData && marketData[stockSymbol]) {
+      const baseCoord = stock.rrg[step];
+      const stockChange = marketData[stockSymbol].change || 0;
       const benchSymbol = drillDownSector.symbol;
-      const liveBenchPrice = marketData[benchSymbol]?.price || drillDownSector.prices[step];
-      const fallbackBenchPrice = drillDownSector.prices[step];
+      const benchChange = marketData[benchSymbol]?.change || 0;
+      const outperformance = stockChange - benchChange;
       
-      const fallbackRS = fallbackPrice / fallbackBenchPrice;
-      const liveRS = livePrice / liveBenchPrice;
+      const adjustedX = baseCoord.x + outperformance * 0.3;
+      const adjustedY = baseCoord.y + outperformance * 0.2;
       
-      if (fallbackRS > 0) {
-        const yRatio = liveRS / fallbackRS;
-        const baseCoord = stock.rrg[step];
-        const adjustedY = baseCoord.y * yRatio;
-        const adjustedX = baseCoord.x + (adjustedY - baseCoord.y) * 0.5;
-        
-        return {
-          x: Math.min(105, Math.max(95, adjustedX)),
-          y: Math.min(105, Math.max(95, adjustedY))
-        };
-      }
+      return {
+        x: Math.min(108, Math.max(92, adjustedX)),
+        y: Math.min(108, Math.max(92, adjustedY))
+      };
     }
     
     return stock.rrg[step];
