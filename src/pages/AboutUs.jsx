@@ -13,9 +13,9 @@ export default function AboutUs() {
           Earn With Us, founded in 2023, is India's premier stock market analytics platform. We are dedicated to building lightning-fast scanners, sector heatmaps, and derivative analysis tools to help traders and investors unlock systematic edge in the markets.
         </p>
 
-        <div className="glass-card" style={{ padding: '32px', margin: '32px 0', backgroundColor: '#0d0f17' }}>
+        <div className="glass-card" style={{ padding: '32px', margin: '32px 0', backgroundColor: 'var(--bg-card)' }}>
           <h2 style={{ fontSize: '1.5rem', marginBottom: 16 }}>The Earn With Us Vision</h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.7 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.7 }}>
             Traditional stock research tools are either too slow, overly complex, or prohibitively expensive. Our vision is to democratize institutional-grade market data. By bringing together technical screeners, RRG rotation indices, option chains, and sentiment heatmaps under one single roof, we give retail participants the speed they need to execute successful trades.
           </p>
         </div>

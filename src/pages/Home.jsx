@@ -1341,7 +1341,7 @@ const homeStyles = {
     left: 0,
     width: '100%',
     height: '1px',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'var(--border-light)',
   },
   rrgLabel: {
     position: 'absolute',
@@ -1364,12 +1364,12 @@ const homeStyles = {
     transform: 'translateX(-50%)',
     fontSize: '0.65rem',
     fontWeight: 700,
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     whiteSpace: 'nowrap',
   },
   miniDialCard: {
-    backgroundColor: '#0a0b10',
-    border: '1px solid rgba(255,255,255,0.06)',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
     borderRadius: '12px',
     padding: '24px 16px',
     width: '100%',
@@ -1382,7 +1382,7 @@ const homeStyles = {
   dialTitle: {
     fontSize: '0.85rem',
     fontWeight: 700,
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
   },
   dialText: {
     fontSize: '1.1rem',
@@ -1393,12 +1393,12 @@ const homeStyles = {
   // Traders Hub (Made For)
   tradersHubSection: {
     padding: '60px 0',
-    backgroundColor: 'rgba(255, 255, 255, 0.01)',
+    backgroundColor: 'transparent',
   },
   traderTabs: {
     display: 'flex',
     justifyContent: 'center',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    borderBottom: '1px solid var(--border-light)',
     marginBottom: '36px',
   },
   traderTabBtn: {
@@ -1431,7 +1431,7 @@ const homeStyles = {
   },
   checklistItem: {
     fontSize: '0.9rem',
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     lineHeight: '1.5',
   },
   traderVisual: {
@@ -1442,16 +1442,16 @@ const homeStyles = {
     width: '100%',
     maxWidth: '340px',
     padding: '24px',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+    backgroundColor: 'var(--bg-card)',
   },
   hubRow: {
     display: 'flex',
     justifyContent: 'space-between',
     fontSize: '0.85rem',
     padding: '10px 12px',
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'var(--bg-card-hover)',
     borderRadius: '6px',
-    border: '1px solid rgba(255,255,255,0.02)',
+    border: '1px solid var(--border-light)',
   },
 
   // CTA Banner
@@ -1459,9 +1459,9 @@ const homeStyles = {
     padding: '40px 0',
   },
   bannerWrapper: {
-    background: 'linear-gradient(135deg, #111827 0%, #1e1b4b 100%)',
+    background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-hover) 100%)',
     borderRadius: '16px',
-    border: '1px solid rgba(139, 92, 246, 0.2)',
+    border: '1px solid var(--border-light)',
     padding: '40px',
     display: 'flex',
     justifyContent: 'space-between',
@@ -1487,9 +1487,9 @@ const homeStyles = {
   },
   sliderNavBtn: {
     background: 'none',
-    border: '1px solid rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    color: '#ffffff',
+    border: '1px solid var(--border-light)',
+    backgroundColor: 'var(--bg-card)',
+    color: 'var(--text-primary)',
     width: '44px',
     height: '44px',
     borderRadius: '50%',
@@ -1499,10 +1499,6 @@ const homeStyles = {
     cursor: 'pointer',
     flexShrink: 0,
     transition: '0.2s',
-    ':hover': {
-      backgroundColor: '#10b981',
-      color: '#07080d',
-    }
   },
   testimonialCard: {
     flexGrow: 1,
@@ -1515,13 +1511,13 @@ const homeStyles = {
     top: '12px',
     left: '24px',
     fontSize: '4.5rem',
-    color: 'rgba(255,255,255,0.04)',
+    color: 'var(--border-light)',
     fontFamily: 'Georgia, serif',
     lineHeight: '1',
   },
   testimonialQuote: {
     fontSize: '1.1rem',
-    color: '#e2e8f0',
+    color: 'var(--text-secondary)',
     lineHeight: '1.7',
     fontStyle: 'italic',
     marginBottom: '24px',
@@ -1548,13 +1544,13 @@ const homeStyles = {
   },
   authorName: {
     fontWeight: 700,
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     fontSize: '0.95rem',
     textAlign: 'left',
   },
   authorRole: {
     fontSize: '0.75rem',
-    color: '#64748b',
+    color: 'var(--text-muted)',
     textAlign: 'left',
   },
   sliderDots: {
@@ -1572,9 +1568,9 @@ const homeStyles = {
   },
   expertCallsSection: {
     padding: '60px 0',
-    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-    background: 'radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.02) 0%, transparent 80%)'
+    borderTop: '1px solid var(--border-light)',
+    borderBottom: '1px solid var(--border-light)',
+    background: 'transparent'
   },
   filterContainer: {
     display: 'flex',
@@ -1584,10 +1580,10 @@ const homeStyles = {
   callTabs: {
     display: 'flex',
     gap: '8px',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'var(--bg-card)',
     padding: '4px',
     borderRadius: '10px',
-    border: '1px solid rgba(255, 255, 255, 0.06)'
+    border: '1px solid var(--border-light)'
   },
   callTabBtn: {
     padding: '10px 20px',
@@ -1613,14 +1609,14 @@ const homeStyles = {
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   },
   premiumCallCard: {
-    border: '1px solid rgba(245, 158, 11, 0.15)',
-    boxShadow: '0 0 15px rgba(245, 158, 11, 0.03)'
+    border: '1px solid var(--color-primary-glow)',
+    boxShadow: 'var(--shadow-glow)'
   },
   callCardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+    borderBottom: '1px solid var(--border-light)',
     paddingBottom: '12px'
   },
   callSymbolRow: {
@@ -1631,7 +1627,7 @@ const homeStyles = {
   callSymbol: {
     fontSize: '1.25rem',
     fontWeight: 800,
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     letterSpacing: '0.02em'
   },
   premiumTag: {
@@ -1645,7 +1641,7 @@ const homeStyles = {
   },
   callName: {
     fontSize: '0.75rem',
-    color: '#64748b',
+    color: 'var(--text-muted)',
     marginTop: '2px'
   },
   callStatusBadge: {
@@ -1670,7 +1666,7 @@ const homeStyles = {
   },
   callTimeframe: {
     fontSize: '0.8rem',
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     fontWeight: 500
   },
   callLevelsRow: {
@@ -1678,8 +1674,8 @@ const homeStyles = {
     gridTemplateColumns: '1fr 1fr 1fr',
     gap: '12px',
     marginTop: '16px',
-    borderTop: '1px dashed rgba(255, 255, 255, 0.05)',
-    borderBottom: '1px dashed rgba(255, 255, 255, 0.05)',
+    borderTop: '1px dashed var(--border-light)',
+    borderBottom: '1px dashed var(--border-light)',
     padding: '12px 0'
   },
   levelCol: {
@@ -1689,14 +1685,14 @@ const homeStyles = {
   },
   levelLabel: {
     fontSize: '0.65rem',
-    color: '#64748b',
+    color: 'var(--text-muted)',
     textTransform: 'uppercase',
     fontWeight: 600
   },
   levelVal: {
     fontSize: '0.9rem',
     fontWeight: 700,
-    color: '#ffffff'
+    color: 'var(--text-primary)'
   },
   callCardFooter: {
     display: 'flex',
@@ -1704,14 +1700,14 @@ const homeStyles = {
     gap: '10px',
     marginTop: '20px',
     paddingTop: '14px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.06)'
+    borderTop: '1px solid var(--border-light)'
   },
   analystAvatar: {
     width: '32px',
     height: '32px',
     borderRadius: '50%',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'var(--bg-card-hover)',
+    border: '1px solid var(--border-light)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1722,11 +1718,11 @@ const homeStyles = {
   analystName: {
     fontSize: '0.8rem',
     fontWeight: 600,
-    color: '#ffffff'
+    color: 'var(--text-primary)'
   },
   analystFirm: {
     fontSize: '0.7rem',
-    color: '#64748b'
+    color: 'var(--text-muted)'
   },
   lockOverlay: {
     position: 'absolute',
@@ -1739,7 +1735,7 @@ const homeStyles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(10, 11, 16, 0.75)',
+    backgroundColor: 'var(--bg-modal)',
     backdropFilter: 'blur(4px)',
     textAlign: 'center',
     padding: '16px',

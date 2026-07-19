@@ -118,23 +118,23 @@ export default function Sentiment() {
       <div className="page-wrapper">
         
         {/* Page Header Card */}
-        <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', backgroundColor: '#0d0f17', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px' }}>
+        <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', backgroundColor: 'var(--bg-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px' }}>
           <div>
             <span className="badge-glow" style={{ marginBottom: 10 }}>Market Sentiment Engine</span>
             <h1 style={{ fontSize: '2.25rem', marginTop: 4 }}>Live Participant Sentiment</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: loading ? '#f59e0b' : '#10b981' }} />
-              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#ffffff' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                 {loading ? 'Refreshing feeds...' : `Live Feed: ${source}`}
               </span>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>(Date: {date})</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>(Date: {date})</span>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '24px' }}>
             <div>
-              <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>NIFTY SPOT</span>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>NIFTY SPOT</span>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
                 {(marketData["NIFTY50"]?.price || nifty).toLocaleString()}
                 <span style={{ fontSize: '0.8rem', color: ((marketData["NIFTY50"]?.change !== undefined ? marketData["NIFTY50"].change : niftyChange) >= 0) ? '#10b981' : '#ef4444', marginLeft: '6px' }}>
                   {(marketData["NIFTY50"]?.change !== undefined ? marketData["NIFTY50"].change : niftyChange) >= 0 ? '+' : ''}{(marketData["NIFTY50"]?.change !== undefined ? marketData["NIFTY50"].change : niftyChange)}%
@@ -143,8 +143,8 @@ export default function Sentiment() {
             </div>
 
             <div>
-              <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>BANKNIFTY SPOT</span>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>BANK NIFTY</span>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
                 {(marketData["BANKNIFTY"]?.price || banknifty).toLocaleString()}
                 <span style={{ fontSize: '0.8rem', color: ((marketData["BANKNIFTY"]?.change !== undefined ? marketData["BANKNIFTY"].change : bankniftyChange) >= 0) ? '#10b981' : '#ef4444', marginLeft: '6px' }}>
                   {(marketData["BANKNIFTY"]?.change !== undefined ? marketData["BANKNIFTY"].change : bankniftyChange) >= 0 ? '+' : ''}{(marketData["BANKNIFTY"]?.change !== undefined ? marketData["BANKNIFTY"].change : bankniftyChange)}%
@@ -326,7 +326,7 @@ const sentimentStyles = {
   },
   dialCard: {
     padding: '24px',
-    backgroundColor: '#0d0f17',
+    backgroundColor: 'var(--bg-card)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -335,7 +335,7 @@ const sentimentStyles = {
   dialTitle: {
     fontSize: '0.95rem',
     fontWeight: 700,
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
   },
@@ -354,7 +354,7 @@ const sentimentStyles = {
   },
   dialDesc: {
     fontSize: '0.8rem',
-    color: '#64748b',
+    color: 'var(--text-muted)',
     lineHeight: '1.4',
   },
   detailsGrid: {
@@ -368,12 +368,12 @@ const sentimentStyles = {
     fontSize: '0.85rem',
   },
   thRow: {
-    borderBottom: '1px solid rgba(255,255,255,0.08)',
+    borderBottom: '1px solid var(--border-light)',
     textAlign: 'left',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+    backgroundColor: 'var(--bg-card-hover)',
     fontSize: '0.75rem',
     fontWeight: 700,
-    color: '#64748b',
+    color: 'var(--text-muted)',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     'th': {
@@ -381,7 +381,7 @@ const sentimentStyles = {
     }
   },
   tr: {
-    borderBottom: '1px solid rgba(255,255,255,0.03)',
+    borderBottom: '1px solid var(--border-light)',
     'td': {
       padding: '14px 24px',
     }
@@ -395,7 +395,7 @@ const sentimentStyles = {
   },
   sectorCard: {
     padding: '24px',
-    backgroundColor: '#0d0f17',
+    backgroundColor: 'var(--bg-card)',
   },
   barContainer: {
     display: 'flex',

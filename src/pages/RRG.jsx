@@ -366,10 +366,10 @@ export default function RRG() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 
                 {/* RRG Settings Box */}
-                <div className="glass-card" style={{ padding: '16px', backgroundColor: '#0d0f17', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="glass-card" style={{ padding: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                    <Sliders size={15} color="#9470F8" />
-                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>RRG SETTINGS</span>
+                    <Sliders size={15} color="var(--color-primary)" />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.05em' }}>RRG SETTINGS</span>
                   </div>
 
                   {/* Benchmark Dropdown */}
@@ -423,7 +423,7 @@ export default function RRG() {
                 </div>
 
                 {/* Index / Sector Selector Sidebar */}
-                <div className="glass-card" style={{ padding: '14px', backgroundColor: '#0d0f17', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="glass-card" style={{ padding: '14px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-light)' }}>
                   <span style={styles.sidebarLabel}>Index Universe</span>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
                     {INDEX_LIST.map(idx => {

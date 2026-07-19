@@ -11,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Context
 import { AuthProvider } from './context/AuthContext';
 import { PaperTradeProvider } from './context/PaperTradeContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Pages
 import Home from './pages/Home';
@@ -179,6 +180,8 @@ function MainApp() {
           <Route path="/tools/market-movers" element={<ProtectedRoute><MarketMovers /></ProtectedRoute>} />
           <Route path="/tools/advance-decline" element={<ProtectedRoute><AdvanceDecline /></ProtectedRoute>} />
           <Route path="/tools/index-contributors" element={<ProtectedRoute><IndexContributors /></ProtectedRoute>} />
+          <Route path="/tools/futures-dashboard" element={<ProtectedRoute><FuturesOptions setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
+          <Route path="/features/futures-dashboard" element={<ProtectedRoute><FuturesOptions setSelectedStockForModal={setSelectedStockForModal} /></ProtectedRoute>} />
           <Route path="/tools/fii-dii-history" element={<ProtectedRoute><FIIDIIHistory /></ProtectedRoute>} />
 
           {/* Wildcard Fallback redirect */}
@@ -202,19 +205,21 @@ function MainApp() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <PaperTradeProvider>
-          <MainApp />
-        </PaperTradeProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <PaperTradeProvider>
+            <MainApp />
+          </PaperTradeProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
 const appStyles = {
   installBanner: {
-    backgroundColor: '#0d0f17',
+    backgroundColor: 'var(--bg-dark)',
     borderBottom: '1px solid rgba(16, 185, 129, 0.2)',
     padding: '10px 24px',
     display: 'flex',

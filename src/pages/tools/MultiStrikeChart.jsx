@@ -114,7 +114,7 @@ export default function MultiStrikeChart() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="time" tick={{ fill: '#64748b', fontSize: 10 }} interval={9} />
               <YAxis tick={{ fill: '#64748b', fontSize: 10 }} tickFormatter={v => `₹${v}`} />
-              <Tooltip contentStyle={{ background: '#0d0f17', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, fontSize: '0.82rem' }} />
+              <Tooltip contentStyle={{ background: 'var(--bg-dropdown)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', borderRadius: 10, fontSize: '0.82rem' }} />
               <Legend wrapperStyle={{ color: '#94a3b8', fontSize: '0.82rem' }} />
               {lines.map((line, i) => (
                 <Line key={line} type="monotone" dataKey={line} stroke={COLORS[i % COLORS.length]} strokeWidth={2} dot={false} name={line} />

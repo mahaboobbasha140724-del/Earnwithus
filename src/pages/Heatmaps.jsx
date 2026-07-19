@@ -293,7 +293,7 @@ const heatmapStyles = {
   },
   gridPanel: {
     padding: '24px',
-    backgroundColor: '#0d0f17',
+    backgroundColor: 'var(--bg-card)',
     minHeight: '380px',
   },
   boxContainer: {

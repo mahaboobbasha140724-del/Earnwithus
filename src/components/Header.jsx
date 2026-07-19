@@ -5,6 +5,7 @@ import { searchStocks } from '../data/mockStocks';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
 import Logo from './Logo';
+import ThemeSelector from './ThemeSelector';
 
 export default function Header({ setSelectedStockForModal }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -116,6 +117,41 @@ export default function Header({ setSelectedStockForModal }) {
         <nav className="desktop-only" style={headerStyles.nav}>
           <ul style={headerStyles.navList}>
 
+            {/* Features Dropdown */}
+            <li style={headerStyles.navItem} onMouseEnter={() => setFeaturesDropdownOpen(true)} onMouseLeave={() => setFeaturesDropdownOpen(false)}>
+              <span style={headerStyles.navLink}>
+                Features <ChevronDown size={14} style={{ marginLeft: 4, transform: featuresDropdownOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+              </span>
+              {featuresDropdownOpen && (
+                <div style={headerStyles.dropdown}>
+                  <Link to="/tools/futures-dashboard" style={headerStyles.dropdownLink}>
+                    <div style={headerStyles.dropdownTitle}>Futures Dashboard <span className="badge-glow" style={{ fontSize: '0.6rem', padding: '1px 4px', marginLeft: 4 }}>NEW</span></div>
+                    <div style={headerStyles.dropdownDesc}>OI build-up cycle & basis spread</div>
+                  </Link>
+                  <Link to="/features/scanners" style={headerStyles.dropdownLink}>
+                    <div style={headerStyles.dropdownTitle}>Scanners</div>
+                    <div style={headerStyles.dropdownDesc}>Real-time technical screeners</div>
+                  </Link>
+                  <Link to="/features/heatmaps" style={headerStyles.dropdownLink}>
+                    <div style={headerStyles.dropdownTitle}>Heatmaps</div>
+                    <div style={headerStyles.dropdownDesc}>Color-coded sector view</div>
+                  </Link>
+                  <Link to="/features/rrg" style={headerStyles.dropdownLink}>
+                    <div style={headerStyles.dropdownTitle}>RRG</div>
+                    <div style={headerStyles.dropdownDesc}>Relative rotation graphs</div>
+                  </Link>
+                  <Link to="/features/sentiment" style={headerStyles.dropdownLink}>
+                    <div style={headerStyles.dropdownTitle}>Market Sentiment</div>
+                    <div style={headerStyles.dropdownDesc}>Fear/Greed & participant flows</div>
+                  </Link>
+                  <Link to="/strategies" style={headerStyles.dropdownLink}>
+                    <div style={headerStyles.dropdownTitle}>Strategies</div>
+                    <div style={headerStyles.dropdownDesc}>Option strategy builder</div>
+                  </Link>
+                </div>
+              )}
+            </li>
+
             {/* Options Lab Dropdown */}
             <li style={headerStyles.navItem} onMouseEnter={() => setOptionsLabOpen(true)} onMouseLeave={() => setOptionsLabOpen(false)}>
               <span style={headerStyles.navLink}>
@@ -125,6 +161,7 @@ export default function Header({ setSelectedStockForModal }) {
                 <div style={{ ...headerStyles.dropdown, width: 320 }}>
                   <div style={headerStyles.dropdownSection}>Core Tools</div>
                   {[
+                    ['/tools/futures-dashboard', 'Futures Dashboard', 'F&O OI build-up cycle & intraday trends'],
                     ['/tools/option-chain', 'Option Chain', 'Live OI, IV, Buildup & Max Pain marker'],
                     ['/tools/open-interest', 'Open Interest', 'CE vs PE OI distribution by strike'],
                     ['/tools/put-call-ratio', 'Put-Call Ratio', 'Intraday PCR + 365-day trend'],
@@ -177,35 +214,14 @@ export default function Header({ setSelectedStockForModal }) {
               )}
             </li>
 
-            {/* Features Dropdown */}
-            <li style={headerStyles.navItem} onMouseEnter={() => setFeaturesDropdownOpen(true)} onMouseLeave={() => setFeaturesDropdownOpen(false)}>
-              <span style={headerStyles.navLink}>
-                Features <ChevronDown size={14} style={{ marginLeft: 4, transform: featuresDropdownOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
-              </span>
-              {featuresDropdownOpen && (
-                <div style={headerStyles.dropdown}>
-                  <Link to="/features/scanners" style={headerStyles.dropdownLink}>
-                    <div style={headerStyles.dropdownTitle}>Scanners</div>
-                    <div style={headerStyles.dropdownDesc}>Real-time technical screeners</div>
-                  </Link>
-                  <Link to="/features/heatmaps" style={headerStyles.dropdownLink}>
-                    <div style={headerStyles.dropdownTitle}>Heatmaps</div>
-                    <div style={headerStyles.dropdownDesc}>Color-coded sector view</div>
-                  </Link>
-                  <Link to="/features/rrg" style={headerStyles.dropdownLink}>
-                    <div style={headerStyles.dropdownTitle}>RRG</div>
-                    <div style={headerStyles.dropdownDesc}>Relative rotation graphs</div>
-                  </Link>
-                  <Link to="/features/futures-options" style={headerStyles.dropdownLink}>
-                    <div style={headerStyles.dropdownTitle}>Futures & Options</div>
-                    <div style={headerStyles.dropdownDesc}>OI insights & option chains</div>
-                  </Link>
-                  <Link to="/strategies" style={headerStyles.dropdownLink}>
-                    <div style={headerStyles.dropdownTitle}>Strategies</div>
-                    <div style={headerStyles.dropdownDesc}>Option strategy builder</div>
-                  </Link>
-                </div>
-              )}
+            <li style={headerStyles.navItem}>
+              <Link to="/tools" style={{ ...headerStyles.navLink, color: 'var(--color-primary)', fontWeight: 700 }}>🔧 Tools Hub</Link>
+            </li>
+            <li style={headerStyles.navItem}>
+              <Link to="/paper-trade" style={headerStyles.navLink}>Paper Trade <span className="badge-glow" style={{marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#3b82f6'}}>NEW</span></Link>
+            </li>
+            <li style={headerStyles.navItem}>
+              <Link to="/pricing" style={headerStyles.navLink}>Pricing</Link>
             </li>
 
             {/* Company Dropdown */}
@@ -223,15 +239,6 @@ export default function Header({ setSelectedStockForModal }) {
               )}
             </li>
 
-            <li style={headerStyles.navItem}>
-              <Link to="/tools" style={{ ...headerStyles.navLink, color: '#C2FA4F', fontWeight: 700 }}>🔧 Tools Hub</Link>
-            </li>
-            <li style={headerStyles.navItem}>
-              <Link to="/paper-trade" style={headerStyles.navLink}>Paper Trade <span className="badge-glow" style={{marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#3b82f6'}}>NEW</span></Link>
-            </li>
-            <li style={headerStyles.navItem}>
-              <Link to="/pricing" style={headerStyles.navLink}>Pricing</Link>
-            </li>
             <li style={headerStyles.navItem}>
               <a href="https://chat.whatsapp.com/LO3eNiIvHRv1DNDaAmkPoG?s=cl&p=a&mlu=1" target="_blank" rel="noopener noreferrer" style={{ ...headerStyles.navLink, color: '#10b981', fontWeight: 600 }}>
                 WhatsApp
@@ -291,6 +298,7 @@ export default function Header({ setSelectedStockForModal }) {
 
           {/* Action CTAs */}
           <div className="desktop-only" style={headerStyles.actions}>
+            <ThemeSelector />
             {currentUser && isTrialActive && (
               <span className="badge-gold" style={{ marginRight: 12, fontSize: '0.75rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', backgroundColor: '#eab308', color: '#07080d', fontWeight: 'bold', borderRadius: '4px' }}>
                 Trial: {trialDaysLeft}d left
@@ -379,7 +387,9 @@ export default function Header({ setSelectedStockForModal }) {
             </button>
           </div>
           <div style={headerStyles.mobileDrawerBody}>
+            <ThemeSelector isMobile={true} />
             <div style={headerStyles.mobileHeading}>Options Lab</div>
+            <Link to="/tools/futures-dashboard" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Futures Dashboard <span className="badge-glow" style={{marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px'}}>NEW</span></Link>
             <Link to="/tools/option-chain" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Option Chain</Link>
             <Link to="/tools/open-interest" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Open Interest</Link>
             <Link to="/tools/put-call-ratio" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Put-Call Ratio</Link>
@@ -563,8 +573,8 @@ export default function Header({ setSelectedStockForModal }) {
 // Inline CSS Styles for absolute component fidelity
 const headerStyles = {
   header: {
-    backgroundColor: 'rgba(7, 8, 13, 0.85)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'var(--bg-header)',
+    borderBottom: '1px solid var(--border-light)',
     position: 'sticky',
     top: 0,
     zIndex: 100,
@@ -584,7 +594,7 @@ const headerStyles = {
   hamburger: {
     background: 'none',
     border: 'none',
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     cursor: 'pointer',
     display: 'none', // Managed by responsive CSS below or media queries
   },
@@ -607,7 +617,7 @@ const headerStyles = {
     fontFamily: 'var(--font-heading)',
     fontWeight: 800,
     fontSize: '1.4rem',
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     letterSpacing: '-0.03em',
   },
   nav: {
@@ -623,7 +633,7 @@ const headerStyles = {
     position: 'relative',
   },
   navLink: {
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     fontWeight: 500,
     fontSize: '0.95rem',
     cursor: 'pointer',
@@ -635,12 +645,12 @@ const headerStyles = {
     position: 'absolute',
     top: '100%',
     left: 0,
-    backgroundColor: '#0d0f17',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'var(--bg-dropdown)',
+    border: '1px solid var(--border-light)',
     borderRadius: '12px',
     width: '260px',
     padding: '12px',
-    boxShadow: '0 12px 28px rgba(0, 0, 0, 0.6)',
+    boxShadow: 'var(--shadow-premium)',
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
@@ -651,29 +661,29 @@ const headerStyles = {
   },
   dropdownSection: {
     fontSize: '0.68rem',
-    color: '#9470F8',
+    color: 'var(--color-primary)',
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '0.07em',
     padding: '8px 12px 4px',
-    borderTop: '1px solid rgba(255,255,255,0.05)',
+    borderTop: '1px solid var(--border-light)',
     marginTop: 4,
   },
   dropdownLink: {
     padding: '10px 12px',
     borderRadius: '8px',
-    color: '#e2e8f0',
+    color: 'var(--text-secondary)',
     fontSize: '0.9rem',
     display: 'block',
     transition: '0.15s ease',
   },
   dropdownTitle: {
     fontWeight: 600,
-    color: '#ffffff',
+    color: 'var(--text-primary)',
   },
   dropdownDesc: {
     fontSize: '0.75rem',
-    color: '#64748b',
+    color: 'var(--text-muted)',
     marginTop: '2px',
   },
   rightContainer: {
@@ -688,21 +698,21 @@ const headerStyles = {
   searchBar: {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
     borderRadius: '9999px',
     padding: '8px 16px',
     width: '100%',
   },
   searchIcon: {
-    color: '#64748b',
+    color: 'var(--text-muted)',
     marginRight: '8px',
   },
   searchInput: {
     background: 'none',
     border: 'none',
     outline: 'none',
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     fontSize: '0.85rem',
     width: '100%',
   },
@@ -710,13 +720,13 @@ const headerStyles = {
     position: 'absolute',
     top: 'calc(100% + 8px)',
     right: 0,
-    backgroundColor: '#0d0f17',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'var(--bg-dropdown)',
+    border: '1px solid var(--border-light)',
     borderRadius: '12px',
     width: '320px',
     maxHeight: '380px',
     overflowY: 'auto',
-    boxShadow: '0 12px 28px rgba(0, 0, 0, 0.6)',
+    boxShadow: 'var(--shadow-premium)',
     padding: '8px',
     display: 'flex',
     flexDirection: 'column',
@@ -733,12 +743,12 @@ const headerStyles = {
   },
   searchSymbol: {
     fontWeight: 700,
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     fontSize: '0.9rem',
   },
   searchName: {
     fontSize: '0.75rem',
-    color: '#64748b',
+    color: 'var(--text-muted)',
     marginTop: '2px',
   },
   searchPriceContainer: {
@@ -746,7 +756,7 @@ const headerStyles = {
   },
   searchPrice: {
     fontWeight: 600,
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     fontSize: '0.85rem',
   },
   searchChange: {
@@ -755,7 +765,7 @@ const headerStyles = {
   },
   noResult: {
     padding: '16px',
-    color: '#64748b',
+    color: 'var(--text-muted)',
     fontSize: '0.85rem',
     textAlign: 'center',
   },
@@ -765,7 +775,7 @@ const headerStyles = {
     gap: '16px',
   },
   loginBtn: {
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     fontWeight: 500,
     fontSize: '0.9rem',
     background: 'none',
@@ -792,8 +802,8 @@ const headerStyles = {
     left: 0,
     width: '300px',
     height: '100vh',
-    backgroundColor: '#0a0b10',
-    borderRight: '1px solid rgba(255,255,255,0.08)',
+    backgroundColor: 'var(--bg-darker)',
+    borderRight: '1px solid var(--border-light)',
     boxShadow: '10px 0 30px rgba(0,0,0,0.5)',
     zIndex: 200,
     padding: '24px',
@@ -805,12 +815,12 @@ const headerStyles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '32px',
+    marginBottom: '24px',
   },
   drawerCloseBtn: {
     background: 'none',
     border: 'none',
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     cursor: 'pointer',
   },
   mobileDrawerBody: {
@@ -820,7 +830,7 @@ const headerStyles = {
     flexGrow: 1,
   },
   mobileHeading: {
-    color: '#64748b',
+    color: 'var(--text-muted)',
     fontSize: '0.75rem',
     fontWeight: 700,
     textTransform: 'uppercase',
@@ -829,12 +839,12 @@ const headerStyles = {
     marginBottom: '8px',
   },
   mobileLink: {
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     fontSize: '1.05rem',
     fontWeight: 500,
     padding: '10px 0',
     display: 'block',
-    borderBottom: '1px solid rgba(255,255,255,0.02)',
+    borderBottom: '1px solid var(--border-light)',
   },
   drawerFooter: {
     marginTop: 'auto',
@@ -846,9 +856,9 @@ const headerStyles = {
     alignItems: 'center',
     width: '100%',
     padding: '12px',
-    border: '1px solid rgba(255,255,255,0.1)',
+    border: '1px solid var(--border-light)',
     borderRadius: '8px',
-    color: '#ffffff',
+    color: 'var(--text-primary)',
     fontWeight: 500,
     background: 'none',
     cursor: 'pointer',
@@ -864,7 +874,7 @@ const headerStyles = {
     height: '38px',
     borderRadius: '50%',
     backgroundColor: '#10b981',
-    border: '2px solid rgba(255,255,255,0.1)',
+    border: '2px solid var(--border-light)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -880,12 +890,12 @@ const headerStyles = {
     position: 'absolute',
     top: 'calc(100% + 12px)',
     right: 0,
-    backgroundColor: '#0d0f17',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'var(--bg-dropdown)',
+    border: '1px solid var(--border-light)',
     borderRadius: '12px',
     width: '220px',
     padding: '8px',
-    boxShadow: '0 12px 28px rgba(0, 0, 0, 0.6)',
+    boxShadow: 'var(--shadow-premium)',
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
@@ -898,7 +908,7 @@ const headerStyles = {
   profileLink: {
     padding: '10px 14px',
     borderRadius: '8px',
-    color: '#e2e8f0',
+    color: 'var(--text-secondary)',
     fontSize: '0.85rem',
     fontWeight: 600,
     display: 'flex',
@@ -939,8 +949,8 @@ const headerStyles = {
     maxWidth: '480px',
     width: '100%',
     padding: '36px',
-    backgroundColor: '#0d0f17',
+    backgroundColor: 'var(--bg-modal)',
     position: 'relative',
-    border: '1px solid rgba(255, 255, 255, 0.08)'
+    border: '1px solid var(--border-light)'
   }
 };

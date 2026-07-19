@@ -40,7 +40,7 @@ const TT = ({ active, payload, label }) => {
   const buildup = payload[0]?.payload?.buildup;
   const bt = BUILDUP_TYPES[buildup];
   return (
-    <div style={{ background: '#0d0f17', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 14px', fontSize: '0.82rem', minWidth: 180 }}>
+    <div style={{ background: 'var(--bg-dropdown)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', borderRadius: 10, padding: '10px 14px', fontSize: '0.82rem', minWidth: 180 }}>
       <div style={{ color: '#9470F8', fontWeight: 700, marginBottom: 6 }}>{label}</div>
       {payload.map(p => <div key={p.dataKey} style={{ color: p.color, marginBottom: 3 }}>{p.name}: {p.dataKey === 'price' ? `₹${p.value}` : `${p.value}K`}</div>)}
       {bt && <div style={{ marginTop: 8, padding: '4px 8px', borderRadius: 4, background: bt.bg, color: bt.color, fontSize: '0.78rem', fontWeight: 600 }}>{buildup}</div>}

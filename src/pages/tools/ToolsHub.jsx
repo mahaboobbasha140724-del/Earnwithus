@@ -11,6 +11,7 @@ const TOOLS = [
     category: '🔵 Options Lab',
     color: '#9470F8',
     tools: [
+      { icon: <Activity size={22} />, name: 'Futures Dashboard', desc: 'F&O OI build-up cycle, basis spread & intraday trends', path: '/tools/futures-dashboard', badge: 'NEW' },
       { icon: <Grid size={22} />, name: 'Option Chain', desc: 'Live NSE option chain with OI, IV, Buildup & Max Pain', path: '/tools/option-chain', badge: 'CORE' },
       { icon: <BarChart2 size={22} />, name: 'Open Interest', desc: 'CE vs PE OI distribution across strikes', path: '/tools/open-interest', badge: 'CORE' },
       { icon: <ArrowUpDown size={22} />, name: 'Put-Call Ratio', desc: 'Intraday PCR chart with 365-day historical trend', path: '/tools/put-call-ratio', badge: 'CORE' },
@@ -48,7 +49,7 @@ const TOOLS = [
       { icon: <Grid size={22} />, name: 'Heatmaps', desc: 'Color-coded sector & stock heatmaps', path: '/features/heatmaps' },
       { icon: <Globe size={22} />, name: 'RRG', desc: 'Relative Rotation Graph for sector momentum', path: '/features/rrg', badge: 'HOT' },
       { icon: <Eye size={22} />, name: 'Sentiment', desc: 'Fear/Greed, FII/DII flows & participant data', path: '/features/sentiment' },
-      { icon: <BarChart2 size={22} />, name: 'Futures & Options', desc: 'F&O option chain, OI analytics & rollovers', path: '/features/futures-options' },
+      { icon: <BarChart2 size={22} />, name: 'Futures & Options', desc: 'F&O option chain, OI analytics & rollovers', path: '/tools/futures-dashboard' },
       { icon: <Layers size={22} />, name: 'Strategies', desc: 'Option strategy builder with payoff diagrams', path: '/strategies', badge: 'CORE' },
       { icon: <Target size={22} />, name: 'Paper Trade', desc: 'Practice trading with zero-risk simulation', path: '/paper-trade' },
     ]
@@ -59,62 +60,62 @@ const BADGE_STYLES = {
   CORE: { bg: 'rgba(16,185,129,0.15)', color: '#10b981' },
   HOT:  { bg: 'rgba(239,68,68,0.15)', color: '#ef4444' },
   PRO:  { bg: 'rgba(148,112,248,0.15)', color: '#9470F8' },
-  LIVE: { bg: 'rgba(251,191,36,0.15)', color: '#fbbf24' },
-  NEW:  { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
+  LIVE: { bg: 'rgba(14,165,233,0.15)', color: '#0ea5e9' },
+  NEW:  { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
 };
 
 export default function ToolsHub() {
-  const totalTools = TOOLS.reduce((a, c) => a + c.tools.length, 0);
-
   return (
     <div style={s.container} className="animate-fade-in">
       <div className="page-wrapper">
-
+        
         {/* Hero */}
         <div style={s.hero}>
-          <span className="badge-glow" style={{ fontSize: '0.7rem', letterSpacing: '0.08em' }}>ALL TOOLS</span>
-          <h1 style={s.heroTitle}>
-            Your Complete <span style={{ color: '#9470F8' }}>Trading Arsenal</span>
-          </h1>
+          <span className="badge-glow">POWER TRADING SUITE</span>
+          <h1 style={s.heroTitle}>Stock Market Tools Hub</h1>
           <p style={s.heroDesc}>
-            {totalTools}+ professional-grade tools — Options Lab, Futures Analytics, Market Internals & more.
-            Everything you need to analyze Indian markets like a pro.
+            18+ institutional-grade tools built for Indian option traders. Option chain analysis, PCR charts, IV percentile, GEX, and market breadth — 100% free with no login required.
           </p>
 
-          {/* Quick Stats */}
           <div style={s.quickStats}>
-            {[
-              { label: 'Total Tools', value: totalTools },
-              { label: 'Options Tools', value: 11 },
-              { label: 'Market Tools', value: 4 },
-              { label: 'Always Free Trial', value: '7 Days' },
-            ].map(st => (
-              <div key={st.label} style={s.quickStatCard}>
-                <div style={s.quickStatVal}>{st.value}</div>
-                <div style={s.quickStatLabel}>{st.label}</div>
-              </div>
-            ))}
+            <div style={s.quickStatCard}>
+              <div style={s.quickStatVal}>18+</div>
+              <div style={s.quickStatLabel}>Tools</div>
+            </div>
+            <div style={s.quickStatCard}>
+              <div style={{ ...s.quickStatVal, color: '#10b981' }}>NSE</div>
+              <div style={s.quickStatLabel}>Live Data</div>
+            </div>
+            <div style={s.quickStatCard}>
+              <div style={{ ...s.quickStatVal, color: '#0ea5e9' }}>Free</div>
+              <div style={s.quickStatLabel}>No Login</div>
+            </div>
           </div>
         </div>
 
-        {/* Tool Categories */}
-        {TOOLS.map(cat => (
+        {/* Tools Sections */}
+        {TOOLS.map((cat) => (
           <div key={cat.category} style={s.section}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <h2 style={{ ...s.catTitle, color: cat.color }}>{cat.category}</h2>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-              <span style={{ color: '#64748b', fontSize: '0.78rem' }}>{cat.tools.length} tools</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div style={{ width: 4, height: 22, backgroundColor: cat.color, borderRadius: 2 }} />
+              <h2 style={{ ...s.catTitle, color: 'var(--text-primary)' }}>{cat.category}</h2>
             </div>
 
             <div style={s.grid}>
-              {cat.tools.map(tool => (
+              {cat.tools.map((tool) => (
                 <Link key={tool.path} to={tool.path} style={s.card} className="glass-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
-                    <div style={{ ...s.iconBox, background: cat.color + '20', color: cat.color }}>
+                    <div style={{ ...s.iconBox, backgroundColor: `${cat.color}15`, color: cat.color }}>
                       {tool.icon}
                     </div>
                     {tool.badge && (
-                      <span style={{ ...s.badge, ...BADGE_STYLES[tool.badge] }}>{tool.badge}</span>
+                      <span style={{
+                        ...s.badge,
+                        backgroundColor: (BADGE_STYLES[tool.badge] || BADGE_STYLES.CORE).bg,
+                        color: (BADGE_STYLES[tool.badge] || BADGE_STYLES.CORE).color,
+                      }}>
+                        {tool.badge}
+                      </span>
                     )}
                   </div>
                   <div style={s.toolName}>{tool.name}</div>
@@ -138,22 +139,20 @@ const s = {
     fontWeight: 900,
     marginTop: 14,
     marginBottom: 16,
-    background: 'linear-gradient(135deg, #fff 50%, #9470F8)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: 'var(--text-primary)',
     lineHeight: 1.15,
   },
-  heroDesc: { color: '#94a3b8', fontSize: '1.05rem', maxWidth: 580, margin: '0 auto 32px', lineHeight: 1.7 },
+  heroDesc: { color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: 580, margin: '0 auto 32px', lineHeight: 1.7 },
   quickStats: { display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' },
-  quickStatCard: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 28px', textAlign: 'center', minWidth: 110 },
-  quickStatVal: { fontSize: '1.8rem', fontWeight: 800, color: '#9470F8' },
-  quickStatLabel: { fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 4 },
+  quickStatCard: { background: 'var(--bg-card)', border: '1px solid var(--border-light)', borderRadius: 12, padding: '16px 28px', textAlign: 'center', minWidth: 110 },
+  quickStatVal: { fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-primary)' },
+  quickStatLabel: { fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 4 },
   section: { marginBottom: 48 },
   catTitle: { fontSize: '1.2rem', fontWeight: 800 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px,1fr))', gap: 16 },
   card: {
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.07)',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
     borderRadius: 14,
     padding: '20px',
     display: 'flex',
@@ -164,7 +163,7 @@ const s = {
   },
   iconBox: { width: 42, height: 42, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' },
   badge: { padding: '2px 8px', borderRadius: 4, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em' },
-  toolName: { fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: 6 },
-  toolDesc: { fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, flex: 1, marginBottom: 14 },
+  toolName: { fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 },
+  toolDesc: { fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5, flex: 1, marginBottom: 14 },
   arrow: { fontSize: '0.8rem', fontWeight: 700 },
 };

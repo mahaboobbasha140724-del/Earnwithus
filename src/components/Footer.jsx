@@ -104,8 +104,8 @@ export default function Footer() {
 
 const footerStyles = {
   footer: {
-    backgroundColor: '#07080d',
-    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'var(--bg-darker)',
+    borderTop: '1px solid var(--border-light)',
     padding: '64px 0 32px 0',
     marginTop: 'auto',
   },
@@ -143,10 +143,10 @@ const footerStyles = {
     fontFamily: 'var(--font-heading)',
     fontWeight: 800,
     fontSize: '1.25rem',
-    color: '#ffffff',
+    color: 'var(--text-primary)',
   },
   description: {
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     fontSize: '0.9rem',
     lineHeight: '1.6',
   },
@@ -158,12 +158,12 @@ const footerStyles = {
     width: '36px',
     height: '36px',
     borderRadius: '50%',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     transition: '0.2s ease',
   },
   heading: {
@@ -171,7 +171,7 @@ const footerStyles = {
     fontWeight: 600,
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-    color: '#ffffff',
+    color: 'var(--text-primary)',
   },
   connectInfo: {
     display: 'flex',
@@ -184,7 +184,7 @@ const footerStyles = {
     gap: '10px',
   },
   infoText: {
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     fontSize: '0.9rem',
   },
   list: {
@@ -197,16 +197,16 @@ const footerStyles = {
     fontSize: '0.9rem',
   },
   link: {
-    color: '#94a3b8',
+    color: 'var(--text-secondary)',
     transition: '0.15s ease',
   },
   copyrightContainer: {
-    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    borderTop: '1px solid var(--border-light)',
     paddingTop: '24px',
     textAlign: 'center',
   },
   copyright: {
-    color: '#64748b',
+    color: 'var(--text-muted)',
     fontSize: '0.8rem',
   }
 };

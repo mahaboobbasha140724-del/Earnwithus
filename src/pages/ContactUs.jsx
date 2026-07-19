@@ -73,7 +73,7 @@ export default function ContactUs() {
 
           {/* Form Column */}
           <div style={contactStyles.formCol}>
-            <div className="glass-card" style={{ padding: '32px', backgroundColor: '#0d0f17' }}>
+            <div className="glass-card" style={{ padding: '32px', backgroundColor: 'var(--bg-card)' }}>
               
               {!formSubmitted ? (
                 <form onSubmit={handleSubmit} style={contactStyles.form}>

@@ -48,7 +48,7 @@ const DiffBar = ({ value }) => {
 const Tooltip2 = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: '#0d0f17', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 14px', fontSize: '0.82rem' }}>
+    <div style={{ background: 'var(--bg-dropdown)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', borderRadius: 10, padding: '10px 14px', fontSize: '0.82rem' }}>
       <div style={{ color: '#9470F8', fontWeight: 700, marginBottom: 6 }}>{label}</div>
       {payload.map(p => <div key={p.dataKey} style={{ color: p.color, marginBottom: 3 }}>{p.name}: {typeof p.value === 'number' ? (Math.abs(p.value) > 1000 ? `${(p.value/1000).toFixed(0)}K` : p.value) : p.value}</div>)}
     </div>
