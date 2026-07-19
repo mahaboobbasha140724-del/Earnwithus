@@ -109,18 +109,27 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
     };
   });
 
-  // Cycle Counts
+  // Cycle & Advanced Counts
   const counts = {
     ALL: futuresData.length,
     LONG_BUILDUP: futuresData.filter(d => d.cycle === 'LONG_BUILDUP').length,
     SHORT_BUILDUP: futuresData.filter(d => d.cycle === 'SHORT_BUILDUP').length,
     SHORT_COVERING: futuresData.filter(d => d.cycle === 'SHORT_COVERING').length,
     LONG_UNWINDING: futuresData.filter(d => d.cycle === 'LONG_UNWINDING').length,
+    OI_SPURTS: futuresData.filter(d => d.oiChange >= 2.5).length,
+    PRICE_GAINERS: futuresData.filter(d => d.change > 0).length,
+    PRICE_LOSERS: futuresData.filter(d => d.change < 0).length,
   };
 
   // Filtered Futures list
   const filteredFutures = futuresData.filter(item => {
-    const matchesCycle = cycleFilter === 'ALL' || item.cycle === cycleFilter;
+    let matchesCycle = true;
+    if (cycleFilter === 'ALL') matchesCycle = true;
+    else if (cycleFilter === 'OI_SPURTS') matchesCycle = item.oiChange >= 2.5;
+    else if (cycleFilter === 'PRICE_GAINERS') matchesCycle = item.change > 0;
+    else if (cycleFilter === 'PRICE_LOSERS') matchesCycle = item.change < 0;
+    else matchesCycle = item.cycle === cycleFilter;
+
     const matchesSector = sectorFilter === 'ALL' || item.sector === sectorFilter;
     const matchesSearch = item.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -290,6 +299,39 @@ export default function FuturesOptions({ setSelectedStockForModal }) {
                 }}
               >
                 🟠 Long Unwinding ({counts.LONG_UNWINDING})
+              </button>
+              <button
+                onClick={() => setCycleFilter('OI_SPURTS')}
+                style={{
+                  ...foStyles.cyclePill,
+                  backgroundColor: cycleFilter === 'OI_SPURTS' ? '#8b5cf6' : 'var(--bg-card)',
+                  color: cycleFilter === 'OI_SPURTS' ? '#ffffff' : '#8b5cf6',
+                  borderColor: '#8b5cf6'
+                }}
+              >
+                ⚡ OI Spurts ({counts.OI_SPURTS})
+              </button>
+              <button
+                onClick={() => setCycleFilter('PRICE_GAINERS')}
+                style={{
+                  ...foStyles.cyclePill,
+                  backgroundColor: cycleFilter === 'PRICE_GAINERS' ? '#10b981' : 'var(--bg-card)',
+                  color: cycleFilter === 'PRICE_GAINERS' ? '#ffffff' : '#10b981',
+                  borderColor: '#10b981'
+                }}
+              >
+                📈 Price Gainers ({counts.PRICE_GAINERS})
+              </button>
+              <button
+                onClick={() => setCycleFilter('PRICE_LOSERS')}
+                style={{
+                  ...foStyles.cyclePill,
+                  backgroundColor: cycleFilter === 'PRICE_LOSERS' ? '#ef4444' : 'var(--bg-card)',
+                  color: cycleFilter === 'PRICE_LOSERS' ? '#ffffff' : '#ef4444',
+                  borderColor: '#ef4444'
+                }}
+              >
+                📉 Price Losers ({counts.PRICE_LOSERS})
               </button>
             </div>
 
