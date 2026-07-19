@@ -152,8 +152,63 @@ async function fetchMarketstackQuote(symbol) {
   }
 }
 
+// Fetch live stock details from Financial Modeling Prep (FMP) API
+async function fetchFMPQuote(symbol) {
+  const apiKey = process.env.FMP_API_KEY || 'demo';
+  
+  try {
+    const url = `https://financialmodelingprep.com/api/v3/quote/${encodeURIComponent(symbol)}?apikey=${apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`FMP HTTP ${res.status}`);
+    const data = await res.json();
+    
+    if (!Array.isArray(data) || !data[0]) {
+      throw new Error("Invalid FMP data structure");
+    }
+    
+    const tick = data[0];
+    const price = tick.price || tick.previousClose || 0;
+    const open = tick.open || price;
+    const high = tick.dayHigh || price;
+    const low = tick.dayLow || price;
+    const close = tick.previousClose || price;
+    const changePercent = tick.changesPercentage !== undefined ? tick.changesPercentage : (close > 0 ? ((price - close) / close) * 100 : 0);
+    const volume = tick.volume || 0;
+    
+    return {
+      symbol: TICKER_MAP[symbol] || symbol,
+      yahooSymbol: symbol,
+      price: Number(price.toFixed(2)),
+      change: Number(changePercent.toFixed(2)),
+      open: Number(open.toFixed(2)),
+      high: Number(high.toFixed(2)),
+      low: Number(low.toFixed(2)),
+      close: Number(close.toFixed(2)),
+      high52: tick.yearHigh || price,
+      low52: tick.yearLow || price,
+      volume: volume,
+      pe: tick.pe || null,
+      eps: tick.eps || null,
+      marketCap: tick.marketCap || null,
+      source: 'FMP'
+    };
+  } catch (err) {
+    console.error(`Failed to fetch FMP quote for ${symbol}:`, err.message);
+    return null;
+  }
+}
+
 async function fetchYahooQuote(yahooSymbol) {
-  // If Marketstack is explicitly configured as the primary data source
+  // Priority 1: Financial Modeling Prep (FMP) API if enabled or key exists
+  if (process.env.USE_FMP === 'true' || process.env.FMP_API_KEY) {
+    const fmpQuote = await fetchFMPQuote(yahooSymbol);
+    if (fmpQuote) {
+      return fmpQuote;
+    }
+    console.log(`[FMP Fallback] Switching to secondary data source for ${yahooSymbol}...`);
+  }
+
+  // Priority 2: Marketstack if explicitly configured
   if (process.env.USE_MARKETSTACK === 'true' && process.env.MARKETSTACK_API_KEY) {
     const msQuote = await fetchMarketstackQuote(yahooSymbol);
     if (msQuote) {
@@ -165,6 +220,7 @@ async function fetchYahooQuote(yahooSymbol) {
     }
   }
 
+  // Priority 3: Yahoo Finance Direct Chart API
   try {
     const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`, {
       headers: { 'User-Agent': USER_AGENT }
@@ -194,12 +250,13 @@ async function fetchYahooQuote(yahooSymbol) {
       close: Number(prevClose.toFixed(2)),
       high52: meta.fiftyTwoWeekHigh || price,
       low52: meta.fiftyTwoWeekLow || price,
-      volume: meta.regularMarketVolume || 0
+      volume: meta.regularMarketVolume || 0,
+      source: 'Yahoo'
     };
   } catch (err) {
     console.error(`Failed to fetch Yahoo quote for ${yahooSymbol}:`, err.message);
     
-    // Fallback to Marketstack if Yahoo Finance fails and key is set
+    // Priority 4: Marketstack Fallback
     if (process.env.MARKETSTACK_API_KEY) {
       console.log(`Attempting Marketstack fallback for ${yahooSymbol}...`);
       const msQuote = await fetchMarketstackQuote(yahooSymbol);
@@ -702,6 +759,42 @@ async function pollYahooFallback() {
 populateInitialMarketData();
 // Poll every 10 seconds
 setInterval(pollYahooFallback, 10000);
+
+// Financial Modeling Prep (FMP) Direct Endpoints
+app.get('/api/market/fmp/quote/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  const quote = await fetchFMPQuote(symbol);
+  if (quote) {
+    res.json({ success: true, quote });
+  } else {
+    res.status(500).json({ success: false, message: `Unable to fetch FMP quote for ${symbol}` });
+  }
+});
+
+app.get('/api/market/fmp/news', async (req, res) => {
+  const apiKey = process.env.FMP_API_KEY || 'demo';
+  try {
+    const response = await fetch(`https://financialmodelingprep.com/api/v3/stock_news?limit=10&apikey=${apiKey}`);
+    if (!response.ok) throw new Error(`FMP News HTTP ${response.status}`);
+    const data = await response.json();
+    res.json({ success: true, news: data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/api/market/fmp/profile/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  const apiKey = process.env.FMP_API_KEY || 'demo';
+  try {
+    const response = await fetch(`https://financialmodelingprep.com/api/v3/profile/${encodeURIComponent(symbol)}?apikey=${apiKey}`);
+    if (!response.ok) throw new Error(`FMP Profile HTTP ${response.status}`);
+    const data = await response.json();
+    res.json({ success: true, profile: Array.isArray(data) ? data[0] : data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 // Initialize FII/DII syncing
 async function startFiiDiiSync() {
