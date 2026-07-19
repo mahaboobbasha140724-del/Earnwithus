@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, TrendingUp, TrendingDown, Star, Activity, User, LogOut, Shield, Grid } from 'lucide-react';
 import { searchStocks } from '../data/mockStocks';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
@@ -10,6 +10,8 @@ export default function Header({ setSelectedStockForModal }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
   const [featuresDropdownOpen, setFeaturesDropdownOpen] = useState(false);
+  const [optionsLabOpen, setOptionsLabOpen] = useState(false);
+  const [marketDropdownOpen, setMarketDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -113,13 +115,70 @@ export default function Header({ setSelectedStockForModal }) {
         {/* Center: Desktop Navigation */}
         <nav className="desktop-only" style={headerStyles.nav}>
           <ul style={headerStyles.navList}>
-            
+
+            {/* Options Lab Dropdown */}
+            <li style={headerStyles.navItem} onMouseEnter={() => setOptionsLabOpen(true)} onMouseLeave={() => setOptionsLabOpen(false)}>
+              <span style={headerStyles.navLink}>
+                Options Lab <ChevronDown size={14} style={{ marginLeft: 4, transform: optionsLabOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+              </span>
+              {optionsLabOpen && (
+                <div style={{ ...headerStyles.dropdown, width: 320 }}>
+                  <div style={headerStyles.dropdownSection}>Core Tools</div>
+                  {[
+                    ['/tools/option-chain', 'Option Chain', 'Live OI, IV, Buildup & Max Pain marker'],
+                    ['/tools/open-interest', 'Open Interest', 'CE vs PE OI distribution by strike'],
+                    ['/tools/put-call-ratio', 'Put-Call Ratio', 'Intraday PCR + 365-day trend'],
+                    ['/tools/max-pain', 'Max Pain', 'Strike where max options expire worthless'],
+                  ].map(([path, title, desc]) => (
+                    <Link key={path} to={path} style={headerStyles.dropdownLink}>
+                      <div style={headerStyles.dropdownTitle}>{title}</div>
+                      <div style={headerStyles.dropdownDesc}>{desc}</div>
+                    </Link>
+                  ))}
+                  <div style={headerStyles.dropdownSection}>Advanced</div>
+                  {[
+                    ['/tools/straddle-chart', 'Straddle Chart', 'ATM straddle premium decay'],
+                    ['/tools/premium-decay', 'Premium Decay', 'Theta erosion visualization'],
+                    ['/tools/pe-ce-difference', 'PE-CE Difference', 'OI change diff table'],
+                    ['/tools/price-vs-oi', 'Price vs OI', 'Buildup classification'],
+                    ['/tools/iv-analysis', 'IV / HV Analysis', 'Implied vs Historical Vol + IVP'],
+                    ['/tools/gamma-exposure', 'Gamma Exposure', 'Dealer GEX by strike'],
+                    ['/tools/multistrike', 'MultiStrike Chart', 'Up to 5 strikes overlaid'],
+                  ].map(([path, title, desc]) => (
+                    <Link key={path} to={path} style={headerStyles.dropdownLink}>
+                      <div style={headerStyles.dropdownTitle}>{title}</div>
+                      <div style={headerStyles.dropdownDesc}>{desc}</div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </li>
+
+            {/* Market Internals Dropdown */}
+            <li style={headerStyles.navItem} onMouseEnter={() => setMarketDropdownOpen(true)} onMouseLeave={() => setMarketDropdownOpen(false)}>
+              <span style={headerStyles.navLink}>
+                Market <ChevronDown size={14} style={{ marginLeft: 4, transform: marketDropdownOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+              </span>
+              {marketDropdownOpen && (
+                <div style={headerStyles.dropdown}>
+                  {[
+                    ['/tools/market-movers', 'Market Movers', 'Gainers, losers, OI buildup'],
+                    ['/tools/advance-decline', 'Advance / Decline', 'Market breadth indicator'],
+                    ['/tools/index-contributors', 'Index Contributors', 'Stocks driving index move'],
+                    ['/tools/fii-dii-history', 'FII/DII History', '365-day flow chart with Nifty'],
+                    ['/features/sentiment', 'Sentiment', 'Fear/Greed & participant flows'],
+                  ].map(([path, title, desc]) => (
+                    <Link key={path} to={path} style={headerStyles.dropdownLink}>
+                      <div style={headerStyles.dropdownTitle}>{title}</div>
+                      <div style={headerStyles.dropdownDesc}>{desc}</div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </li>
+
             {/* Features Dropdown */}
-            <li 
-              style={headerStyles.navItem}
-              onMouseEnter={() => setFeaturesDropdownOpen(true)}
-              onMouseLeave={() => setFeaturesDropdownOpen(false)}
-            >
+            <li style={headerStyles.navItem} onMouseEnter={() => setFeaturesDropdownOpen(true)} onMouseLeave={() => setFeaturesDropdownOpen(false)}>
               <span style={headerStyles.navLink}>
                 Features <ChevronDown size={14} style={{ marginLeft: 4, transform: featuresDropdownOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
               </span>
@@ -137,24 +196,20 @@ export default function Header({ setSelectedStockForModal }) {
                     <div style={headerStyles.dropdownTitle}>RRG</div>
                     <div style={headerStyles.dropdownDesc}>Relative rotation graphs</div>
                   </Link>
-                  <Link to="/features/sentiment" style={headerStyles.dropdownLink}>
-                    <div style={headerStyles.dropdownTitle}>Sentiment Indicators</div>
-                    <div style={headerStyles.dropdownDesc}>Fear/Greed & participant flows</div>
-                  </Link>
                   <Link to="/features/futures-options" style={headerStyles.dropdownLink}>
                     <div style={headerStyles.dropdownTitle}>Futures & Options</div>
                     <div style={headerStyles.dropdownDesc}>OI insights & option chains</div>
+                  </Link>
+                  <Link to="/strategies" style={headerStyles.dropdownLink}>
+                    <div style={headerStyles.dropdownTitle}>Strategies</div>
+                    <div style={headerStyles.dropdownDesc}>Option strategy builder</div>
                   </Link>
                 </div>
               )}
             </li>
 
             {/* Company Dropdown */}
-            <li 
-              style={headerStyles.navItem}
-              onMouseEnter={() => setCompanyDropdownOpen(true)}
-              onMouseLeave={() => setCompanyDropdownOpen(false)}
-            >
+            <li style={headerStyles.navItem} onMouseEnter={() => setCompanyDropdownOpen(true)} onMouseLeave={() => setCompanyDropdownOpen(false)}>
               <span style={headerStyles.navLink}>
                 Company <ChevronDown size={14} style={{ marginLeft: 4, transform: companyDropdownOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
               </span>
@@ -169,21 +224,16 @@ export default function Header({ setSelectedStockForModal }) {
             </li>
 
             <li style={headerStyles.navItem}>
-              <Link to="/paper-trade" style={headerStyles.navLink}>Paper Trade <span className="badge-glow" style={{marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#3b82f6'}}>NEW</span></Link>
+              <Link to="/tools" style={{ ...headerStyles.navLink, color: '#C2FA4F', fontWeight: 700 }}>🔧 Tools Hub</Link>
             </li>
             <li style={headerStyles.navItem}>
-              <Link to="/strategies" style={headerStyles.navLink}>Strategies</Link>
+              <Link to="/paper-trade" style={headerStyles.navLink}>Paper Trade <span className="badge-glow" style={{marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#3b82f6'}}>NEW</span></Link>
             </li>
             <li style={headerStyles.navItem}>
               <Link to="/pricing" style={headerStyles.navLink}>Pricing</Link>
             </li>
             <li style={headerStyles.navItem}>
-              <a 
-                href="https://chat.whatsapp.com/LO3eNiIvHRv1DNDaAmkPoG?s=cl&p=a&mlu=1" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                style={{ ...headerStyles.navLink, color: '#10b981', fontWeight: 600 }}
-              >
+              <a href="https://chat.whatsapp.com/LO3eNiIvHRv1DNDaAmkPoG?s=cl&p=a&mlu=1" target="_blank" rel="noopener noreferrer" style={{ ...headerStyles.navLink, color: '#10b981', fontWeight: 600 }}>
                 WhatsApp
               </a>
             </li>
@@ -329,12 +379,32 @@ export default function Header({ setSelectedStockForModal }) {
             </button>
           </div>
           <div style={headerStyles.mobileDrawerBody}>
+            <div style={headerStyles.mobileHeading}>Options Lab</div>
+            <Link to="/tools/option-chain" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Option Chain</Link>
+            <Link to="/tools/open-interest" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Open Interest</Link>
+            <Link to="/tools/put-call-ratio" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Put-Call Ratio</Link>
+            <Link to="/tools/straddle-chart" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Straddle Chart</Link>
+            <Link to="/tools/premium-decay" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Premium Decay</Link>
+            <Link to="/tools/max-pain" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Max Pain</Link>
+            <Link to="/tools/pe-ce-difference" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>PE-CE Difference</Link>
+            <Link to="/tools/iv-analysis" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>IV / HV Analysis</Link>
+            <Link to="/tools/gamma-exposure" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Gamma Exposure</Link>
+            <Link to="/tools/price-vs-oi" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Price vs OI</Link>
+            <Link to="/tools/multistrike" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>MultiStrike Chart</Link>
+
+            <div style={headerStyles.mobileHeading}>Market</div>
+            <Link to="/tools/market-movers" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Market Movers</Link>
+            <Link to="/tools/advance-decline" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Advance / Decline</Link>
+            <Link to="/tools/index-contributors" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Index Contributors</Link>
+            <Link to="/tools/fii-dii-history" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>FII/DII History</Link>
+
             <div style={headerStyles.mobileHeading}>Features</div>
             <Link to="/features/scanners" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Scanners</Link>
             <Link to="/features/heatmaps" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Heatmaps</Link>
             <Link to="/features/rrg" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Relative Rotation Graph (RRG)</Link>
             <Link to="/features/sentiment" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Sentiment Indicators</Link>
             <Link to="/features/futures-options" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Futures & Options</Link>
+            <Link to="/strategies" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>Strategies</Link>
             
             <div style={headerStyles.mobileHeading}>Company</div>
             <Link to="/about-us" onClick={handleMobileLinkClick} style={headerStyles.mobileLink}>About Us</Link>
@@ -573,8 +643,21 @@ const headerStyles = {
     boxShadow: '0 12px 28px rgba(0, 0, 0, 0.6)',
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '2px',
     animation: 'fadeIn 0.2s ease',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    zIndex: 200,
+  },
+  dropdownSection: {
+    fontSize: '0.68rem',
+    color: '#9470F8',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.07em',
+    padding: '8px 12px 4px',
+    borderTop: '1px solid rgba(255,255,255,0.05)',
+    marginTop: 4,
   },
   dropdownLink: {
     padding: '10px 12px',

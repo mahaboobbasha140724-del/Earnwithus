@@ -1,26 +1,26 @@
 {
   "success": true,
   "source": "Aggregator Backup",
-  "date": "10-Jul-2026",
-  "dateStr": "2026-07-10",
-  "updatedAt": "12 Jul 2026, 3:28 am IST",
-  "nifty": 24206.9,
-  "niftyChange": 1.02,
-  "banknifty": 58045.9,
-  "bankniftyChange": 1.39,
+  "date": "17-Jul-2026",
+  "dateStr": "2026-07-17",
+  "updatedAt": "19 Jul 2026, 2:40 pm IST",
+  "nifty": null,
+  "niftyChange": null,
+  "banknifty": null,
+  "bankniftyChange": null,
   "flows": [
     {
       "segment": "FII Cash Market",
-      "netValue": 2603.72,
-      "buy": 15318.07,
-      "sell": 12714.35,
-      "action": "Net Buyer"
+      "netValue": -376.41,
+      "buy": 14393.77,
+      "sell": 14770.18,
+      "action": "Net Seller"
     },
     {
       "segment": "DII Cash Market",
-      "netValue": 2019.68,
-      "buy": 17171.75,
-      "sell": 15152.07,
+      "netValue": 1017.89,
+      "buy": 17180.08,
+      "sell": 16162.19,
       "action": "Net Buyer"
     },
     {

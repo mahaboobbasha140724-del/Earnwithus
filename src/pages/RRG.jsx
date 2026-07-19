@@ -60,10 +60,12 @@ export default function RRG() {
     return fallbackPrice;
   };
 
-  // Reset timeline Step when timeframe changes
+  // Reset timeline step, drilldown and playback when timeframe changes
   useEffect(() => {
-    setTimelineStep(104);
-  }, [timeframe]);
+    setIsPlaying(false);
+    setTimelineStep(historicalRrgData.weeks);
+    setDrillDownSector(null); // reset drilldown to avoid stale sector references across timeframes
+  }, [timeframe, historicalRrgData.weeks]);
   
   // Drilldown: null (sector level) or sector object (stock level)
   const [drillDownSector, setDrillDownSector] = useState(null);
@@ -132,7 +134,7 @@ export default function RRG() {
     if (isPlaying) {
       interval = setInterval(() => {
         setTimelineStep((prev) => {
-          if (prev >= 104) {
+          if (prev >= historicalRrgData.weeks) {
             return 0; // loop
           }
           return prev + 1;
@@ -142,7 +144,7 @@ export default function RRG() {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, playbackSpeed]);
+  }, [isPlaying, playbackSpeed, historicalRrgData.weeks]);
 
   const toggleSectorSelection = (symbol) => {
     if (selectedSectors.includes(symbol)) {
@@ -822,14 +824,20 @@ export default function RRG() {
               <div style={styles.controls}>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button 
-                    onClick={() => setIsPlaying(!isPlaying)}
+                    onClick={() => {
+                      if (!isPlaying && timelineStep >= historicalRrgData.weeks) {
+                        // If at the end and pressing Play, restart from beginning
+                        setTimelineStep(0);
+                      }
+                      setIsPlaying(!isPlaying);
+                    }}
                     className="rrg-control-btn"
                     title={isPlaying ? "Pause Rotation" : "Play Rotation Animation"}
                   >
                     {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                   </button>
                   <button 
-                    onClick={() => { setIsPlaying(false); setTimelineStep(104); }}
+                    onClick={() => { setIsPlaying(false); setTimelineStep(historicalRrgData.weeks); }}
                     className="rrg-control-btn"
                     title="Reset to Current Date"
                   >
@@ -843,12 +851,12 @@ export default function RRG() {
                     <input 
                       type="range"
                       min="0"
-                      max="104"
+                      max={historicalRrgData.weeks}
                       value={timelineStep}
                       onChange={(e) => { setIsPlaying(false); setTimelineStep(Number(e.target.value)); }}
                       style={styles.slider}
                     />
-                    <div style={{ position: 'absolute', top: -14, left: `${(timelineStep/104)*100}%`, transform: 'translateX(-50%)', backgroundColor: '#10b981', color: '#07080d', fontSize: '0.65rem', padding: '1px 4px', borderRadius: 3, fontWeight: 700 }}>
+                    <div style={{ position: 'absolute', top: -14, left: `${(timelineStep/historicalRrgData.weeks)*100}%`, transform: 'translateX(-50%)', backgroundColor: '#10b981', color: '#07080d', fontSize: '0.65rem', padding: '1px 4px', borderRadius: 3, fontWeight: 700 }}>
                       {historicalRrgData.dateLabels[timelineStep]}
                     </div>
                   </div>

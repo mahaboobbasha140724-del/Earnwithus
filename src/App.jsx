@@ -28,6 +28,24 @@ import Strategies from './pages/Strategies';
 import AdminDashboard from './pages/AdminDashboard';
 import PaperTrade from './pages/PaperTrade';
 
+// Tools Pages
+import ToolsHub from './pages/tools/ToolsHub';
+import OptionChain from './pages/tools/OptionChain';
+import OpenInterest from './pages/tools/OpenInterest';
+import PutCallRatio from './pages/tools/PutCallRatio';
+import PECEDifference from './pages/tools/PECEDifference';
+import StraddleChart from './pages/tools/StraddleChart';
+import PremiumDecay from './pages/tools/PremiumDecay';
+import MaxPain from './pages/tools/MaxPain';
+import PriceVsOI from './pages/tools/PriceVsOI';
+import IVAnalysis from './pages/tools/IVAnalysis';
+import GammaExposure from './pages/tools/GammaExposure';
+import MultiStrikeChart from './pages/tools/MultiStrikeChart';
+import MarketMovers from './pages/tools/MarketMovers';
+import AdvanceDecline from './pages/tools/AdvanceDecline';
+import IndexContributors from './pages/tools/IndexContributors';
+import FIIDIIHistory from './pages/tools/FIIDIIHistory';
+
 // Helper component to auto-scroll window to top on navigation
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -144,6 +162,24 @@ function MainApp() {
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/strategies" element={<ProtectedRoute><Strategies /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminDashboard />} />
+
+          {/* Tools Hub & All Tool Routes */}
+          <Route path="/tools" element={<ProtectedRoute><ToolsHub /></ProtectedRoute>} />
+          <Route path="/tools/option-chain" element={<ProtectedRoute><OptionChain /></ProtectedRoute>} />
+          <Route path="/tools/open-interest" element={<ProtectedRoute><OpenInterest /></ProtectedRoute>} />
+          <Route path="/tools/put-call-ratio" element={<ProtectedRoute><PutCallRatio /></ProtectedRoute>} />
+          <Route path="/tools/pe-ce-difference" element={<ProtectedRoute><PECEDifference /></ProtectedRoute>} />
+          <Route path="/tools/straddle-chart" element={<ProtectedRoute><StraddleChart /></ProtectedRoute>} />
+          <Route path="/tools/premium-decay" element={<ProtectedRoute><PremiumDecay /></ProtectedRoute>} />
+          <Route path="/tools/max-pain" element={<ProtectedRoute><MaxPain /></ProtectedRoute>} />
+          <Route path="/tools/price-vs-oi" element={<ProtectedRoute><PriceVsOI /></ProtectedRoute>} />
+          <Route path="/tools/iv-analysis" element={<ProtectedRoute><IVAnalysis /></ProtectedRoute>} />
+          <Route path="/tools/gamma-exposure" element={<ProtectedRoute><GammaExposure /></ProtectedRoute>} />
+          <Route path="/tools/multistrike" element={<ProtectedRoute><MultiStrikeChart /></ProtectedRoute>} />
+          <Route path="/tools/market-movers" element={<ProtectedRoute><MarketMovers /></ProtectedRoute>} />
+          <Route path="/tools/advance-decline" element={<ProtectedRoute><AdvanceDecline /></ProtectedRoute>} />
+          <Route path="/tools/index-contributors" element={<ProtectedRoute><IndexContributors /></ProtectedRoute>} />
+          <Route path="/tools/fii-dii-history" element={<ProtectedRoute><FIIDIIHistory /></ProtectedRoute>} />
 
           {/* Wildcard Fallback redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
